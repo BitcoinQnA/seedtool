@@ -18,12 +18,10 @@ body {
   background-attachment: fixed !important;
   background: linear-gradient(var(--q-blue), var(--q-blue));
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
 }
 .container {
   width: 100vw;
-  flex: 1 0 auto;
 }
 .content {
   padding: 40px;
@@ -152,12 +150,9 @@ textarea {
 }
 footer {
   text-align: center;
-  /* position: fixed; */
+  position: sticky;
+  top: calc(100vh - 50px);
   height: 50px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  margin-bottom: 0px;
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
 }
