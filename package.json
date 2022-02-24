@@ -1,0 +1,19 @@
+{
+  "name": "seed-tool",
+  "version": "0.0.1",
+  "description": "Bitcoin wallet seed tool",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/server.js",
+    "build": "node ./build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SuperPhatArrow",
+  "license": "MIT",
+  "devDependencies": {
+    "fastify": "^3.27.2",
+    "fastify-static": "^4.5.0",
+    "nodemon": "^2.0.15",
+    "ws": "^8.5.0"
+  }
+}

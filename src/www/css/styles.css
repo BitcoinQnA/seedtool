@@ -1,0 +1,163 @@
+:root {
+  --q-blue: #00151a;
+  --q-orange: #f99925;
+  --q-white: #f0e7d5;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  /* padding: 0px 0px 20px 0px; */
+  margin: 0px;
+  /* margin-bottom: 51px; */
+  font: 14px/1.5 'OpenSansRegular', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
+  color: var(--q-white);
+  font-weight: normal;
+  background: var(--q-blue);
+  background-attachment: fixed !important;
+  background: linear-gradient(var(--q-blue), var(--q-blue));
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.container {
+  width: 100vw;
+  flex: 1 0 auto;
+}
+.content {
+  padding: 40px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+h1 {
+  text-align: center;
+  color: var(--q-orange);
+}
+a {
+  color: var(--q-orange);
+  text-decoration: none;
+}
+p {
+  text-align: justify;
+  text-justify: inter-word;
+}
+.hidden {
+  display: none;
+}
+.small {
+  font-size: small;
+}
+.btn {
+  background-color: var(--q-orange);
+  color: var(--q-blue);
+  border: 1px solid var(--q-white);
+  border-radius: 2px;
+}
+.warning {
+  color: var(--q-blue);
+  background-color: var(--q-orange);
+  border: 1px solid var(--q-orange);
+  border-radius: 5px;
+  padding: 5px;
+}
+.warning > a {
+  color: var(--q-blue);
+  text-decoration: underline;
+}
+textarea {
+  resize: none;
+}
+.form-group {
+  border: 1px solid var(--q-white);
+  border-radius: 3px;
+}
+#textarea-wrapper,
+#textarea-input {
+  width: calc(100% - 3px);
+  float: left;
+  height: auto;
+}
+.accordion {
+  color: var(--q-white);
+  background-color: var(--q-blue);
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+.active,
+.accordion:hover {
+  background-color: var(--q-blue);
+  color: var(--q-orange);
+}
+.panel {
+  padding: 0 18px;
+  background-color: var(--q-blue);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+.accordion:after {
+  content: '\02795';
+  font-size: 13px;
+  color: var(--q-blue);
+  float: right;
+  margin-left: 5px;
+}
+.accordion.active:after {
+  content: '\2796';
+}
+.tiny {
+  font-size: xx-small;
+}
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid var(--q-white);
+  background-color: var(--q-blue);
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  width: calc(100% / 3);
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: var(--q-orange);
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: var(--q-orange);
+}
+
+/* Style the tab content */
+.tabContent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid var(--q-white);
+  border-top: none;
+}
+footer {
+  text-align: center;
+  /* position: fixed; */
+  height: 50px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  margin-bottom: 0px;
+  border-top: 1px solid var(--q-orange);
+  background-color: var(--q-blue);
+}
