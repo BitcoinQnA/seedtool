@@ -25,12 +25,10 @@ body {
   background-attachment: fixed !important;
   background: linear-gradient(var(--q-blue), var(--q-blue));
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
 }
 .container {
   width: 100vw;
-  flex: 1 0 auto;
 }
 .content {
   padding: 40px;
@@ -79,10 +77,9 @@ textarea {
   border: 1px solid var(--q-white);
   border-radius: 3px;
 }
-#textarea-wrapper,
-#textarea-input {
-  width: calc(100% - 3px);
-  float: left;
+.textarea-wrapper,
+.textarea-input {
+  width: 100%;
   height: auto;
 }
 .accordion {
@@ -121,14 +118,11 @@ textarea {
 .tiny {
   font-size: xx-small;
 }
-/* Style the tab */
 .tab {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
 }
-
-/* Style the buttons that are used to open the tab content */
 .tab button {
   background-color: inherit;
   float: left;
@@ -139,34 +133,114 @@ textarea {
   transition: 0.3s;
   width: calc(100% / 3);
 }
-
-/* Change background color of buttons on hover */
 .tab button:hover {
   background-color: var(--q-orange);
 }
-
-/* Create an active/current tablink class */
 .tab button.active {
   background-color: var(--q-orange);
 }
-
-/* Style the tab content */
 .tabContent {
   display: none;
   padding: 6px 12px;
   border: 1px solid var(--q-white);
   border-top: none;
 }
+.entropy-details--flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-evenly;
+}
+.entropy-details--flex-item {
+  border: 1px solid var(--q-white);
+  border-radius: 3px;
+  padding: 1px;
+  margin: 1px;
+  text-align: center;
+}
+.entropy-details--detail--text {
+  background-color: var(--q-white);
+  color: var(--q-blue);
+  font-family: monospace;
+  border-radius: 2px;
+  padding: 2px;
+}
+.info-button {
+  background-color: var(--q-blue);
+  color: var(--q-orange);
+  border: 1px solid var(--q-orange);
+  border-radius: 5px;
+  margin: 5px;
+  padding: 6px;
+}
+.info-button:hover {
+  background-color: var(--q-orange);
+  color: var(--q-blue);
+}
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: var(--q-white);
+  color: var(--q-blue);
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid var(--q-orange);
+  width: 80%; /* Could be more or less, depending on screen size */
+  border-radius: 20px;
+}
+
+/* The Close Button */
+#modalClose {
+  color: var(--q-blue);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+#modalClose:hover,
+#modalClose:focus {
+  color: var(--q-blue);
+  text-decoration: none;
+  cursor: pointer;
+}
 footer {
   text-align: center;
-  /* position: fixed; */
+  position: sticky;
+  top: calc(100vh - 50px);
   height: 50px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  margin-bottom: 0px;
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
+}
+.chip {
+  display: inline-block;
+  padding: 0 25px;
+  height: 50px;
+  font-size: 16px;
+  line-height: 50px;
+  border-radius: 25px;
+  background-color: var(--q-blue);
+  color: var(--q-orange);
+}
+
+.chip-img {
+  float: left;
+  margin: 0 10px 0 -25px;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAAJKklEQVRYw9VZWWwbxxn+Z2YvLimJ4iGKOqjDOmpbdmL5ihwfclLbadCgCeqgDXoAbYE2QB8aIHko0ALtQ9HXvrZo06IFmjwEgWsESILEsZXDbuxKkV1HlpTI1kGRlEhK4bXLvWamD6JlydFBKgqQLviw3J1/+e0/33z/9w/Rof2Pw1fvwPCVPP4fYMmypLrVjQOqq6tWfn2imD1dWATOv0RYe/b0HOnr2zigp6dHFMVSMHUOm9pOqkuOuUFId3dXpbBIY0Pn8pd4PHHnzuTGAdHoLGNs6ZxjrDzR/1oirWPXBiGh+rpUKr3eXYTQiRPHp6ent5NbkfYWjZLSKxLiXosDt0ZGN8kNIdtJeW4bTZFmwixObQDo7Ow4ffrMygHt7W0P7ntgk4dwfvHipc1hKYri9dZsionZBhDRHwg0tUe4YwHA2Nj4uXPnVo65c2fy+vCNz8eePNmvqq7KBMLv9zU3N60ahFF/f//9nMACt/S5WKzW50GCXFGaBwbe1fViZbBisfjNmyOrEsP4wMDA0nlLa6QEiwhIdje1tBx46DAiQmWzv5mglMutjs4dZ8+eBYBgILhyERXy+R0d7QCV6RZC26TyE5/efvXVVwFgcHBo5fMLBa2xubm+rqp8TM3NTc88871tKz5rZj6byyuKcvyRPqYo4JjgWJzRTZXvpZf+WYGclg2QcVNDekbu6rK6DyfT2SsFOdnQ5Q/V+g/1udvaBJnQ1AzNZQBhRMQtSE+FVKUO0hZqjj3iO3BcDUcSsblLOfmSRqjcoFq36o+edoeb7yKnRiqRnxiZf+MVazGPJLUy8pXvt3gx13nmVG3/t6ivHgABAHfsQmxaT82JAlEbW4niwqKEJQXhe9xgljn+9uv6+X8g1buByocb6mejscqzpWeOPvd84MCJyVRGSybzhq07qGDaOpeot5NhAYoCylnYystGoUYRqwXmrfGowXDSIol9j8mekPLyH5DiWXvKBBLwB1bCKotb3DZ6v/t0cN/RtycWxj8zYqJ3AatG9LZW10JdHi7KYirKXB6uqExRUTqeqd+RlmoSOSM9NZlIpni1j/rDGIMQnVhTGyilc3PzFa/E2kh9xyPfHDVdc3IN6Pmli1ZbD+BSibXD7VxSStdbd5X4oeUy3nAhNoHHBgHA3HeSW/r2uVPOO089nkymr+dsAHBCLWU+2gm1INnFRNlIz+Jsmnm8dNeBbYPFqVUTbnYCEVa5A0VEwK4qQcuxZBQAWLBp2wQCcW4Xdd1iKy96PzjnSsWBU7Ct5YFMVuaf/Pn97+2uLgYaFUMjALzs0lnGOIQESRbJaqoWC4ZRYAgxLDBCOBFBksG9hh0iapUDwG0LALChf1FYoig6jsM550TMzcf87XtX3s2c+kG58ygqwBlGCADQ3NTKMv/jH/3kxb/+pTJuPfXkU93dnQCAEJ587x2fCwfELVlZQtRUDIkyLhbIp/9dWWHXw7SRbo3cGkmnF0pSmkw2Hzzkq/VNFJyK66dZLBqa4vGK2bQwfh1hsn3tq+z+5OIbbV6pUa44Ydw2sW0hb514fQAJ0jZ31RNvXcjFp4+FVbxa0kofxpBtIbOITB1WGxuWTctWEdsGGR3+EhyE7L752ivHnn3hYb98eXq+5+abXdnBIlpw+5H+seXOU+NrxaY2ei1+ati33+l5eNlHiJMfk/pW+YPz6xXEL2pspj74sPP49Z6dD06lpGeDbx05Shc7su5avvjrougB8XlF9ZDE753rxfy9Yrc4z0RZzabJ2DDIFcCqgCtIkK/+7Y+sqD0kZ3vb7ETO8IXR7A3LR/FcG6sNkFTcfqApBKREIO5YVmxC1bPi+/9ClWCq2J1amkmdQsSNalLvz5hWgbBPBsRsrOZ22DdPm4b/LcyTgzeoi4UiwDkfHxRjn1ZdewNjFVBlawVVvO3mWH0/+2lsURvTEeUcLfGdUVTIAGNcVrg35PQcseem2cRw4OLLmLiRqHy5phkAQJCu/vlPp3/zO6+7+b0Fe80Oy8kk7ei4f+QKBnkLmLbYYnAk3L7wel1He9QVAoTuw8SzKXL5fPXof6RUcuXqQwhhjHl5O2FlwUKft5RESg9dAV+dE2gEhHAhs2QDuWWia29WDb0jaPpd8USA0M6d3bIi79q1a3Z2dtsmsb+//9Kl+zdVGJKk8y+SW9fMh74BREDUFhJT7uELavSjxePfd6p8HGPggMwiySTdsj06+OHsTLRM7pcF6/OYlrMo3LoKWgar7nZzBhAoqjtdXWXXt3JZdRraS66asfemR/DOeWF2QjAMKKM5E2BrB+fcKVqPfsfq7kWG5hGlurFXEEKc888sRBvagVKsZVmVD2s5NPR2TpBoZy9q3xsYuiAl48wXgmo/2AZKxZBhgOKB1V3ulmAxh7Z162d+SL1BZGjYsfKyOl7bWzU/boju+I4eLrmE+ITd2IW1HP3ogn7XHnoW4vTE07m23czlWX49kk2LUyPy639HgmtLsByTNbbRxjYApPc/zQURALjiBkPHC/GYL4IFN/N4EaNC/I7d0IGoQ28M6Gp1CdPiPOp7wvQG7+MB9Qa5P1zsPeEdvIQkdyWwqO3adyjV+xitrZNHrxk9R2CFbaLeIPUGATjUtwBCSw03AKDRy7pcSoBSyOD9j9L7MC0NswwzOm4Fm+Qdu9Xo5FL45rAIcvp+8dztwJ6ERpWPL5u7+2BtK7dKwPBn88XcAsgqACBG5VCL46tf+wdmP7FkFQAKTZ3qnTEQlbVLdWtry8GDpYZOFPjXf/Vbo3X/qM5qY+Nnjh8us3vhU7ccubTiXHqedjy4LjXSpR7fVquo6l7XQUxPzwwNfQQAiFr9L/wSN3ZdTBnINh+uI/6gH5VTaM2inVtYJrXQ2LlExDUMjJ6z6T3b6NT41oXFOV/6Q2DP2W/7u/YOxHTGITQ3Eel5YC5vl1M7SHLGvLv6ZC3LIuv/i5FbpNK97WCquDbxW4SZXSfPjC8YCYsBwJ6QCoI4mDbLEpDc4jLPiDfIpfX3uguZ5SUCAExxbwIrcuwoqN7LaQsAsKnXh/yJvJ20WVmwtOy9aaoNbTS0WFgVSISl3eF1YYV3753JWhbnAKBqmeq68FTWLldubfNu/09RlW8jFtLV/cjdbZ//ATNJCRDfF2L0AAAAAElFTkSuQmCC');
 }
 
       </style>
@@ -275,32 +349,121 @@ footer {
         </div>
 
         <div id="Input_Entropy" class="tabContent">
-          <p>
-            <span>Enter your own entropy: </span>:
-            <button class="btn generate"><b>GENERATE</b></button>
-            <span>words.</span>
-          </p>
-          <div class="entropy-container">
-            <div class="warning">
-              <h4>Warning!</h4>
-              <span>Entropy is an advanced feature. Your mnemonic may be insecure if this
-                feature is used incorrectly.</span>
-              <a href="#entropy-notes">Read more</a>
+          <div class="warning">
+            <h4>Warning!</h4>
+            <span>Entropy is an advanced feature. Your mnemonic may be insecure if this
+              feature is used incorrectly.</span>
+            <a href="#entropy-notes">Read more</a>
+          </div>
+          <label for="entropy">Enter your own entropy:</label>
+          <div class="textarea-wrapper">
+            <textarea id="entropy" rows="4" class="textarea-input"
+              placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+          <div id="entropy-discarded-chars" class="warning hidden">
+            <p>
+              <strong>
+                Some characters have been discarded
+              </strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+      <button class="accordion">Entropy</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <button class="info-button" onclick="openInfoModal(event, 'entropy')">ℹ️ More Information</button>
+          <div class="entropy-details--flex-container">
+            <div class="entropy-details--flex-item">
+              <label>Time to crack (zxcvbn using Filtered Entropy): </label>
+              <span class="entropy-details--detail--text" id="entropyTimeToCrack">Example text</span>
             </div>
-            <div class="form-group">
-              <label for="entropy">Entropy</label>
-              <div class="textarea-wrapper">
-                <textarea id="entropy" rows="4" class="textarea-input"
-                  placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
-                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-              </div>
-              <div class="warning">
-                <p>
-                  <strong>
-                    Some characters have been discarded
-                  </strong>
-                </p>
-              </div>
+            <div class="entropy-details--flex-item">
+              <label>Event count: </label>
+              <span class="entropy-details--detail--text" id="entropyEventCount">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Entropy type: </label>
+              <span class="entropy-details--detail--text" id="entropyEntropyType">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Avg Bits Per Event: </label>
+              <span class="entropy-details--detail--text" id="entropyBitsPerEvent">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Raw Entropy Words: </label>
+              <span class="entropy-details--detail--text" id="entropyRawWords">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Total Bits: </label>
+              <span class="entropy-details--detail--text" id="entropyTotalBits">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Filtered Entropy: </label>
+              <span class="entropy-details--detail--text" id="entropyFiltered">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Raw Binary: </label>
+              <span class="entropy-details--detail--text" id="entropyRawBinary">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Binary Checksum: </label>
+              <span class="entropy-details--detail--text" id="entropyBinaryChecksum">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Word Indexes: </label>
+              <span class="entropy-details--detail--text" id="entropyWordIndexes">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Mnemonic Length: </label>
+              <span class="entropy-details--detail--text" id="entropyMnemonicLength"></span>
+              <select class="entropy-details--detail--select">
+                <option value="raw">Use Raw Entropy (3 words per 32 bits)</option>
+                <option value="12">12 <span>Words</span></option>
+                <option value="15">15 <span>Words</span></option>
+                <option value="18">18 <span>Words</span></option>
+                <option value="21">21 <span>Words</span></option>
+                <option value="24" selected>24 <span>Words</span></option>
+              </select>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
             </div>
           </div>
         </div>
@@ -445,13 +608,26 @@ footer {
           software.</p>
       </div>
     </div>
+    <footer class="tiny">
+      Copyright&nbsp;&nbsp;&#169;<span class="cYear">2022</span>&nbsp;BitcoinQnA,&nbsp;<wbr>&#169;<span
+        class="cYear">2022</span>&nbsp;SuperPhatArrow,&nbsp;<wbr>&#169;<span
+        class="cYear">2014</span>&nbsp;Ian&nbsp;Coleman,&nbsp;<wbr>&#169;<span
+        class="cYear">2019</span>&nbsp;Katana&nbsp;Cryptographic&nbsp;Ltd.&nbsp;<wbr>All Rights Reserved.
+    </footer>
   </div>
-  <footer class="tiny">
-    Copyright&nbsp;&nbsp;&#169;<span class="cYear">2022</span>&nbsp;BitcoinQnA,&nbsp;<wbr>&#169;<span
-      class="cYear">2022</span>&nbsp;SuperPhatArrow,&nbsp;<wbr>&#169;<span
-      class="cYear">2014</span>&nbsp;Ian&nbsp;Coleman,&nbsp;<wbr>&#169;<span
-      class="cYear">2019</span>&nbsp;Katana&nbsp;Cryptographic&nbsp;Ltd.&nbsp;<wbr>All Rights Reserved.
-  </footer>
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <span id="modalClose" onclick="clearInfoModal();">&times;</span>
+      <div class="chip">
+        <div class="chip-img"></div>
+        @BitcoinQnA Explains:
+      </div>
+      <div id="infoModalText">
+
+      </div>
+    </div>
+
+  </div>
   <script>
       /**
  * Setup the DOM for interaction
@@ -498,6 +674,89 @@ window.tabSelect = (event, tabId) => {
   document.getElementById(tabId).style.display = 'block';
   event.currentTarget.classList.add('active');
   seedGenPanel.style.maxHeight = seedGenPanel.scrollHeight + 'px';
+};
+
+const infoModal = document.getElementById('infoModal');
+const infoModalText = document.getElementById('infoModalText');
+const clearInfoModal = () => {
+  infoModal.style.display = 'none';
+  infoModalText.innerHTML = '';
+};
+// document.getElementById('infoModalClose').onclick(clearInfoModal);
+
+window.openInfoModal = (_event, section) => {
+  infoModalText.innerHTML = window.infoHtml[section];
+  infoModal.style.display = 'block';
+};
+window.onclick = function (event) {
+  if (event.target == infoModal) {
+    clearInfoModal();
+  }
+};
+
+      </script>
+  <script>
+      window.infoHtml = {
+  entropy: /*html*/ `<h5>(NOTE TEXT IS EXAMPLE)</h5>
+        <h3 id="entropy-notes">Entropy</h3>
+        <p>
+          <span>Entropy values should not include the BIP39 checksum. This is automatically added by the tool.</span>
+        </p>
+        <p>
+          <span>
+            Entropy values must be sourced from a
+            <a href="https://en.wikipedia.org/wiki/Random_number_generation" target="_blank">strong source of
+              randomness</a>.
+          </span>
+          <span>This means flipping a fair coin, rolling a fair dice, noise measurements etc.</span>
+          <span>
+            Do <strong>NOT</strong> use phrases from books, lyrics from songs, your birthday or street address,
+            keyboard mashing, or anything you <i>think</i> is random, because chances are overwhelming it isn't
+            random enough for the needs of this tool.
+          </span>
+        </p>
+        <p>
+          <strong><span>Do not store entropy.</span></strong>
+        </p>
+        <p>
+          <span>Storing entropy (such as keeping a deck of cards in a specific shuffled order) is unreliable compared to
+            storing a mnemonic.</span>
+          <span>Instead of storing entropy, store the mnemonic generated from the entropy.</span>
+          <span><a href="https://en.wikipedia.org/wiki/Steganography#Physical" target="_blank">Steganography</a> may be
+            beneficial when storing the mnemonic.</span>
+        </p>
+        <p>
+          <span>
+            The random mnemonic generator on this page uses a
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues"
+              target="_blank">cryptographically secure random number generator</a>.
+          </span>
+          <span>The built in random generator can generally be trusted more than your own intuition about
+            randomness.</span>
+          <span>If cryptographic randomness isn't available in your browser, this page will show a warning and the
+            generate
+            button will not work.</span>
+          <span>In that case you might choose to use your own source of entropy.</span>
+        </p>
+        <p>
+          <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank">You are not a
+            good
+            source of entropy.</a>
+        </p>
+        <p>
+          <span>Card entropy has been implemented assuming cards are replaced, not drawn one after another.</span>
+          <span>A full deck with replacement generates 232 bits of entropy (21 words). A full deck without replacement
+            generates 225 bits of entropy (21 words).</span>
+          <span>Card entropy changed significantly from v0.4.3 to v0.5.0. The old version can be accessed at
+            <a href="https://github.com/iancoleman/bip39/releases/tag/0.4.3">
+              here
+            </a>
+            or
+            <a href="https://web.archive.org/web/20201018232020/https://iancoleman.io/bip39/">
+              here
+            </a>
+          </span>
+        </p>`,
 };
 
       </script>
