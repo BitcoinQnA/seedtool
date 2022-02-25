@@ -110,32 +110,121 @@
         </div>
 
         <div id="Input_Entropy" class="tabContent">
-          <p>
-            <span>Enter your own entropy: </span>:
-            <button class="btn generate"><b>GENERATE</b></button>
-            <span>words.</span>
-          </p>
-          <div class="entropy-container">
-            <div class="warning">
-              <h4>Warning!</h4>
-              <span>Entropy is an advanced feature. Your mnemonic may be insecure if this
-                feature is used incorrectly.</span>
-              <a href="#entropy-notes">Read more</a>
+          <div class="warning">
+            <h4>Warning!</h4>
+            <span>Entropy is an advanced feature. Your mnemonic may be insecure if this
+              feature is used incorrectly.</span>
+            <a href="#entropy-notes">Read more</a>
+          </div>
+          <label for="entropy">Enter your own entropy:</label>
+          <div class="textarea-wrapper">
+            <textarea id="entropy" rows="4" class="textarea-input"
+              placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+          <div id="entropy-discarded-chars" class="warning hidden">
+            <p>
+              <strong>
+                Some characters have been discarded
+              </strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+      <button class="accordion">Entropy</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <button class="info-button" onclick="openInfoModal(event, 'entropy')">ℹ️ More Information</button>
+          <div class="entropy-details--flex-container">
+            <div class="entropy-details--flex-item">
+              <label>Time to crack (zxcvbn using Filtered Entropy): </label>
+              <span class="entropy-details--detail--text" id="entropyTimeToCrack">Example text</span>
             </div>
-            <div class="form-group">
-              <label for="entropy">Entropy</label>
-              <div class="textarea-wrapper">
-                <textarea id="entropy" rows="4" class="textarea-input"
-                  placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
-                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-              </div>
-              <div class="warning">
-                <p>
-                  <strong>
-                    Some characters have been discarded
-                  </strong>
-                </p>
-              </div>
+            <div class="entropy-details--flex-item">
+              <label>Event count: </label>
+              <span class="entropy-details--detail--text" id="entropyEventCount">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Entropy type: </label>
+              <span class="entropy-details--detail--text" id="entropyEntropyType">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Avg Bits Per Event: </label>
+              <span class="entropy-details--detail--text" id="entropyBitsPerEvent">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Raw Entropy Words: </label>
+              <span class="entropy-details--detail--text" id="entropyRawWords">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Total Bits: </label>
+              <span class="entropy-details--detail--text" id="entropyTotalBits">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Filtered Entropy: </label>
+              <span class="entropy-details--detail--text" id="entropyFiltered">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Raw Binary: </label>
+              <span class="entropy-details--detail--text" id="entropyRawBinary">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Binary Checksum: </label>
+              <span class="entropy-details--detail--text" id="entropyBinaryChecksum">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Word Indexes: </label>
+              <span class="entropy-details--detail--text" id="entropyWordIndexes">Example text</span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>Mnemonic Length: </label>
+              <span class="entropy-details--detail--text" id="entropyMnemonicLength"></span>
+              <select class="entropy-details--detail--select">
+                <option value="raw">Use Raw Entropy (3 words per 32 bits)</option>
+                <option value="12">12 <span>Words</span></option>
+                <option value="15">15 <span>Words</span></option>
+                <option value="18">18 <span>Words</span></option>
+                <option value="21">21 <span>Words</span></option>
+                <option value="24" selected>24 <span>Words</span></option>
+              </select>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
+            </div>
+            <div class="entropy-details--flex-item">
+              <label>lbl: </label>
+              <span class="entropy-details--detail--text" id="entropy"></span>
             </div>
           </div>
         </div>
@@ -287,7 +376,21 @@
         class="cYear">2019</span>&nbsp;Katana&nbsp;Cryptographic&nbsp;Ltd.&nbsp;<wbr>All Rights Reserved.
     </footer>
   </div>
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <span id="modalClose" onclick="clearInfoModal();">&times;</span>
+      <div class="chip">
+        <div class="chip-img"></div>
+        @BitcoinQnA Explains:
+      </div>
+      <div id="infoModalText">
+
+      </div>
+    </div>
+
+  </div>
   <script src="js/dom.js"></script>
+  <script src="js/info.js"></script>
   <script src="js/english.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;

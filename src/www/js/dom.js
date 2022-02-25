@@ -44,3 +44,21 @@ window.tabSelect = (event, tabId) => {
   event.currentTarget.classList.add('active');
   seedGenPanel.style.maxHeight = seedGenPanel.scrollHeight + 'px';
 };
+
+const infoModal = document.getElementById('infoModal');
+const infoModalText = document.getElementById('infoModalText');
+const clearInfoModal = () => {
+  infoModal.style.display = 'none';
+  infoModalText.innerHTML = '';
+};
+// document.getElementById('infoModalClose').onclick(clearInfoModal);
+
+window.openInfoModal = (_event, section) => {
+  infoModalText.innerHTML = window.infoHtml[section];
+  infoModal.style.display = 'block';
+};
+window.onclick = function (event) {
+  if (event.target == infoModal) {
+    clearInfoModal();
+  }
+};
