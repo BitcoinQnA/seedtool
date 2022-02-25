@@ -36,6 +36,9 @@ a {
   color: var(--q-orange);
   text-decoration: none;
 }
+a:hover {
+  color: var(--q-white);
+}
 p {
   text-align: justify;
   text-justify: inter-word;
@@ -127,10 +130,10 @@ textarea {
   width: calc(100% / 3);
 }
 .tab button:hover {
-  background-color: var(--q-orange);
+  background-color: #002933;
 }
 .tab button.active {
-  background-color: var(--q-orange);
+  background-color: #002933;
 }
 .tabContent {
   display: none;
@@ -166,8 +169,8 @@ textarea {
   padding: 6px;
 }
 .info-button:hover {
-  background-color: var(--q-orange);
-  color: var(--q-blue);
+  background-color: #002933;
+  color: var(--q-orange);
 }
 /* The Modal (background) */
 .modal {
