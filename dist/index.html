@@ -3,10 +3,11 @@
 
 <head lang="en">
   <meta charset="utf-8" />
-  <title>QnA Seed Tool</title>
+  <title>Seed Tool</title>
   <style>
       :root {
   --q-blue: #00151a;
+  --q-light-blue: #002933;
   --q-orange: #f99925;
   --q-white: #f0e7d5;
 }
@@ -96,7 +97,7 @@ textarea {
   outline: none;
   transition: 0.4s;
 }
-.active,
+.accordion.active,
 .accordion:hover {
   background-color: var(--q-blue);
   color: var(--q-orange);
@@ -136,11 +137,10 @@ textarea {
   transition: 0.3s;
   width: calc(100% / 3);
 }
-.tab button:hover {
-  background-color: #002933;
-}
+.tab button:hover,
 .tab button.active {
-  background-color: #002933;
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
 }
 .tabContent {
   display: none;
@@ -179,6 +179,9 @@ textarea {
   background-color: #002933;
   color: var(--q-orange);
 }
+.one-click-copy {
+  cursor: copy;
+}
 /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
@@ -203,6 +206,10 @@ textarea {
   width: 80%; /* Could be more or less, depending on screen size */
   border-radius: 20px;
 }
+.modal-content a {
+  color: var(--q-blue);
+  text-decoration: underline;
+}
 
 /* The Close Button */
 #modalClose {
@@ -226,6 +233,88 @@ footer {
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
 }
+#toast {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; /* Set a default minimum width */
+  margin-left: -125px; /* Divide value of min-width by 2 */
+  background-color: var(--q-orange); /* Black background color */
+  color: var(--q-blue); /* White text color */
+  text-align: center; /* Centered text */
+  border-radius: 20px; /* Rounded borders */
+  padding: 16px; /* Padding */
+  position: fixed; /* Sit on top of the screen */
+  z-index: 2; /* Add a z-index if needed */
+  left: 50%; /* Center the toast */
+  bottom: 30px; /* 30px from the bottom */
+  box-shadow: 0 0 4px 2px var(--q-white); /* glow */
+}
+#toast-background {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+  cursor: not-allowed;
+}
+/* Show the toast when clicking on a button (class added with JavaScript) */
+#toast.show-toast,
+#toast-background.show-toast {
+  visibility: visible; /* Show the toast */
+  /* Add animation: Take 0.5 seconds to fade in and out the toast.
+  However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+  animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+}
+
+/* Animations to fade the toast in and out */
+@-webkit-keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
 .chip {
   display: inline-block;
   padding: 0 25px;
@@ -235,6 +324,9 @@ footer {
   border-radius: 25px;
   background-color: var(--q-blue);
   color: var(--q-orange);
+  box-shadow: 0 0 4px 2px var(--q-orange);
+  margin: 4px;
+  cursor: pointer;
 }
 
 .chip-img {
@@ -257,7 +349,7 @@ footer {
 <body>
   <div class="container">
     <div class="content">
-      <h1>QnA Seed Tool</h1>
+      <h1>Seed Tool</h1>
       <hr>
       <noscript>
         <h1>JavaScript is Required</h1>
@@ -269,38 +361,52 @@ footer {
       </noscript>
       <button class="accordion">About</button>
       <div class="panel">
-        <p>This is a simplified version of the Ian Coleman <a href="https://iancoleman.io/bip39/" target="_blank">BIP39
-            tool</a>. If accessing this tool online, <b>DO NOT</b> enter or generate any
-          seeds for use in a live environment with real funds. For use with live funds, this tool <b>must</b> be
-          used offline. Right click and 'Save Page As' to save a HTML file that can be opened in any web browser
+        <p>This tool is a simplified version of the Ian Coleman <a href="https://iancoleman.io/bip39/"
+            target="_blank">BIP39
+            tool</a> combined with the Samourai Wallet <a href="https://code.samourai.io/dojo/bip47-tool"
+            target="_blank">BIP47
+            tool</a>. If accessing this tool online, <b>NEVER</b> enter a seed used to secure live funds.<br /><br />
+
+          For creating or interacting with seeds used with live funds, this tool <b>MUST</b> be
+          used offline. Right click and <i>'Save Page As'</i> to save a HTML file that can be opened in any web browser
           on an offline device or an amnesic operating system like <a href="https://tails.boum.org/about/index.en.html"
             target="_blank">Tails.</a>
         </p>
         <p>
-          For more info see the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP39 spec</a>.
+          <a href="https://github.com/BitcoinQnA/seedtool" target="_blank">View page source</a>
         </p>
       </div>
       <hr>
       <button class="accordion">Usage</button>
       <div class="panel">
-        <button class="info-button" onclick="openInfoModal(event, 'usage')">ℹ️ More Information</button>
+        <div class="chip" onclick="openInfoModal(event, 'usage')">
+          <div class="chip-img"></div>
+          More Information:
+        </div>
         <p>The most comomon use cases for this tool are:- <br>
         <ul>
           <li>Generating a seed</li>
           <li>Generating seeds via dice rolls or playing cards</li>
-          <li>Generating BIP85 child seeds (or check those generated by a hardware wallet)</li>
-          <li>Verifying hardware wallet address generation</li>
-          <li>Verifying external wallet manual entopy inputs (dice rolls or card picks)</li>
-          <li>Testing for a forgotten passphrase (if you know a receive address)</li>
+          <li>Generating <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki"
+              target="_blank">BIP85</a> child seeds (or check those generated by a hardware wallet)</li>
+          <li>Generating <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki"
+              target="_blank">BIP47</a> payment codes and corresponding <a href="https://bitcoiner.guide/paynym/"
+              target="_blank">PayNym</a></li>
+          <li>Verifying wallet address generation from a given seed/passphrase combination</li>
+          <li>Verifying wallet entopy inputs (dice rolls or card picks)</li>
+          <li>Testing for a forgotten/incorrect passphrase (if you know a receive address)</li>
         </ul>
         </p>
       </div>
       <hr>
-      <button class="accordion">Seed Generation/Input</button>
+      <button class="accordion">Seed Generation/Input - BIP32: Hierarchical Deterministic Wallets</button>
       <div class="panel" id="seedGenPanel">
+        <div class="chip" onclick="openInfoModal(event, 'BIP32')">
+          <div class="chip-img"></div>
+          More Information:
+        </div>
         <ul style="list-style-type: none; padding-inline-start: 0;">
-          <li>🤖 Generate a cryptographically strong random mnemonic</li>
+          <li>🤖 Generate a cryptographically strong + random mnemonic</li>
           <li>⌨️ Enter an existing BIP39 mnemonic</li>
           <li>🎲 Enter in your own entropy</li>
         </ul>
@@ -355,9 +461,8 @@ footer {
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
             <h4>Warning!</h4>
-            <span>Entropy is an advanced feature. Your mnemonic may be insecure if this
-              feature is used incorrectly.</span>
-            <a href="#entropy-notes">Read more</a>
+            <p>Entropy is an advanced feature. Your mnemonic may be insecure if this
+              feature is used incorrectly.</p>
           </div>
           <label for="entropy">Enter your own entropy:</label>
           <div class="textarea-wrapper">
@@ -372,248 +477,191 @@ footer {
               </strong>
             </p>
           </div>
-        </div>
-      </div>
-
-      <hr>
-      <button class="accordion">Entropy</button>
-      <div class="panel" id="seedGenPanel">
-        <div class="entropy-details">
-          <button class="info-button" onclick="openInfoModal(event, 'entropy')">ℹ️ More Information</button>
+          <!-- Entropy Details -->
           <div class="entropy-details--flex-container">
             <div class="entropy-details--flex-item">
               <label>Time to crack (zxcvbn using Filtered Entropy): </label>
-              <span class="entropy-details--detail--text" id="entropyTimeToCrack">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Event count: </label>
-              <span class="entropy-details--detail--text" id="entropyEventCount">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyEventCount">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Entropy type: </label>
-              <span class="entropy-details--detail--text" id="entropyEntropyType">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyEntropyType">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Avg Bits Per Event: </label>
-              <span class="entropy-details--detail--text" id="entropyBitsPerEvent">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyBitsPerEvent">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Raw Entropy Words: </label>
-              <span class="entropy-details--detail--text" id="entropyRawWords">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyRawWords">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Total Bits: </label>
-              <span class="entropy-details--detail--text" id="entropyTotalBits">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyTotalBits">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Filtered Entropy: </label>
-              <span class="entropy-details--detail--text" id="entropyFiltered">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyFiltered">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Raw Binary: </label>
-              <span class="entropy-details--detail--text" id="entropyRawBinary">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyRawBinary">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Binary Checksum: </label>
-              <span class="entropy-details--detail--text" id="entropyBinaryChecksum">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyBinaryChecksum">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Word Indexes: </label>
-              <span class="entropy-details--detail--text" id="entropyWordIndexes">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyWordIndexes">Example text</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Mnemonic Length: </label>
-              <span class="entropy-details--detail--text" id="entropyMnemonicLength"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyMnemonicLength"></span>
               <select class="entropy-details--detail--select">
-                <option value="raw">Use Raw Entropy (3 words per 32 bits)</option>
+                <option value="raw" selected>Use Raw Entropy (3 words per 32 bits)</option>
                 <option value="12">12 <span>Words</span></option>
                 <option value="15">15 <span>Words</span></option>
                 <option value="18">18 <span>Words</span></option>
                 <option value="21">21 <span>Words</span></option>
-                <option value="24" selected>24 <span>Words</span></option>
+                <option value="24">24 <span>Words</span></option>
               </select>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
             <div class="entropy-details--flex-item">
               <label>lbl: </label>
-              <span class="entropy-details--detail--text" id="entropy"></span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
             </div>
           </div>
         </div>
       </div>
-      <!-- end of content -->
       <hr>
-      <button class="accordion">More Information</button>
-      <div class="panel">
-        <h3>BIP39 <span class="small">Mnemonic code for generating deterministic keys</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">official BIP39 spec</a>
-        </p>
-        <h3>BIP32 <span class="small">Hierarchical Deterministic Wallets</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">official BIP32
-            spec</a>
-        </p>
-        <p>
-          See the demo at
-          <a href="http://bip32.org/" target="_blank">bip32.org</a>
-        </p>
-        <h3>BIP44 <span class="small">Multi-Account Hierarchy for Deterministic Wallets</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">official BIP44
-            spec</a>
-        </p>
-        <h3>BIP47 <span class="small">Reusable Payment Codes for Hierarchical Deterministic Wallets</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">official BIP47
-            spec</a>
-        </p>
-        <h3>BIP49 <span class="small">Derivation scheme for P2WPKH-nested-in-P2SH based accounts</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">official BIP49
-            spec</a>
-        </p>
-        <h3>BIP85 <span class="small">Deterministic Entropy From BIP32 Keychains</span></h3>
-        <p>
-          Read more at the
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">official BIP85
-            spec</a>
-        </p>
-        <h3 id="entropy-notes">Entropy</h3>
-        <p>
-          <span>Entropy values should not include the BIP39 checksum. This is automatically added by the tool.</span>
-        </p>
-        <p>
-          <span>
-            Entropy values must be sourced from a
-            <a href="https://en.wikipedia.org/wiki/Random_number_generation" target="_blank">strong source of
-              randomness</a>.
-          </span>
-          <span>This means flipping a fair coin, rolling a fair dice, noise measurements etc.</span>
-          <span>
-            Do <strong>NOT</strong> use phrases from books, lyrics from songs, your birthday or street address,
-            keyboard mashing, or anything you <i>think</i> is random, because chances are overwhelming it isn't
-            random enough for the needs of this tool.
-          </span>
-        </p>
-        <p>
-          <strong><span>Do not store entropy.</span></strong>
-        </p>
-        <p>
-          <span>Storing entropy (such as keeping a deck of cards in a specific shuffled order) is unreliable compared to
-            storing a mnemonic.</span>
-          <span>Instead of storing entropy, store the mnemonic generated from the entropy.</span>
-          <span><a href="https://en.wikipedia.org/wiki/Steganography#Physical" target="_blank">Steganography</a> may be
-            beneficial when storing the mnemonic.</span>
-        </p>
-        <p>
-          <span>
-            The random mnemonic generator on this page uses a
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues"
-              target="_blank">cryptographically secure random number generator</a>.
-          </span>
-          <span>The built in random generator can generally be trusted more than your own intuition about
-            randomness.</span>
-          <span>If cryptographic randomness isn't available in your browser, this page will show a warning and the
-            generate
-            button will not work.</span>
-          <span>In that case you might choose to use your own source of entropy.</span>
-        </p>
-        <p>
-          <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank">You are not a
-            good
-            source of entropy.</a>
-        </p>
-        <p>
-          <span>Card entropy has been implemented assuming cards are replaced, not drawn one after another.</span>
-          <span>A full deck with replacement generates 232 bits of entropy (21 words). A full deck without replacement
-            generates 225 bits of entropy (21 words).</span>
-          <span>Card entropy changed significantly from v0.4.3 to v0.5.0. The old version can be accessed at
-            <a href="https://github.com/iancoleman/bip39/releases/tag/0.4.3">
-              here
-            </a>
-            or
-            <a href="https://web.archive.org/web/20201018232020/https://iancoleman.io/bip39/">
-              here
-            </a>
-          </span>
-        </p>
-        <h3 id="PBKDF2-notes">PBKDF2</h3>
-        <p><a href="https://learnmeabitcoin.com/technical/mnemonic#pbkdf2---password-based-key-derivation-function-2   "
-            target="_blank">What is PBKDF2 (Password Based Key Derivation Function 2) ?</a></p>
-        <p><span>Please refer to this <a href="https://en.wikipedia.org/wiki/PBKDF2" target="_blank">wikipedia
-              article</a> for
-            more detail.
-            <span>Mail about PBKDF2 security <a
-                href="https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2016-July/012902.html"
-                target="_blank">here</a>.
-        </p>
-        <p>Wallet software that implement BIP39 only use 2048 iterations as a norm. Increasing this parameter will
-          increase
-          security against brute force attack, but you will need to store this new parameter. However, as long as you
-          back up
-          your BIP39 seed there will not be risk to lost your fund. To access them with custom PBKDF2 iterations, use
-          this
-          file (or <a href="https://stuff.birkenstab.de/pbkdf2/" target="_blank">other</a>) to compute your targeted
-          BIP39
-          seed.</p>
-        <p>Using less than 2048 PBKDF2 iterations is insecure without strong optional BIP39 Passphrase.</p>
-        <h3>License</h3>
-        <p>
-          <span>Please refer to <a href="../LICENSE" target="_blank">the
-              software
-              license</a> for more detail.
-          </span>
-        </p>
-        <p class="small">The software is provided "as is", without warranty of any kind, express or implied, including
-          but
-          not limited
-          to
-          the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the
-          authors or copyright holders be liable for any claim, damages or other liability, whether in an action of
-          contract,
-          tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the
-          software.</p>
+      <button class="accordion">BIP39: Mnemonic code for generating deterministic keys</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP39')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP44: Multi-Account Hierarchy for Deterministic Wallets</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP44')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP47')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP49')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP84: Derivation scheme for P2WPKH based accounts</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP84')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP85: Deterministic Entropy From BIP32 Keychains</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP85')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP141: Segregated Witness (Consensus layer)</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'BIP141')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
+      </div>
+      <hr>
+      <button class="accordion">Credits and licenses</button>
+      <div class="panel" id="seedGenPanel">
+        <div class="entropy-details">
+          <div class="chip" onclick="openInfoModal(event, 'CREDITS')">
+            <div class="chip-img"></div>
+            More Information:
+          </div>
+
+        </div>
       </div>
     </div>
+    <!-- end of content -->
     <footer class="tiny">
-      <br/>
+      <br />
       Copyright&nbsp;&nbsp;&#169;<span class="cYear">2022</span>&nbsp;BitcoinQnA,&nbsp;<wbr>&#169;<span
         class="cYear">2022</span>&nbsp;SuperPhatArrow,&nbsp;<wbr>&#169;<span
         class="cYear">2014</span>&nbsp;Ian&nbsp;Coleman,&nbsp;<wbr>&#169;<span
@@ -627,17 +675,18 @@ footer {
         <div class="chip-img"></div>
         @BitcoinQnA Explains:
       </div>
-      <div id="infoModalText">
-
-      </div>
+      <div id="infoModalText"></div>
     </div>
-
+  </div>
+  <div id="toast-background">
+    <div id="toast"></div>
   </div>
   <script>
       /**
  * Setup the DOM for interaction
  */
 window.addEventListener('DOMContentLoaded', () => {
+  // Accordion Sections
   const accordionSections = document.getElementsByClassName('accordion');
   for (let i = 0; i < accordionSections.length; i++) {
     const section = accordionSections[i];
@@ -651,6 +700,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  // FOOTER: calculate copyright year
   const yearSpan = document.getElementsByClassName('cYear');
   for (let i = 0; i < yearSpan.length; i++) {
     let output = '';
@@ -665,6 +715,13 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('defaultOpenTab').click();
   seedGenPanel.style.maxHeight = null;
+  // Setup one click copy
+  document.querySelectorAll('.one-click-copy').forEach((textElement) => {
+    textElement.addEventListener('click', () => {
+      const text = textElement.innerText || textElement.value;
+      copyTextToClipboard(text);
+    });
+  });
 });
 const seedGenPanel = document.getElementById('seedGenPanel');
 window.tabSelect = (event, tabId) => {
@@ -688,22 +745,115 @@ const clearInfoModal = () => {
   infoModalText.innerHTML = '';
 };
 // document.getElementById('infoModalClose').onclick(clearInfoModal);
-
+/**
+ * Open the QnA Explains dialog
+ * @param {Event} _event Not used
+ * @param {string} section string for the key to open from info.js
+ */
 window.openInfoModal = (_event, section) => {
   infoModalText.innerHTML = window.infoHtml[section];
   infoModal.style.display = 'block';
 };
+/**
+ * Function to close the dialog when user clicks on the outside
+ * @param {Event} event Click Event on area outside the dialog
+ */
 window.onclick = function (event) {
   if (event.target == infoModal) {
     clearInfoModal();
   }
 };
+/**
+ * If navigator.clipboard is not available, here is fallback
+ * @param {string} text text to copy
+ */
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement('textarea');
+  textArea.value = text;
+
+  // Avoid scrolling to bottom
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+    toast('Copied to clipboard');
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+    toast('ERROR: Unable to copy to clipboard');
+  }
+
+  document.body.removeChild(textArea);
+}
+/**
+ * Copy text to clipboard
+ * @param {string} text text to copy
+ */
+function copyTextToClipboard(text) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+  } else {
+    navigator.clipboard.writeText(text).then(
+      function () {
+        console.log('Async: Copying to clipboard was successful!');
+        toast('Copied to clipboard');
+      },
+      function (err) {
+        console.error('Async: Could not copy text: ', err);
+        toast('ERROR: Unable to copy to clipboard');
+      }
+    );
+  }
+}
+/**
+ * Displays a pop-up message like a notification
+ * @param {string} message Message to display in notification toast
+ */
+function toast(message) {
+  const toastMessage = document.getElementById('toast');
+  toastMessage.innerText = message || 'ERROR: Unknown Message';
+  toastMessage.classList.add('show-toast');
+  const background = document.getElementById('toast-background');
+  background.classList.add('show-toast');
+  setTimeout(() => {
+    toastMessage.classList.remove('show-toast');
+    background.classList.remove('show-toast');
+  }, 3000);
+}
 
       </script>
   <script>
       window.infoHtml = {
-  entropy: /*html*/ `<h5>(NOTE TEXT IS EXAMPLE)</h5>
-        <h3 id="entropy-notes">Entropy</h3>
+  usage: /*html*/ `
+  <h3>Usage</h3>
+  <p>
+    This tool is awesome! Here's why:
+  </p>
+  <ul>
+    <li>this reason</li>
+    <li>this reason</li>
+    <li>this reason</li>
+    <li>this reason</li>
+    <li>this reason</li>
+    <li>this reason</li>
+  </ul>
+  `,
+  BIP32: /*html*/ `
+        <h3>BIP32: Hierarchical Deterministic Wallets</h3>
+        <p>
+          About BIP
+        </p>
+        <p>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>
+        <h4>Entropy</h4>
         <p>
           <span>Entropy values should not include the BIP39 checksum. This is automatically added by the tool.</span>
         </p>
@@ -762,66 +912,82 @@ window.onclick = function (event) {
             </a>
           </span>
         </p>`,
-
-    usage: /*html*/ `<h5>(TEST)</h5>
-        <h3 id="entropy-notes">USAGE TITLE</h3>
+  BIP39: /*html*/ `
+        <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
-          <span>Entropy values should not include the BIP39 checksum. This is automatically added by the tool.</span>
+          About BIP
         </p>
         <p>
-          <span>
-            Entropy values must be sourced from a
-            <a href="https://en.wikipedia.org/wiki/Random_number_generation" target="_blank">strong source of
-              randomness</a>.
-          </span>
-          <span>This means flipping a fair coin, rolling a fair dice, noise measurements etc.</span>
-          <span>
-            Do <strong>NOT</strong> use phrases from books, lyrics from songs, your birthday or street address,
-            keyboard mashing, or anything you <i>think</i> is random, because chances are overwhelming it isn't
-            random enough for the needs of this tool.
-          </span>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP44: /*html*/ `
+        <h3>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h3>
+        <p>
+          About BIP
         </p>
         <p>
-          <strong><span>Do not store entropy.</span></strong>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP47: /*html*/ `
+        <h3>BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</h3>
+        <p>
+          About BIP
         </p>
         <p>
-          <span>Storing entropy (such as keeping a deck of cards in a specific shuffled order) is unreliable compared to
-            storing a mnemonic.</span>
-          <span>Instead of storing entropy, store the mnemonic generated from the entropy.</span>
-          <span><a href="https://en.wikipedia.org/wiki/Steganography#Physical" target="_blank">Steganography</a> may be
-            beneficial when storing the mnemonic.</span>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP49: /*html*/ `
+        <h3>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h3>
+        <p>
+          About BIP
         </p>
         <p>
-          <span>
-            The random mnemonic generator on this page uses a
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues"
-              target="_blank">cryptographically secure random number generator</a>.
-          </span>
-          <span>The built in random generator can generally be trusted more than your own intuition about
-            randomness.</span>
-          <span>If cryptographic randomness isn't available in your browser, this page will show a warning and the
-            generate
-            button will not work.</span>
-          <span>In that case you might choose to use your own source of entropy.</span>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP84: /*html*/ `
+        <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
+        <p>
+          About BIP
         </p>
         <p>
-          <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank">You are not a
-            good
-            source of entropy.</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP85: /*html*/ `
+        <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
+        <p>
+          About BIP
         </p>
         <p>
-          <span>Card entropy has been implemented assuming cards are replaced, not drawn one after another.</span>
-          <span>A full deck with replacement generates 232 bits of entropy (21 words). A full deck without replacement
-            generates 225 bits of entropy (21 words).</span>
-          <span>Card entropy changed significantly from v0.4.3 to v0.5.0. The old version can be accessed at
-            <a href="https://github.com/iancoleman/bip39/releases/tag/0.4.3">
-              here
-            </a>
-            or
-            <a href="https://web.archive.org/web/20201018232020/https://iancoleman.io/bip39/">
-              here
-            </a>
-          </span>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  BIP141: /*html*/ `
+        <h3>BIP141: Segregated Witness (Consensus layer)</h3>
+        <p>
+          About BIP
+        </p>
+        <p>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  CREDITS: /*html*/ `
+        <h3>Credits and licenses</h3>
+        <h4>Ian Coleman</h4>
+        <p>
+          The MIT License (MIT)
+          Copyright (c) 2014-2016 Ian Coleman
+        </p>
+        <p>
+          Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        </p>
+        <p>
+          The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        </p>
+        <p>
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        </p>`,
+  UNKNOWN: /*html*/ `
+        <h3>ERROR: 404</h3>
+        <p>
+          Sorry, No more information on that topic found.
         </p>`,
 };
 
