@@ -2,6 +2,7 @@
  * Setup the DOM for interaction
  */
 window.addEventListener('DOMContentLoaded', () => {
+  // Accordion Sections
   const accordionSections = document.getElementsByClassName('accordion');
   for (let i = 0; i < accordionSections.length; i++) {
     const section = accordionSections[i];
@@ -15,6 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  // FOOTER: calculate copyright year
   const yearSpan = document.getElementsByClassName('cYear');
   for (let i = 0; i < yearSpan.length; i++) {
     let output = '';
@@ -29,6 +31,13 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('defaultOpenTab').click();
   seedGenPanel.style.maxHeight = null;
+  // Setup one click copy
+  document.querySelectorAll('.one-click-copy').forEach((textElement) => {
+    textElement.addEventListener('click', () => {
+      const text = textElement.innerText || textElement.value;
+      copyTextToClipboard(text);
+    });
+  });
 });
 const seedGenPanel = document.getElementById('seedGenPanel');
 window.tabSelect = (event, tabId) => {
@@ -52,13 +61,67 @@ const clearInfoModal = () => {
   infoModalText.innerHTML = '';
 };
 // document.getElementById('infoModalClose').onclick(clearInfoModal);
-
+/**
+ * Open the QnA Explains dialog
+ * @param {Event} _event Not used
+ * @param {string} section string for the key to open from info.js
+ */
 window.openInfoModal = (_event, section) => {
   infoModalText.innerHTML = window.infoHtml[section];
   infoModal.style.display = 'block';
 };
+/**
+ * Function to close the dialog when user clicks on the outside
+ * @param {Event} event Click Event on area outside the dialog
+ */
 window.onclick = function (event) {
   if (event.target == infoModal) {
     clearInfoModal();
   }
 };
+/**
+ * If navigator.clipboard is not available, here is fallback
+ * @param {string} text text to copy
+ */
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement('textarea');
+  textArea.value = text;
+
+  // Avoid scrolling to bottom
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Fallback: Copying text command was ' + msg);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+/**
+ * Copy text to clipboard
+ * @param {string} text text to copy
+ * @returns {undefined}
+ */
+function copyTextToClipboard(text) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(
+    function () {
+      console.log('Async: Copying to clipboard was successful!');
+    },
+    function (err) {
+      console.error('Async: Could not copy text: ', err);
+    }
+  );
+}
