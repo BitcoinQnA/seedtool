@@ -135,8 +135,11 @@ function copyTextToClipboard(text) {
 function toast(message) {
   const toastMessage = document.getElementById('toast');
   toastMessage.innerText = message || 'ERROR: Unknown Message';
-  toastMessage.className = 'show-toast';
+  toastMessage.classList.add('show-toast');
+  const background = document.getElementById('toast-background');
+  background.classList.add('show-toast');
   setTimeout(() => {
     toastMessage.classList.remove('show-toast');
+    background.classList.remove('show-toast');
   }, 3000);
 }
