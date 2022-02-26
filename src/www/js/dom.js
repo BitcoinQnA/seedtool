@@ -100,8 +100,10 @@ function fallbackCopyTextToClipboard(text) {
     var successful = document.execCommand('copy');
     var msg = successful ? 'successful' : 'unsuccessful';
     console.log('Fallback: Copying text command was ' + msg);
+    toast('Copied to clipboard');
   } catch (err) {
     console.error('Fallback: Oops, unable to copy', err);
+    toast('ERROR: Unable to copy to clipboard');
   }
 
   document.body.removeChild(textArea);
@@ -109,19 +111,32 @@ function fallbackCopyTextToClipboard(text) {
 /**
  * Copy text to clipboard
  * @param {string} text text to copy
- * @returns {undefined}
  */
 function copyTextToClipboard(text) {
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text);
-    return;
+  } else {
+    navigator.clipboard.writeText(text).then(
+      function () {
+        console.log('Async: Copying to clipboard was successful!');
+        toast('Copied to clipboard');
+      },
+      function (err) {
+        console.error('Async: Could not copy text: ', err);
+        toast('ERROR: Unable to copy to clipboard');
+      }
+    );
   }
-  navigator.clipboard.writeText(text).then(
-    function () {
-      console.log('Async: Copying to clipboard was successful!');
-    },
-    function (err) {
-      console.error('Async: Could not copy text: ', err);
-    }
-  );
+}
+/**
+ * Displays a pop-up message like a notification
+ * @param {string} message Message to display in notification toast
+ */
+function toast(message) {
+  const toastMessage = document.getElementById('toast');
+  toastMessage.innerText = message || 'ERROR: Unknown Message';
+  toastMessage.className = 'show-toast';
+  setTimeout(() => {
+    toastMessage.classList.remove('show-toast');
+  }, 3000);
 }

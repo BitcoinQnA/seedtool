@@ -172,6 +172,9 @@ textarea {
   background-color: #002933;
   color: var(--q-orange);
 }
+.one-click-copy {
+  cursor: pointer;
+}
 /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
@@ -222,6 +225,75 @@ footer {
   height: 50px;
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
+}
+#toast {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; /* Set a default minimum width */
+  margin-left: -125px; /* Divide value of min-width by 2 */
+  background-color: var(--q-orange); /* Black background color */
+  color: var(--q-blue); /* White text color */
+  text-align: center; /* Centered text */
+  border-radius: 20px; /* Rounded borders */
+  padding: 16px; /* Padding */
+  position: fixed; /* Sit on top of the screen */
+  z-index: 1; /* Add a z-index if needed */
+  left: 50%; /* Center the toast */
+  bottom: 30px; /* 30px from the bottom */
+  box-shadow: 0 0 4px 2px var(--q-white); /* glow */
+}
+
+/* Show the toast when clicking on a button (class added with JavaScript) */
+#toast.show-toast {
+  visibility: visible; /* Show the toast */
+  /* Add animation: Take 0.5 seconds to fade in and out the toast.
+  However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+  animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+}
+
+/* Animations to fade the toast in and out */
+@-webkit-keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
 }
 .chip {
   display: inline-block;
