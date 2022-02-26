@@ -1,5 +1,6 @@
 :root {
   --q-blue: #00151a;
+  --q-light-blue: #002933;
   --q-orange: #f99925;
   --q-white: #f0e7d5;
 }
@@ -89,7 +90,7 @@ textarea {
   outline: none;
   transition: 0.4s;
 }
-.active,
+.accordion.active,
 .accordion:hover {
   background-color: var(--q-blue);
   color: var(--q-orange);
@@ -129,11 +130,10 @@ textarea {
   transition: 0.3s;
   width: calc(100% / 3);
 }
-.tab button:hover {
-  background-color: #002933;
-}
+.tab button:hover,
 .tab button.active {
-  background-color: #002933;
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
 }
 .tabContent {
   display: none;
@@ -196,6 +196,10 @@ textarea {
   width: 80%; /* Could be more or less, depending on screen size */
   border-radius: 20px;
 }
+.modal-content a {
+  color: var(--q-blue);
+  text-decoration: underline;
+}
 
 /* The Close Button */
 #modalClose {
@@ -228,6 +232,9 @@ footer {
   border-radius: 25px;
   background-color: var(--q-blue);
   color: var(--q-orange);
+  box-shadow: 0 0 4px 2px var(--q-orange);
+  margin: 4px;
+  cursor: pointer;
 }
 
 .chip-img {
