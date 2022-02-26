@@ -48,7 +48,6 @@ builds the output html file to the dist directory for distribution
 ```
 MSG="Added this awesome new feature" npm run git
 ```
-Should run tests when written (TODO)
 
 ### Test
 ```
