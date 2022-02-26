@@ -29,6 +29,15 @@ npm run dev
 open browser to [http://localhost:3000/](http://localhost:3000/)
 change files in your code editor of choice and the webpage will reload on save of files in the src folder.
 
+If you get an error that port 8080 is still in use, you can kill the process with this command
+```
+npx kill-port 8080
+```
+after that you should be able to start the development script with
+```
+npm run dev
+```
+
 ### Build
 ```
 npm run build
