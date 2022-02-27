@@ -160,12 +160,27 @@ textarea {
   margin: 1px;
   text-align: center;
 }
-.entropy-details--detail--text {
+.entropy-details--detail--text,
+.address-details-text {
   background-color: var(--q-white);
   color: var(--q-blue);
   font-family: monospace;
   border-radius: 2px;
   padding: 2px;
+}
+.bip44-text-input {
+  width: 50px;
+}
+.address-block {
+  border: 1px solid var(--q-white);
+  overflow: hidden;
+  margin-top: 3px;
+  padding: 2px;
+  border-radius: 5px;
+}
+.address-display {
+  height: 50vh;
+  overflow-y: scroll;
 }
 .info-button {
   background-color: var(--q-blue);
@@ -410,21 +425,6 @@ footer {
           <li>⌨️ Enter an existing BIP39 mnemonic</li>
           <li>🎲 Enter in your own entropy</li>
         </ul>
-        <p>
-          <span>Select a language for your BIP39 Mnemonic:</span>
-          <select id="language">
-            <option value="english" selected>English</option>
-            <option value="japanese">日本語</option>
-            <option value="spanish">Español</option>
-            <option value="chinese_simplified">中文(简体)</option>
-            <option value="chinese_traditional">中文(繁體)</option>
-            <option value="french">Français</option>
-            <option value="italian">Italiano</option>
-            <option value="korean">한국어</option>
-            <option value="czech">Čeština</option>
-            <option value="portuguese">Português</option>
-          </select>
-        </p>
         <div class="tab">
           <button class="tabLinks" id="defaultOpenTab" onclick="tabSelect(event, 'Generate_Random')">🤖</button>
           <button class="tabLinks" onclick="tabSelect(event, 'Input_Known')">⌨️</button>
@@ -525,8 +525,7 @@ footer {
             </div>
             <div class="entropy-details--flex-item">
               <label>Mnemonic Length: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyMnemonicLength"></span>
-              <select class="entropy-details--detail--select">
+              <select class="entropy-details--detail--select" id="entropyMnemonicLength">
                 <option value="raw" selected>Use Raw Entropy (3 words per 32 bits)</option>
                 <option value="12">12 <span>Words</span></option>
                 <option value="15">15 <span>Words</span></option>
@@ -536,130 +535,289 @@ footer {
               </select>
             </div>
             <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
+              <label>PBKDF2 rounds: </label>
+              <select class="entropy-details--detail--select" id="entropyPBKDF2Rounds" style="width: 60%;float: left;">
+                <option value="2048" selected>2048 <span>(compatibility)</span></option>
+                <option value="4096">4096 <span>iterations</span></option>
+                <option value="8192">8192 <span>iterations</span></option>
+                <option value="16384">16384 <span>iterations</span></option>
+                <option value="32768">32768 <span>iterations</span></option>
+                <option value="custom">Custom <span>iterations</span></option>
+              </select>
+              <input type="number" class="entropy-details--detail--input hidden" id="pbkdf2-custom-input" value="1"
+                min="1" pattern="[0-9]" style="float: right;width: 40%;">
             </div>
+
             <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
+              <label>Entropy method: </label>
+              <select class="entropy-details--detail--select" id="entropyMethod">
+                <option value="binary" selected>Binary [0-1] eg. 101010011</option>
+                <option value="base 6">Base 6 [0-5] eg. 123434014</option>
+                <option value="dice">Dice [1-6] eg. 62535634</option>
+                <option value="base 10">Base 10 (Coldcard) [0-9] eg. 90834528</option>
+                <option value="hexadecimal">Hex [0-9A-F] eg. 4187a8bfd9</option>
+                <option value="card">Card [A2-9TJQK][CDHS] eg.ahqs9dtc</option>
+              </select>
             </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>lbl: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropy"></span>
-            </div>
+          </div>
+        </div>
+        <div class="">
+          <label for="root-key" class="">BIP32 Root Key</label>
+          <div class="">
+            <textarea id="root-key" class="root-key private-data textarea-input" data-show-qr autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false">Example Root Key</textarea>
           </div>
         </div>
       </div>
       <hr>
       <button class="accordion">BIP39: Mnemonic code for generating deterministic keys</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP39')">
-            <div class="chip-img"></div>
-            More Information:
+        <div class="chip" onclick="openInfoModal(event, 'BIP39')">
+          <div class="chip-img"></div>
+          More Information:
+        </div>
+        <div class="danger PBKDF2-infos-danger hidden">
+          <label class="">Warning</label>
+          <div class="">
+            <span>You are using a custom number of PBKDF2 iterations. Your BIP39 seed might not show the same addresses
+              on different software.</span>
           </div>
-
+        </div>
+        <div class="">
+          <label for="phrase" class="">BIP39 Mnemonic (English)</label>
+          <div class="">
+            <textarea id="phrase" class="phrase private-data textarea-input" data-show-qr autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <div class="">
+          <div class="splitMnemonic hidden">
+            <label for="phrase" class="">BIP39 Split Mnemonic</label>
+            <div class="">
+              <textarea id="phraseSplit" class="phraseSplit private-data textarea-input"
+                title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
+              <p class="help-block">
+                <span id="phraseSplitWarn" class="phraseSplitWarn"></span>
+              </p>
+            </div>
+          </div>
+          <div class="">
+            <label class="control-label text-weight-normal">
+              <input type="checkbox" class="showSplitMnemonic">
+              Show split mnemonic cards
+            </label>
+          </div>
+        </div>
+        <div class="">
+          <label for="passphrase" class="">BIP39 Passphrase
+            (optional)</label>
+          <div class="">
+            <textarea id="passphrase" class="passphrase private-data textarea-input" autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <div class="">
+          <label for="seed" class="">BIP39 Seed</label>
+          <div class="">
+            <textarea id="seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
         </div>
       </div>
       <hr>
       <button class="accordion">BIP44: Multi-Account Hierarchy for Deterministic Wallets</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP44')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'BIP44')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
+        <table>
+          <tr>
+            <th>Purpose</th>
+            <th>Coin</th>
+            <th>Account</th>
+            <th>External / Internal</th>
+          </tr>
+          <tr>
+            <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
+            <td><select name="bip44-coin" id="bip44Coin">
+                <option value="0">0 (Bitcoin)</option>
+                <option value="1">1 (Bitcoin TESTNET)</option>
+              </select></td>
+            <td><input id="bip44-account" type="text" class="bip44-text-input bip44-account" value="0"></td>
+            <td><input id="bip44-change" type="text" class="bip44-text-input bip44-change" value="0"></td>
+          </tr>
+        </table>
+        <div class="">
+          <p>The account extended keys can be used for importing to most BIP44 compatible
+            wallets, such as mycelium or electrum.</p>
+        </div>
+        <label for="account-xprv" class="col-sm-2 control-label">
+          <span>Account Extended Private Key</span>
+        </label>
+        <textarea id="account-xprv-bip44" type="text" class="account-xprv private-data form-control" readonly
+          data-show-qr autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <label for="account-xpub" class="col-sm-2 control-label">
+          <span>Account Extended Public Key</span>
+        </label>
+        <textarea id="account-xpub-bip44" type="text" class="account-xpub form-control" readonly data-show-qr
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div class="col-sm-10">
+          <p>The BIP32 derivation path and extended keys are the basis for the derived
+            addresses.</p>
+        </div>
+        <label for="bip44-path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
+        <input id="bip44-path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
       </div>
       <hr>
       <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP47')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'BIP47')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
       </div>
       <hr>
       <button class="accordion">BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP49')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'BIP49')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
       </div>
       <hr>
       <button class="accordion">BIP84: Derivation scheme for P2WPKH based accounts</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP84')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'BIP84')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
       </div>
       <hr>
       <button class="accordion">BIP85: Deterministic Entropy From BIP32 Keychains</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP85')">
-            <div class="chip-img"></div>
-            More Information:
+        <div class="chip" onclick="openInfoModal(event, 'BIP85')">
+          <div class="chip-img"></div>
+          More Information:
+        </div>
+        <div class="text-danger">
+          <label class="">Warning</label>
+          <div class="">
+            This is an advanced feature and should only be used if you understand what it does.
           </div>
+        </div>
+        <label for="bip85-application" class="">BIP85 Application</label>
+        <div class="">
+          <select id="bip85-application" class="">
+            <option value="bip39" selected>BIP39</option>
+            <option value="wif">WIF</option>
+            <option value="xprv">Xprv</option>
+            <option value="hex">Hex</option>
+          </select>
+        </div>
+        <div class="bip85-mnemonic-length-input">
+          <label for="bip85-mnemonic-length" class="">BIP85 Mnemonic
+            Length</label>
+          <div class="">
+            <select id="bip85-mnemonic-length" class="strength">
+              <option value="12" selected>12</option>
+              <option value="18">18</option>
+              <option value="24">24</option>
+            </select>
+          </div>
+        </div>
+        <div class="bip85">
+          <span class="bip85-bytes-input">
+            <label for="bip85-bytes" class="">BIP85 Bytes</label>
+            <div class="">
+              <input id="bip85-bytes" type="text" class="change" value="64" />
+            </div>
+          </span>
+        </div>
 
+        <div class="bip85 bip85-index-input">
+          <label for="bip85-index" class="">BIP85 Index</label>
+          <div class="">
+            <input id="bip85-index" type="text" class="change" value="0" />
+          </div>
+        </div>
+
+        <div class="bip85">
+          <label for="phrase" class="">BIP85 Child Key</label>
+          <div class="">
+            <textarea id="bip85Field" data-show-qr class="bip85Field textarea-input private-data"
+              title="BIP85 Child Key" rows="3"></textarea>
+          </div>
         </div>
       </div>
       <hr>
       <button class="accordion">BIP141: Segregated Witness (Consensus layer)</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'BIP141')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'BIP141')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
+      </div>
+      <hr>
+      <button class="accordion">Derived Addresses</button>
+      <div class="panel">
+        <div class="chip" onclick="openInfoModal(event, 'ADDRESSES')">
+          <div class="chip-img"></div>
+          More Information:
+        </div>
+        <p>
+          Note these addresses are derived from the BIP32 Extended Key
+        </p>
+        <div>
+          <input type="checkbox" name="encrypt_addresses" id="encrypt_addresses">
+          <label for="encrypt_addresses">Encrypt private keys using BIP38 and this password: </label>
+          <input type="text" name="encrypt_addresses_password" id="encrypt_addresses_password">
+          Enabling BIP38 means each key will take several minutes to generate.
+        </div>
+        <div>
+          <input type="checkbox" name="hardened_addresses" id="hardened_addresses" checked>
+          <label for="hardened_addresses">Use hardened addresses</label>
+        </div>
+        <div class="address-display">
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <br>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <br>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <br>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <br>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <br>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <br>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <br>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <br>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <br>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+        </div>
+
       </div>
       <hr>
       <button class="accordion">Credits and licenses</button>
       <div class="panel">
-        <div class="entropy-details">
-          <div class="chip" onclick="openInfoModal(event, 'CREDITS')">
-            <div class="chip-img"></div>
-            More Information:
-          </div>
-
+        <div class="chip" onclick="openInfoModal(event, 'CREDITS')">
+          <div class="chip-img"></div>
+          More Information:
         </div>
       </div>
     </div>
@@ -1001,6 +1159,11 @@ function adjustPanelHeight() {
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
+  ADDRESSES: /*html*/ `
+        <h3>Derived Addresses</h3>
+        <p>
+          About Derived Addresses
         </p>`,
   CREDITS: /*html*/ `
         <h3>Credits and licenses</h3>

@@ -136,6 +136,11 @@ window.infoHtml = {
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
         </p>`,
+  ADDRESSES: /*html*/ `
+        <h3>Derived Addresses</h3>
+        <p>
+          About Derived Addresses
+        </p>`,
   CREDITS: /*html*/ `
         <h3>Credits and licenses</h3>
         <h4>Ian Coleman</h4>

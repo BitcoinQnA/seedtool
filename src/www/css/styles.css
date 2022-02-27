@@ -153,12 +153,27 @@ textarea {
   margin: 1px;
   text-align: center;
 }
-.entropy-details--detail--text {
+.entropy-details--detail--text,
+.address-details-text {
   background-color: var(--q-white);
   color: var(--q-blue);
   font-family: monospace;
   border-radius: 2px;
   padding: 2px;
+}
+.bip44-text-input {
+  width: 50px;
+}
+.address-block {
+  border: 1px solid var(--q-white);
+  overflow: hidden;
+  margin-top: 3px;
+  padding: 2px;
+  border-radius: 5px;
+}
+.address-display {
+  height: 50vh;
+  overflow-y: scroll;
 }
 .info-button {
   background-color: var(--q-blue);
