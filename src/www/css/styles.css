@@ -26,7 +26,7 @@ body {
 }
 .content {
   padding: 40px;
-  max-width: 650px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 h1 {
@@ -79,6 +79,10 @@ textarea {
   width: 100%;
   height: auto;
 }
+.textarea-input {
+  background-color: var(--q-light-blue);
+  color: var(--q-white);
+}
 .accordion {
   color: var(--q-white);
   background-color: var(--q-blue);
@@ -120,7 +124,11 @@ textarea {
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
 }
-.tab button {
+.tab-addresses {
+  height: 50px;
+}
+.tab button,
+.tab-addresses button {
   background-color: inherit;
   float: left;
   border: none;
@@ -130,8 +138,13 @@ textarea {
   transition: 0.3s;
   width: calc(100% / 3);
 }
+.tab-addresses button {
+  width: 50%;
+}
 .tab button:hover,
-.tab button.tab--active {
+.tab button.tab--active,
+.tab-addresses button:hover,
+.tab-addresses button.tab-addresses--active {
   background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
@@ -143,10 +156,14 @@ textarea {
 }
 .entropy-details--flex-container {
   display: none;
+}
+.entropy-details--flex-container,
+.bip85-flex-container {
   flex-flow: row wrap;
   justify-content: space-evenly;
 }
-.entropy-details--flex-item {
+.entropy-details--flex-item,
+.bip85-flex-child {
   border: 1px solid var(--q-white);
   border-radius: 3px;
   padding: 1px;
@@ -155,8 +172,8 @@ textarea {
 }
 .entropy-details--detail--text,
 .address-details-text {
-  background-color: var(--q-white);
-  color: var(--q-blue);
+  background-color: var(--q-light-blue);
+  color: var(--q-white);
   font-family: monospace;
   border-radius: 2px;
   padding: 2px;
@@ -174,6 +191,8 @@ textarea {
 .address-display {
   height: 50vh;
   overflow-y: scroll;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 .info-button {
   background-color: var(--q-blue);

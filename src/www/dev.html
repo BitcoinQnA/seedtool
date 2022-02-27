@@ -227,7 +227,7 @@
           <div class="chip-img"></div>
           More Information:
         </div>
-        <div class="danger PBKDF2-infos-danger hidden">
+        <div class="warning PBKDF2-infos-danger hidden">
           <label class="">Warning</label>
           <div class="">
             <span>You are using a custom number of PBKDF2 iterations. Your BIP39 seed might not show the same addresses
@@ -351,51 +351,43 @@
           <div class="chip-img"></div>
           More Information:
         </div>
-        <div class="text-danger">
+        <div class="warning">
           <label class="">Warning</label>
           <div class="">
             This is an advanced feature and should only be used if you understand what it does.
           </div>
         </div>
-        <label for="bip85-application" class="">BIP85 Application</label>
-        <div class="">
-          <select id="bip85-application" class="">
-            <option value="bip39" selected>BIP39</option>
-            <option value="wif">WIF</option>
-            <option value="xprv">Xprv</option>
-            <option value="hex">Hex</option>
-          </select>
-        </div>
-        <div class="bip85-mnemonic-length-input">
-          <label for="bip85-mnemonic-length" class="">BIP85 Mnemonic
-            Length</label>
-          <div class="">
+        <div class="bip85-flex-container">
+          <div class="bip85-flex-child">
+            <label for="bip85-application" class="">BIP85 Application</label>
+            <select id="bip85-application" class="">
+              <option value="bip39" selected>BIP39</option>
+              <option value="wif">WIF</option>
+              <option value="xprv">Xprv</option>
+              <option value="hex">Hex</option>
+            </select>
+          </div>
+          <div class="bip85-flex-child bip85-mnemonic-length-input">
+            <label for="bip85-mnemonic-length" class="">BIP85 Mnemonic
+              Length</label>
             <select id="bip85-mnemonic-length" class="strength">
               <option value="12" selected>12</option>
               <option value="18">18</option>
               <option value="24">24</option>
             </select>
           </div>
-        </div>
-        <div class="bip85">
-          <span class="bip85-bytes-input">
+          <div class="bip85-flex-child bip85-bytes-input bip85">
             <label for="bip85-bytes" class="">BIP85 Bytes</label>
-            <div class="">
-              <input id="bip85-bytes" type="text" class="change" value="64" />
-            </div>
-          </span>
-        </div>
+            <input id="bip85-bytes" type="text" class="change" value="64" />
+          </div>
 
-        <div class="bip85 bip85-index-input">
-          <label for="bip85-index" class="">BIP85 Index</label>
-          <div class="">
+          <div class="bip85-flex-child bip85 bip85-index-input">
+            <label for="bip85-index" class="">BIP85 Index</label>
             <input id="bip85-index" type="text" class="change" value="0" />
           </div>
-        </div>
 
-        <div class="bip85">
-          <label for="phrase" class="">BIP85 Child Key</label>
-          <div class="">
+          <div class="bip85-flex-child bip85">
+            <label for="phrase" class="">BIP85 Child Key</label>
             <textarea id="bip85Field" data-show-qr class="bip85Field textarea-input private-data"
               title="BIP85 Child Key" rows="3"></textarea>
           </div>
@@ -429,37 +421,146 @@
           <input type="checkbox" name="hardened_addresses" id="hardened_addresses" checked>
           <label for="hardened_addresses">Use hardened addresses</label>
         </div>
-        <div class="address-display">
+        <div class="tab-addresses">
+          <button class="address-tab-links" id="addressListDefault"
+            onclick="openAddressTab(event, 'addressList')">List</button>
+          <button class="address-tab-links" onclick="openAddressTab(event, 'CSV')">CSV</button>
+        </div><br>
+        <div class="address-display address-display-content" id="addressList">
           <div class="address-block">
             Path: <span class="address-details-text">m/0/0'</span> <br>
-            Address: <br>
+            Address: <wbr>
             <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
-            Public Key: <br>
+            Public Key: <wbr>
             <span
               class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
-            Private Key: <br>
+            Private Key: <wbr>
             <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
           </div>
           <div class="address-block">
             Path: <span class="address-details-text">m/0/0'</span> <br>
-            Address: <br>
+            Address: <wbr>
             <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
-            Public Key: <br>
+            Public Key: <wbr>
             <span
               class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
-            Private Key: <br>
+            Private Key: <wbr>
             <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
           </div>
           <div class="address-block">
             Path: <span class="address-details-text">m/0/0'</span> <br>
-            Address: <br>
+            Address: <wbr>
             <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
-            Public Key: <br>
+            Public Key: <wbr>
             <span
               class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
-            Private Key: <br>
+            Private Key: <wbr>
             <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
           </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+          <div class="address-block">
+            Path: <span class="address-details-text">m/0/0'</span> <br>
+            Address: <wbr>
+            <span class="address-details-text">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+            Public Key: <wbr>
+            <span
+              class="address-details-text">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+            Private Key: <wbr>
+            <span class="address-details-text">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+          </div>
+        </div>
+        <div class="address-display-content" id="CSV">
+          <div>
+            <textarea class="csv-textarea textarea-input" rows="25" readonly autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <div>
+          <span>Show</span>
+          <input type="number" class="rows-to-add" value="20">
+          <button class="more">more rows</button>
+          <span>starting from index</span>
+          <input type="number" class="more-rows-start-index">
+          <span>(leave blank to generate from next index)</span>
         </div>
       </div>
       <hr>
