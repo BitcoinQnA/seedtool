@@ -90,7 +90,7 @@ textarea {
   outline: none;
   transition: 0.4s;
 }
-.accordion.active,
+.accordion.accordion--active,
 .accordion:hover {
   background-color: var(--q-blue);
   color: var(--q-orange);
@@ -109,7 +109,7 @@ textarea {
   float: right;
   margin-left: 5px;
 }
-.accordion.active:after {
+.accordion.accordion--active:after {
   content: '\2796';
 }
 .tiny {
@@ -131,7 +131,7 @@ textarea {
   width: calc(100% / 3);
 }
 .tab button:hover,
-.tab button.active {
+.tab button.tab--active {
   background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
@@ -142,7 +142,7 @@ textarea {
   border-top: none;
 }
 .entropy-details--flex-container {
-  display: flex;
+  display: none;
   flex-flow: row wrap;
   justify-content: space-evenly;
 }

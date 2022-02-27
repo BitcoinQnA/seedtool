@@ -3,68 +3,71 @@
  */
 window.addEventListener('DOMContentLoaded', () => {
   // Accordion Sections
-  const accordionSections = document.getElementsByClassName('accordion');
-  for (let i = 0; i < accordionSections.length; i++) {
-    const section = accordionSections[i];
-    section.addEventListener('click', () => {
-      section.classList.toggle('active');
-      const panel = section.nextElementSibling;
-      if (panel.style.maxHeight) {
-        panel.style.maxHeight = null;
-      } else {
-        panel.style.maxHeight = panel.scrollHeight + 'px';
-      }
+  document.querySelectorAll('.accordion').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      btn.classList.toggle('accordion--active');
+      const panel = btn.nextElementSibling;
+      panel.classList.toggle('accordion-panel--active');
+      adjustPanelHeight();
     });
-  }
+  });
   // FOOTER: calculate copyright year
-  const yearSpan = document.getElementsByClassName('cYear');
-  for (let i = 0; i < yearSpan.length; i++) {
+  document.querySelectorAll('.cYear').forEach((yearSpan) => {
     let output = '';
     const currentYear = new Date().getFullYear();
-    const originYear = parseInt(yearSpan[i].innerHTML);
+    const originYear = parseInt(yearSpan.innerHTML);
     if (currentYear - originYear > 10) {
       output = '&nbsp;-&nbsp;' + originYear + 10;
     } else if (currentYear !== originYear) {
       output = '&nbsp;-&nbsp;' + currentYear;
     }
-    yearSpan[i].innerHTML += output;
-  }
+    yearSpan.innerHTML += output;
+  });
+  // Make sure that the generate seed tab is open
   document.getElementById('defaultOpenTab').click();
-  seedGenPanel.style.maxHeight = null;
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
-    textElement.addEventListener('click', () => {
+    textElement.addEventListener('click', (event) => {
+      event.preventDefault();
       const text = textElement.innerText || textElement.value;
       copyTextToClipboard(text);
     });
   });
+  // Add event listener for displaying/hiding entropy details
+  const entropyDisplay = document.querySelector('input[id="entropyDetails"]');
+  entropyDisplay.addEventListener('click', () => {
+    displayEntropy(entropyDisplay.checked);
+  });
 });
-const seedGenPanel = document.getElementById('seedGenPanel');
+// Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
-  const contentElements = document.getElementsByClassName('tabContent');
-  for (let i = 0; i < contentElements.length; i++) {
-    contentElements[i].style.display = 'none';
-  }
-  const tabLinks = document.getElementsByClassName('tabLinks');
-  for (i = 0; i < tabLinks.length; i++) {
-    tabLinks[i].classList.remove('active');
-  }
+  document.querySelectorAll('.tabContent').forEach((contentElement) => {
+    contentElement.style.display = 'none';
+  });
+  document.querySelectorAll('.tabLinks').forEach((tabLink) => {
+    tabLink.classList.remove('tab--active');
+  });
   document.getElementById(tabId).style.display = 'block';
-  event.currentTarget.classList.add('active');
-  seedGenPanel.style.maxHeight = seedGenPanel.scrollHeight + 'px';
+  event.currentTarget.classList.add('tab--active');
+  adjustPanelHeight();
 };
-
+/**
+ * QnA Explains dialog / Modal
+ */
 const infoModal = document.getElementById('infoModal');
 const infoModalText = document.getElementById('infoModalText');
+/**
+ * Hide the modal and clear it's text
+ */
 const clearInfoModal = () => {
   infoModal.style.display = 'none';
   infoModalText.innerHTML = '';
 };
-// document.getElementById('infoModalClose').onclick(clearInfoModal);
 /**
  * Open the QnA Explains dialog
  * @param {Event} _event Not used
- * @param {string} section string for the key to open from info.js
+ * @param {string} section string for the key to get value from info.js
  */
 window.openInfoModal = (_event, section) => {
   infoModalText.innerHTML = window.infoHtml[section];
@@ -142,4 +145,31 @@ function toast(message) {
     toastMessage.classList.remove('show-toast');
     background.classList.remove('show-toast');
   }, 3000);
+}
+/**
+ * Display / Hide Entropy details
+ * @param {boolean} checked Is the checkbox checked
+ */
+function displayEntropy(checked) {
+  const container = document.getElementById('entropyDetailsContainer');
+  if (checked) {
+    // show details
+    container.style.display = 'flex';
+  } else {
+    container.style.display = 'none';
+  }
+  adjustPanelHeight();
+}
+/**
+ * Whenever some CSS changes in an accordion panel, call this to fix the panel
+ */
+function adjustPanelHeight() {
+  document.querySelectorAll('.panel').forEach((panel) => {
+    const isActive = panel.classList.contains('accordion-panel--active');
+    if (isActive) {
+      panel.style.maxHeight = panel.scrollHeight + 'px';
+    } else {
+      panel.style.maxHeight = null;
+    }
+  });
 }
