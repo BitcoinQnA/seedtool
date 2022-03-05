@@ -580,9 +580,9 @@ footer {
             </div>
           </div>
         </div>
-        <div class="">
-          <label for="root-key" class="">BIP32 Root Key</label>
-          <div class="">
+        <div>
+          <label for="root-key">BIP32 Root Key</label>
+          <div>
             <textarea id="root-key" class="root-key private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false">Example Root Key</textarea>
           </div>
@@ -602,23 +602,23 @@ footer {
           More Information:
         </div>
         <div class="warning PBKDF2-infos-danger hidden">
-          <label class="">Warning</label>
-          <div class="">
+          <label>Warning</label>
+          <div>
             <span>You are using a custom number of PBKDF2 iterations. Your BIP39 seed might not show the same addresses
               on different software.</span>
           </div>
         </div>
-        <div class="">
-          <label for="phrase" class="">BIP39 Mnemonic (English)</label>
-          <div class="">
+        <div>
+          <label for="phrase">BIP39 Mnemonic (English)</label>
+          <div>
             <textarea id="phrase" class="phrase private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
-        <div class="">
+        <div>
           <div class="splitMnemonic hidden">
-            <label for="phrase" class="">BIP39 Split Mnemonic</label>
-            <div class="">
+            <label for="phrase">BIP39 Split Mnemonic</label>
+            <div>
               <textarea id="phraseSplit" class="phraseSplit private-data textarea-input"
                 title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
               <p class="help-block">
@@ -626,24 +626,24 @@ footer {
               </p>
             </div>
           </div>
-          <div class="">
+          <div>
             <label class="control-label text-weight-normal">
               <input type="checkbox" class="showSplitMnemonic">
               Show split mnemonic cards
             </label>
           </div>
         </div>
-        <div class="">
-          <label for="passphrase" class="">BIP39 Passphrase
+        <div>
+          <label for="passphrase">BIP39 Passphrase
             (optional)</label>
-          <div class="">
+          <div>
             <textarea id="passphrase" class="passphrase private-data textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
-        <div class="">
-          <label for="seed" class="">BIP39 Seed</label>
-          <div class="">
+        <div>
+          <label for="seed">BIP39 Seed</label>
+          <div>
             <textarea id="seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
@@ -673,7 +673,7 @@ footer {
             <td><input id="bip44-change" type="text" class="bip44-text-input bip44-change" value="0"></td>
           </tr>
         </table>
-        <div class="">
+        <div>
           <p>The account extended keys can be used for importing to most BIP44 compatible
             wallets, such as mycelium or electrum.</p>
         </div>
@@ -738,15 +738,15 @@ footer {
           More Information:
         </div>
         <div class="warning">
-          <label class="">Warning</label>
-          <div class="">
+          <label>Warning</label>
+          <div>
             This is an advanced feature and should only be used if you understand what it does.
           </div>
         </div>
         <div class="bip85-flex-container">
           <div class="bip85-flex-child">
-            <label for="bip85-application" class="">BIP85 Application</label>
-            <select id="bip85-application" class="">
+            <label for="bip85-application">BIP85 Application</label>
+            <select id="bip85-application">
               <option value="bip39" selected>BIP39</option>
               <option value="wif">WIF</option>
               <option value="xprv">Xprv</option>
@@ -754,7 +754,7 @@ footer {
             </select>
           </div>
           <div class="bip85-flex-child bip85-mnemonic-length-input">
-            <label for="bip85-mnemonic-length" class="">BIP85 Mnemonic
+            <label for="bip85-mnemonic-length">BIP85 Mnemonic
               Length</label>
             <select id="bip85-mnemonic-length" class="strength">
               <option value="12" selected>12</option>
@@ -763,17 +763,17 @@ footer {
             </select>
           </div>
           <div class="bip85-flex-child bip85-bytes-input bip85">
-            <label for="bip85-bytes" class="">BIP85 Bytes</label>
+            <label for="bip85-bytes">BIP85 Bytes</label>
             <input id="bip85-bytes" type="text" class="change" value="64" />
           </div>
 
           <div class="bip85-flex-child bip85 bip85-index-input">
-            <label for="bip85-index" class="">BIP85 Index</label>
+            <label for="bip85-index">BIP85 Index</label>
             <input id="bip85-index" type="text" class="change" value="0" />
           </div>
 
           <div class="bip85-flex-child bip85">
-            <label for="phrase" class="">BIP85 Child Key</label>
+            <label for="phrase">BIP85 Child Key</label>
             <textarea id="bip85Field" data-show-qr class="bip85Field textarea-input private-data"
               title="BIP85 Child Key" rows="3"></textarea>
           </div>
