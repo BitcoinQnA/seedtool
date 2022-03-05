@@ -3,6 +3,7 @@
  * Copyright (c) 2014-2016 Ian Coleman
  * https://github.com/iancoleman/bip39/blob/master/src/js/entropy.js
  */
+/* cSpell:disable */
 /*
  * Detects entropy from a string.
  *
@@ -366,3 +367,4 @@ window.Entropy = new (function () {
     };
   }
 })();
+/* cSpell:enable */

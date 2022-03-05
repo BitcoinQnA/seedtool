@@ -279,6 +279,7 @@ const injectAddresses = (addressDataArray, addressListName) => {
 };
 
 // Just here for testing
+/* cSpell:disable */
 const testAddressData = [
   [
     "m/0/0'",
@@ -521,3 +522,4 @@ const testAddressData = [
     'L2f6J3CMdoGqEZP55z4T3GhiCz2kXHpSVCKwQcxt88GuRLygHivh',
   ],
 ].map((a) => new AddressData(a[0], a[1], a[2], a[3]));
+/* cSpell:enable */
