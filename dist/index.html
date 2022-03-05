@@ -587,6 +587,12 @@ footer {
               autocorrect="off" autocapitalize="off" spellcheck="false">Example Root Key</textarea>
           </div>
         </div>
+        <p>
+          Note these addresses are derived from the BIP32 Extended Key
+        </p>
+        <div class="derived-addresses-block-bip32">
+
+        </div>
       </div>
       <hr>
       <button class="accordion">BIP39: Mnemonic code for generating deterministic keys</button>
@@ -687,6 +693,9 @@ footer {
         </div>
         <label for="bip44-path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
         <input id="bip44-path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
+        <div class="derived-addresses-block-bip44">
+
+        </div>
       </div>
       <hr>
       <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
@@ -694,6 +703,9 @@ footer {
         <div class="chip" onclick="openInfoModal(event, 'BIP47')">
           <div class="chip-img"></div>
           More Information:
+        </div>
+        <div class="derived-addresses-block-bip47">
+
         </div>
       </div>
       <hr>
@@ -703,6 +715,9 @@ footer {
           <div class="chip-img"></div>
           More Information:
         </div>
+        <div class="derived-addresses-block-bip49">
+
+        </div>
       </div>
       <hr>
       <button class="accordion">BIP84: Derivation scheme for P2WPKH based accounts</button>
@@ -710,6 +725,9 @@ footer {
         <div class="chip" onclick="openInfoModal(event, 'BIP84')">
           <div class="chip-img"></div>
           More Information:
+        </div>
+        <div class="derived-addresses-block-bip84">
+
         </div>
       </div>
       <hr>
@@ -770,42 +788,6 @@ footer {
         </div>
       </div>
       <hr>
-      <button class="accordion">Derived Addresses</button>
-      <div class="panel">
-        <div class="chip" onclick="openInfoModal(event, 'ADDRESSES')">
-          <div class="chip-img"></div>
-          More Information:
-        </div>
-        <p>
-          Note these addresses are derived from the BIP32 Extended Key
-        </p>
-        <div>
-          <input type="checkbox" name="encrypt_addresses" id="encrypt_addresses">
-          <label for="encrypt_addresses">Encrypt private keys using BIP38 and this password: </label>
-          <input type="text" name="encrypt_addresses_password" id="encrypt_addresses_password">
-          Enabling BIP38 means each key will take several minutes to generate.
-        </div>
-        <div>
-          <input type="checkbox" name="hardened_addresses" id="hardened_addresses" checked>
-          <label for="hardened_addresses">Use hardened addresses</label>
-        </div>
-        <div>
-          <a class="bip32-csv-download-link" href="data:text/csv;charset=utf-8,path,address,public key,private key"
-            target="_blank" class="download-csv--bip32" download="bip32_addresses.csv">Download CSV file</a>
-        </div>
-        <div class="address-display address-display-content bip32-address-display-content--list">
-          <!-- Populated By JavaScript -->
-        </div>
-        <div>
-          <span>Show</span>
-          <input type="number" class="rows-to-add" value="20">
-          <button class="more">more rows</button>
-          <span>starting from index</span>
-          <input type="number" class="more-rows-start-index">
-          <span>(leave blank to generate from next index)</span>
-        </div>
-      </div>
-      <hr>
       <button class="accordion">Credits and licenses</button>
       <div class="panel">
         <div class="chip" onclick="openInfoModal(event, 'CREDITS')">
@@ -847,6 +829,34 @@ footer {
       Private Key: <wbr>
       <span
         class="address-details-text address-details--prvKey">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+    </div>
+  </template>
+  <template id="derivedAddressTemplate">
+    <div>
+      <div>
+        <input type="checkbox" name="encrypt_addresses" id="encrypt_addresses">
+        <label for="encrypt_addresses">Encrypt private keys using BIP38 and this password: </label>
+        <input type="text" name="encrypt_addresses_password" id="encrypt_addresses_password">
+        Enabling BIP38 means each key will take several minutes to generate.
+      </div>
+      <div>
+        <input type="checkbox" name="hardened_addresses" id="hardened_addresses" checked>
+        <label for="hardened_addresses">Use hardened addresses</label>
+      </div>
+      <div>
+        <a href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV file</a>
+      </div>
+      <div class="address-display address-display-content">
+        <!-- Populated By JavaScript -->
+      </div>
+      <div>
+        <span>Show</span>
+        <input type="number" class="rows-to-add" value="20">
+        <button class="more">more rows</button>
+        <span>starting from index</span>
+        <input type="number" class="more-rows-start-index">
+        <span>(leave blank to generate from next index)</span>
+      </div>
     </div>
   </template>
   <script>
@@ -895,8 +905,14 @@ window.addEventListener('DOMContentLoaded', () => {
   entropyDisplay.addEventListener('click', () => {
     displayEntropy(entropyDisplay.checked);
   });
+  // add template for derived addresses
+  addDerivedAddressBlocks();
   // add fake csv for testing
   injectAddresses(testAddressData, 'bip32');
+  injectAddresses(testAddressData, 'bip44');
+  injectAddresses(testAddressData, 'bip47');
+  injectAddresses(testAddressData, 'bip49');
+  injectAddresses(testAddressData, 'bip84');
 });
 // Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
@@ -1032,6 +1048,34 @@ function adjustPanelHeight() {
   });
 }
 /**
+ * Add derived address blocks to each section
+ */
+const addDerivedAddressBlocks = () => {
+  const bips = ['bip32', 'bip44', 'bip47', 'bip49', 'bip84'];
+  // Ensure not internet explorer!
+  if (!('content' in document.createElement('template'))) {
+    throw new Error(
+      'Browser Outdated! Unable to populate list and generate csv.'
+    );
+  }
+  bips.forEach((bip) => {
+    const container = document.querySelector('.derived-addresses-block-' + bip);
+    const template = document.querySelector('#derivedAddressTemplate');
+    const clone = template.content.firstElementChild.cloneNode(true);
+    if (!container || !template || !clone) {
+      console.error('Unable to insert Address block template for ' + bip);
+      return;
+    }
+    const a = clone.querySelector('a');
+    a.className = bip + '-csv-download-link';
+    a.download = bip + '_addresses.csv';
+    clone
+      .querySelector('.address-display-content')
+      .classList.add(bip + '-address-display-content--list');
+    container.appendChild(clone);
+  });
+};
+/**
  * Class representing address data
  * Used to populate address lists
  */
@@ -1060,7 +1104,7 @@ const injectAddresses = (addressDataArray, addressListName) => {
   let csv = `path,address,public key,private key
 `;
   // declare DOM elements
-  const a = document.querySelector('.bip32-csv-download-link');
+  const a = document.querySelector(`.${addressListName}-csv-download-link`);
   const listContainer = document.querySelector(
     `.${addressListName}-address-display-content--list`
   );

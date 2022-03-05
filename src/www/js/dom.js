@@ -43,8 +43,14 @@ window.addEventListener('DOMContentLoaded', () => {
   entropyDisplay.addEventListener('click', () => {
     displayEntropy(entropyDisplay.checked);
   });
+  // add template for derived addresses
+  addDerivedAddressBlocks();
   // add fake csv for testing
   injectAddresses(testAddressData, 'bip32');
+  injectAddresses(testAddressData, 'bip44');
+  injectAddresses(testAddressData, 'bip47');
+  injectAddresses(testAddressData, 'bip49');
+  injectAddresses(testAddressData, 'bip84');
 });
 // Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
@@ -180,6 +186,34 @@ function adjustPanelHeight() {
   });
 }
 /**
+ * Add derived address blocks to each section
+ */
+const addDerivedAddressBlocks = () => {
+  const bips = ['bip32', 'bip44', 'bip47', 'bip49', 'bip84'];
+  // Ensure not internet explorer!
+  if (!('content' in document.createElement('template'))) {
+    throw new Error(
+      'Browser Outdated! Unable to populate list and generate csv.'
+    );
+  }
+  bips.forEach((bip) => {
+    const container = document.querySelector('.derived-addresses-block-' + bip);
+    const template = document.querySelector('#derivedAddressTemplate');
+    const clone = template.content.firstElementChild.cloneNode(true);
+    if (!container || !template || !clone) {
+      console.error('Unable to insert Address block template for ' + bip);
+      return;
+    }
+    const a = clone.querySelector('a');
+    a.className = bip + '-csv-download-link';
+    a.download = bip + '_addresses.csv';
+    clone
+      .querySelector('.address-display-content')
+      .classList.add(bip + '-address-display-content--list');
+    container.appendChild(clone);
+  });
+};
+/**
  * Class representing address data
  * Used to populate address lists
  */
@@ -208,7 +242,7 @@ const injectAddresses = (addressDataArray, addressListName) => {
   let csv = `path,address,public key,private key
 `;
   // declare DOM elements
-  const a = document.querySelector('.bip32-csv-download-link');
+  const a = document.querySelector(`.${addressListName}-csv-download-link`);
   const listContainer = document.querySelector(
     `.${addressListName}-address-display-content--list`
   );
