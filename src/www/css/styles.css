@@ -356,6 +356,10 @@ footer {
   cursor: pointer;
 }
 
+.chip:hover {
+  background-color: var(--q-light-blue);
+}
+
 .chip-img {
   float: left;
   margin: 0 10px 0 -25px;
