@@ -136,43 +136,43 @@
           <div class="entropy-details--flex-container" id="entropyDetailsContainer">
             <div class="entropy-details--flex-item">
               <label>Time to crack (zxcvbn using Filtered Entropy): </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Event count: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyEventCount">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyEventCount">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Entropy type: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyEntropyType">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyEntropyType">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Avg Bits Per Event: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyBitsPerEvent">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyBitsPerEvent">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Raw Entropy Words: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyRawWords">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyRawWords">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Total Bits: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyTotalBits">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyTotalBits">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Filtered Entropy: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyFiltered">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyFiltered">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Raw Binary: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyRawBinary">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyRawBinary">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Binary Checksum: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyBinaryChecksum">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyBinaryChecksum">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Word Indexes: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyWordIndexes">Example text</span>
+              <span class="entropy-details--detail--text one-click-copy" id="entropyWordIndexes">Unknown</span>
             </div>
             <div class="entropy-details--flex-item">
               <label>Mnemonic Length: </label>
@@ -429,6 +429,7 @@
         <h3>Libraries</h3>
         <ul>
           <li><a href="https://github.com/iancoleman/bip39">BIP39 by Ian Coleman - MIT License</a></li>
+          <li><a href="https://github.com/dropbox/zxcvbn">zxcvbn by Dropbox - MIT License</a></li>
         </ul>
       </div>
     </div>
@@ -499,6 +500,7 @@
   <script src="js/info.js"></script>
   <script src="js/english.js"></script>
   <script src="js/entropy.js"></script>
+  <script src="js/zxcvbn.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;
     const setTimer = () => {

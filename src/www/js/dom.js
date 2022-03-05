@@ -26,10 +26,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   // Make sure that the generate seed tab is open
   document.getElementById('defaultOpenTab').click();
-  // Make sure that the addressList tab is open
-  // document.querySelectorAll('address-tab-links--default').forEach((element) => {
-  //   element.click();
-  // });
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
     textElement.addEventListener('click', (event) => {
@@ -43,6 +39,8 @@ window.addEventListener('DOMContentLoaded', () => {
   entropyDisplay.addEventListener('click', () => {
     displayEntropy(entropyDisplay.checked);
   });
+  // add event listener for entropy
+  document.getElementById('entropy').oninput = calculateEntropy;
   // add template for derived addresses
   addDerivedAddressBlocks();
   // add fake csv for testing
@@ -99,7 +97,7 @@ window.onclick = function (event) {
  * @param {string} text text to copy
  */
 function fallbackCopyTextToClipboard(text) {
-  var textArea = document.createElement('textarea');
+  const textArea = document.createElement('textarea');
   textArea.value = text;
 
   // Avoid scrolling to bottom
@@ -112,8 +110,8 @@ function fallbackCopyTextToClipboard(text) {
   textArea.select();
 
   try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? 'successful' : 'unsuccessful';
+    const successful = document.execCommand('copy');
+    let msg = successful ? 'successful' : 'unsuccessful';
     console.log('Fallback: Copying text command was ' + msg);
     toast('Copied to clipboard');
   } catch (err) {
@@ -277,6 +275,149 @@ const injectAddresses = (addressDataArray, addressListName) => {
   });
   a.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
+
+const calculateEntropy = (event) => {
+  const entropy = window.Entropy.fromString(event.target.value);
+  const numberOfBits = entropy.binaryStr.length;
+  const wordCount = Math.floor(numberOfBits / 32) * 3;
+  const bitsPerEvent = entropy.bitsPerEvent.toFixed(2);
+  const spacedBinaryStr = addSpacesEveryElevenBits(entropy.binaryStr);
+  let timeToCrack = 'unknown';
+  try {
+    const z = window.zxcvbn(entropy.base.events.join(''));
+    timeToCrack = z.crack_times_display.offline_fast_hashing_1e10_per_second;
+    if (z.feedback.warning != '') {
+      timeToCrack = timeToCrack + ' - ' + z.feedback.warning;
+    }
+  } catch (e) {
+    console.log('Error detecting entropy strength with zxcvbn:');
+    console.log(e);
+  }
+  document.getElementById('entropyTimeToCrack').innerText = timeToCrack;
+  document.getElementById('entropyEventCount').innerText =
+    entropy.base.events.length;
+  document.getElementById('entropyEntropyType').innerText =
+    getEntropyTypeStr(entropy);
+  document.getElementById('entropyBitsPerEvent').innerText = bitsPerEvent;
+  document.getElementById('entropyRawWords').innerText = wordCount;
+  document.getElementById('entropyTotalBits').innerText = numberOfBits;
+  document.getElementById('entropyFiltered').innerText = entropy.cleanHtml;
+  document.getElementById('entropyRawBinary').innerText = spacedBinaryStr;
+  document.getElementById('entropyBinaryChecksum').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  const eg = {
+    binaryStr:
+      '00111110010101111100000111001110101010111111110110101111100100010111011111100001',
+    cleanStr: '3e57C1ceABFdAf9177E1',
+    cleanHtml: '3e57C1ceABFdAf9177E1',
+    bitsPerEvent: 4,
+    base: {
+      ints: [
+        3, 14, 5, 7, 12, 1, 12, 14, 10, 11, 15, 13, 10, 15, 9, 1, 7, 7, 14, 1,
+      ],
+      events: [
+        '3',
+        'e',
+        '5',
+        '7',
+        'C',
+        '1',
+        'c',
+        'e',
+        'A',
+        'B',
+        'F',
+        'd',
+        'A',
+        'f',
+        '9',
+        '1',
+        '7',
+        '7',
+        'E',
+        '1',
+      ],
+      asInt: 16,
+      bitsPerEvent: 4,
+      str: 'hexadecimal',
+    },
+  };
+};
+
+const getEntropyTypeStr = (entropy) => {
+  let typeStr = entropy.base.str;
+  // Add some detail if these are cards
+  if (entropy.base.asInt == 52) {
+    const cardDetail = []; // array of message strings
+    // Detect duplicates
+    const dupes = [];
+    const dupeTracker = {};
+    entropy.base.events.forEach((card) => {
+      const cardUpper = card.toUpperCase();
+      if (cardUpper in dupeTracker) {
+        dupes.push(card);
+      }
+      dupeTracker[cardUpper] = true;
+    });
+    if (dupes.length > 0) {
+      const dupeWord = dupes.length === 1 ? 'duplicate' : 'duplicates';
+      let msg = `${dupes.length} ${dupeWord}: ${dupes.slice(0, 3).join(' ')}`;
+      if (dupes.length > 3) {
+        msg += '...';
+      }
+      cardDetail.push(msg);
+    }
+    // Detect full deck
+    const uniqueCards = [];
+    for (const uniqueCard in dupeTracker) {
+      uniqueCards.push(uniqueCard);
+    }
+    if (uniqueCards.length == 52) {
+      cardDetail.unshift('full deck');
+    }
+    // Detect missing cards
+    /* cSpell:disable */
+    const values = 'A23456789TJQK';
+    const suits = 'CDHS';
+    /* cSpell:ensable */
+    const missingCards = [];
+    suits.forEach((suit) => {
+      values.forEach((value) => {
+        const card = value + suit;
+        if (!(card in dupeTracker)) {
+          missingCards.push(card);
+        }
+      });
+    });
+    // Display missing cards if six or less, ie clearly going for full deck
+    if (missingCards.length > 0 && missingCards.length <= 6) {
+      let msg = `${missingCards.length} missing: ${missingCards
+        .slice(0, 3)
+        .join(' ')}`;
+      if (missingCards.length > 3) {
+        msg += '...';
+      }
+      cardDetail.push(msg);
+    }
+    // Add card details to typeStr
+    if (cardDetail.length > 0) {
+      typeStr += ` (${cardDetail.join(', ')})`;
+    }
+  }
+  return typeStr;
+};
+/**
+ * Adds a space every eleven bits
+ * @param {string} binaryStr - Binary string
+ * @returns {string}
+ */
+const addSpacesEveryElevenBits = (binaryStr) =>
+  binaryStr.match(/.{1,11}/g).join(' ');
 
 // Just here for testing
 /* cSpell:disable */
