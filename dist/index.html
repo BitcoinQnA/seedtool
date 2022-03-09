@@ -456,7 +456,7 @@ footer {
         <div id="Generate_Random" class="tabContent">
           <p>
             <span>Generate a Cryptographically Random Mnemonic of </span>
-            <select id="strength">
+            <select id="generateRandomStrength">
               <option value="12" selected>12</option>
               <option value="15">15</option>
               <option value="18">18</option>
@@ -469,13 +469,15 @@ footer {
         </div>
 
         <div id="Input_Known" class="tabContent">
+          <!-- TODO: Add other seed input types EG WIF, HEX, ETC -->
           <p>
             Typing your own random words will not
             work since the words require a particular structure (the last word contains a checksum).
           </p>
-          <label for="known">Entropy</label>
+
+          <label for="knownInputTextarea">Entropy</label>
           <div class="textarea-wrapper">
-            <textarea id="known_mnemonic_input" rows="4" class="textarea-input"
+            <textarea id="knownInputTextarea" rows="4" class="textarea-input"
               placeholder="Type in your mnemonic words separated by spaces" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false"></textarea>
           </div>
@@ -567,7 +569,7 @@ footer {
                 <option value="32768">32768 <span>iterations</span></option>
                 <option value="custom">Custom <span>iterations</span></option>
               </select>
-              <input type="number" class="entropy-details--detail--input hidden" id="pbkdf2-custom-input" value="1"
+              <input type="number" class="entropy-details--detail--input hidden" id="pbkdf2CustomInput" value="1"
                 min="1" pattern="[0-9]" style="float: right;width: 40%;">
             </div>
 
@@ -587,7 +589,7 @@ footer {
         <div>
           <label for="root-key">BIP32 Root Key</label>
           <div>
-            <textarea id="root-key" class="root-key private-data textarea-input" data-show-qr autocomplete="off"
+            <textarea id="bip32RootKey" class="root-key private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false">Example Root Key</textarea>
           </div>
         </div>
@@ -613,42 +615,42 @@ footer {
           </div>
         </div>
         <div>
-          <label for="phrase">BIP39 Mnemonic (English)</label>
+          <label for="bip39Phrase">BIP39 Mnemonic (English)</label>
           <div>
-            <textarea id="phrase" class="phrase private-data textarea-input" data-show-qr autocomplete="off"
+            <textarea id="bip39Phrase" class="phrase private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
           <div class="splitMnemonic hidden">
-            <label for="phrase">BIP39 Split Mnemonic</label>
+            <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
             <div>
-              <textarea id="phraseSplit" class="phraseSplit private-data textarea-input"
+              <textarea id="bip39PhraseSplit" class="phraseSplit private-data textarea-input"
                 title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
               <p class="help-block">
-                <span id="phraseSplitWarn" class="phraseSplitWarn"></span>
+                <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
               </p>
             </div>
           </div>
           <div>
-            <label class="control-label text-weight-normal">
-              <input type="checkbox" class="showSplitMnemonic">
+            <label>
+              <input type="checkbox" id="bip39ShowSplitMnemonic">
               Show split mnemonic cards
             </label>
           </div>
         </div>
         <div>
-          <label for="passphrase">BIP39 Passphrase
+          <label for="bip39Passphrase">BIP39 Passphrase
             (optional)</label>
           <div>
-            <textarea id="passphrase" class="passphrase private-data textarea-input" autocomplete="off"
+            <textarea id="bip39Passphrase" class="passphrase private-data textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
-          <label for="seed">BIP39 Seed</label>
+          <label for="bip39Seed">BIP39 Seed</label>
           <div>
-            <textarea id="seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
+            <textarea id="bip39Seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
@@ -669,34 +671,34 @@ footer {
           </tr>
           <tr>
             <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
-            <td><select name="bip44-coin" id="bip44Coin">
+            <td><select name="bip44Coin" id="bip44Coin">
                 <option value="0">0 (Bitcoin)</option>
                 <option value="1">1 (Bitcoin TESTNET)</option>
               </select></td>
-            <td><input id="bip44-account" type="text" class="bip44-text-input bip44-account" value="0"></td>
-            <td><input id="bip44-change" type="text" class="bip44-text-input bip44-change" value="0"></td>
+            <td><input id="bip44Account" type="text" class="bip44-text-input bip44-account" value="0"></td>
+            <td><input id="bip44Change" type="text" class="bip44-text-input bip44Change" value="0"></td>
           </tr>
         </table>
         <div>
           <p>The account extended keys can be used for importing to most BIP44 compatible
             wallets, such as mycelium or electrum.</p>
         </div>
-        <label for="account-xprv" class="col-sm-2 control-label">
+        <label for="bip44AccountXprv" class="col-sm-2 control-label">
           <span>Account Extended Private Key</span>
         </label>
-        <textarea id="account-xprv-bip44" type="text" class="account-xprv private-data form-control" readonly
-          data-show-qr autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-        <label for="account-xpub" class="col-sm-2 control-label">
+        <textarea id="bip44AccountXprv" type="text" class="account-xprv private-data form-control" readonly data-show-qr
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <label for="bip44AccountXpub" class="col-sm-2 control-label">
           <span>Account Extended Public Key</span>
         </label>
-        <textarea id="account-xpub-bip44" type="text" class="account-xpub form-control" readonly data-show-qr
+        <textarea id="bip44AccountXpub" type="text" class="account-xpub form-control" readonly data-show-qr
           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         <div class="col-sm-10">
           <p>The BIP32 derivation path and extended keys are the basis for the derived
             addresses.</p>
         </div>
-        <label for="bip44-path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
-        <input id="bip44-path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
+        <label for="bip44Path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
+        <input id="bip44Path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
         <div class="derived-addresses-block-bip44">
 
         </div>
@@ -749,8 +751,8 @@ footer {
         </div>
         <div class="bip85-flex-container">
           <div class="bip85-flex-child">
-            <label for="bip85-application">BIP85 Application</label>
-            <select id="bip85-application">
+            <label for="bip85Application">BIP85 Application</label>
+            <select id="bip85Application">
               <option value="bip39" selected>BIP39</option>
               <option value="wif">WIF</option>
               <option value="xprv">Xprv</option>
@@ -758,27 +760,27 @@ footer {
             </select>
           </div>
           <div class="bip85-flex-child bip85-mnemonic-length-input">
-            <label for="bip85-mnemonic-length">BIP85 Mnemonic
+            <label for="bip85MnemonicLength">BIP85 Mnemonic
               Length</label>
-            <select id="bip85-mnemonic-length" class="strength">
+            <select id="bip85MnemonicLength" class="strength">
               <option value="12" selected>12</option>
               <option value="18">18</option>
               <option value="24">24</option>
             </select>
           </div>
           <div class="bip85-flex-child bip85-bytes-input bip85">
-            <label for="bip85-bytes">BIP85 Bytes</label>
-            <input id="bip85-bytes" type="text" class="change" value="64" />
+            <label for="bip85Bytes">BIP85 Bytes</label>
+            <input id="bip85Bytes" type="text" class="change" value="64" />
           </div>
 
           <div class="bip85-flex-child bip85 bip85-index-input">
-            <label for="bip85-index">BIP85 Index</label>
-            <input id="bip85-index" type="text" class="change" value="0" />
+            <label for="bip85Index">BIP85 Index</label>
+            <input id="bip85Index" type="text" class="change" value="0" />
           </div>
 
           <div class="bip85-flex-child bip85">
-            <label for="phrase">BIP85 Child Key</label>
-            <textarea id="bip85Field" data-show-qr class="bip85Field textarea-input private-data"
+            <label for="bip85ChildKey">BIP85 Child Key</label>
+            <textarea id="bip85ChildKey" data-show-qr class="bip85Field textarea-input private-data"
               title="BIP85 Child Key" rows="3"></textarea>
           </div>
         </div>
@@ -872,9 +874,58 @@ footer {
       /**
  * Setup the DOM for interaction
  */
-window.addEventListener('DOMContentLoaded', () => {
+const DOM = {};
+const setupDom = () => {
+  DOM.accordionButtons = document.querySelectorAll('.accordion');
+  DOM.accordionPanels = document.querySelectorAll('.panel');
+  DOM.allTabContents = document.querySelectorAll('.tabContent');
+  DOM.allTabLinks = document.querySelectorAll('.tabLinks');
+  DOM.generateRandomStrengthSelect = document.getElementById(
+    'generateRandomStrength'
+  );
+  DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
+  DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
+  DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
+  DOM.entropyInput = document.getElementById('entropy');
+  DOM.toastMessage = document.getElementById('toast');
+  DOM.entropyTimeToCrack = document.getElementById('entropyTimeToCrack');
+  DOM.entropyEventCount = document.getElementById('entropyEventCount');
+  DOM.entropyEntropyType = document.getElementById('entropyEntropyType');
+  DOM.entropyBitsPerEvent = document.getElementById('entropyBitsPerEvent');
+  DOM.entropyRawWords = document.getElementById('entropyRawWords');
+  DOM.entropyTotalBits = document.getElementById('entropyTotalBits');
+  DOM.entropyFiltered = document.getElementById('entropyFiltered');
+  DOM.entropyRawBinary = document.getElementById('entropyRawBinary');
+  DOM.entropyBinaryChecksum = document.getElementById('entropyBinaryChecksum');
+  DOM.entropyWordIndexes = document.getElementById('entropyWordIndexes');
+  DOM.entropyMnemonicLengthSelect = document.getElementById(
+    'entropyMnemonicLength'
+  );
+  DOM.entropyPBKDF2Rounds = document.getElementById('entropyPBKDF2Rounds');
+  DOM.pbkdf2CustomInput = document.getElementById('pbkdf2CustomInput');
+  DOM.entropyMethod = document.getElementById('entropyMethod');
+  DOM.bip32RootKey = document.getElementById('bip32RootKey');
+  DOM.bip39Phrase = document.getElementById('bip39Phrase');
+  DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
+  DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
+  DOM.bip39ShowSplitMnemonic = document.getElementById(
+    'bip39ShowSplitMnemonic'
+  );
+  DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
+  DOM.bip39Seed = document.getElementById('bip39Seed');
+  DOM.bip44Coin = document.getElementById('bip44Coin');
+  DOM.bip44Account = document.getElementById('bip44Account');
+  DOM.bip44Change = document.getElementById('bip44Change');
+  DOM.bip44AccountXprv = document.getElementById('bip44AccountXprv');
+  DOM.bip44AccountXpub = document.getElementById('bip44AccountXpub');
+  DOM.bip85Application = document.getElementById('bip85Application');
+  DOM.bip85MnemonicLength = document.getElementById('bip85MnemonicLength');
+  DOM.bip85Bytes = document.getElementById('bip85Bytes');
+  DOM.bip85Index = document.getElementById('bip85Index');
+  DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+
   // Accordion Sections
-  document.querySelectorAll('.accordion').forEach((btn) => {
+  DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
       event.preventDefault();
       btn.classList.toggle('accordion--active');
@@ -906,12 +957,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
   // Add event listener for displaying/hiding entropy details
-  const entropyDisplay = document.querySelector('input[id="entropyDetails"]');
-  entropyDisplay.addEventListener('click', () => {
-    displayEntropy(entropyDisplay.checked);
+  DOM.entropyDisplay.addEventListener('click', () => {
+    displayEntropy(DOM.entropyDisplay.checked);
   });
   // add event listener for entropy
-  document.getElementById('entropy').oninput = calculateEntropy;
+  DOM.entropyInput.oninput = calculateEntropy;
   // add template for derived addresses
   addDerivedAddressBlocks();
   // add fake csv for testing
@@ -920,13 +970,17 @@ window.addEventListener('DOMContentLoaded', () => {
   injectAddresses(testAddressData, 'bip47');
   injectAddresses(testAddressData, 'bip49');
   injectAddresses(testAddressData, 'bip84');
-});
+};
+
+// Run setupDom function when the page has loaded
+window.addEventListener('DOMContentLoaded', setupDom);
+
 // Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
-  document.querySelectorAll('.tabContent').forEach((contentElement) => {
+  DOM.allTabContents.forEach((contentElement) => {
     contentElement.style.display = 'none';
   });
-  document.querySelectorAll('.tabLinks').forEach((tabLink) => {
+  DOM.allTabLinks.forEach((tabLink) => {
     tabLink.classList.remove('tab--active');
   });
   document.getElementById(tabId).style.display = 'block';
@@ -936,14 +990,14 @@ window.tabSelect = (event, tabId) => {
 /**
  * QnA Explains dialog / Modal
  */
-const infoModal = document.getElementById('infoModal');
-const infoModalText = document.getElementById('infoModalText');
+DOM.infoModal = document.getElementById('infoModal');
+DOM.infoModalText = document.getElementById('infoModalText');
 /**
  * Hide the modal and clear it's text
  */
 const clearInfoModal = () => {
-  infoModal.style.display = 'none';
-  infoModalText.innerHTML = '';
+  DOM.infoModal.style.display = 'none';
+  DOM.infoModalText.innerHTML = '';
 };
 /**
  * Open the QnA Explains dialog
@@ -951,15 +1005,15 @@ const clearInfoModal = () => {
  * @param {string} section string for the key to get value from info.js
  */
 window.openInfoModal = (_event, section) => {
-  infoModalText.innerHTML = window.infoHtml[section];
-  infoModal.style.display = 'block';
+  DOM.infoModalText.innerHTML = window.infoHtml[section];
+  DOM.infoModal.style.display = 'block';
 };
 /**
  * Function to close the dialog when user clicks on the outside
  * @param {Event} event Click Event on area outside the dialog
  */
 window.onclick = function (event) {
-  if (event.target == infoModal) {
+  if (event.target == DOM.infoModal) {
     clearInfoModal();
   }
 };
@@ -1017,13 +1071,12 @@ function copyTextToClipboard(text) {
  * @param {string} message Message to display in notification toast
  */
 function toast(message) {
-  const toastMessage = document.getElementById('toast');
-  toastMessage.innerText = message || 'ERROR: Unknown Message';
-  toastMessage.classList.add('show-toast');
+  DOM.toastMessage.innerText = message || 'ERROR: Unknown Message';
+  DOM.toastMessage.classList.add('show-toast');
   const background = document.getElementById('toast-background');
   background.classList.add('show-toast');
   setTimeout(() => {
-    toastMessage.classList.remove('show-toast');
+    DOM.toastMessage.classList.remove('show-toast');
     background.classList.remove('show-toast');
   }, 3000);
 }
@@ -1032,12 +1085,14 @@ function toast(message) {
  * @param {boolean} checked Is the checkbox checked
  */
 function displayEntropy(checked) {
-  const container = document.getElementById('entropyDetailsContainer');
+  DOM.entropyDetailsContainer = document.getElementById(
+    'entropyDetailsContainer'
+  );
   if (checked) {
     // show details
-    container.style.display = 'flex';
+    DOM.entropyDetailsContainer.style.display = 'flex';
   } else {
-    container.style.display = 'none';
+    DOM.entropyDetailsContainer.style.display = 'none';
   }
   adjustPanelHeight();
 }
@@ -1045,7 +1100,7 @@ function displayEntropy(checked) {
  * Whenever some CSS changes in an accordion panel, call this to fix the panel
  */
 function adjustPanelHeight() {
-  document.querySelectorAll('.panel').forEach((panel) => {
+  DOM.accordionPanels.forEach((panel) => {
     const isActive = panel.classList.contains('accordion-panel--active');
     if (isActive) {
       panel.style.maxHeight = panel.scrollHeight + 'px';
@@ -1164,23 +1219,32 @@ const calculateEntropy = (event) => {
     console.log('Error detecting entropy strength with zxcvbn:');
     console.log(e);
   }
-  document.getElementById('entropyTimeToCrack').innerText = timeToCrack;
-  document.getElementById('entropyEventCount').innerText =
-    entropy.base.events.length;
-  document.getElementById('entropyEntropyType').innerText =
-    getEntropyTypeStr(entropy);
-  document.getElementById('entropyBitsPerEvent').innerText = bitsPerEvent;
-  document.getElementById('entropyRawWords').innerText = wordCount;
-  document.getElementById('entropyTotalBits').innerText = numberOfBits;
-  document.getElementById('entropyFiltered').innerText = entropy.cleanHtml;
-  document.getElementById('entropyRawBinary').innerText = spacedBinaryStr;
-  document.getElementById('entropyBinaryChecksum').innerText = '... TODO ';
+
+  //
+  DOM.entropyTimeToCrack.innerText = timeToCrack;
+  DOM.entropyEventCount.innerText = entropy.base.events.length;
+  DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
+  DOM.entropyBitsPerEvent.innerText = bitsPerEvent;
+  DOM.entropyRawWords.innerText = wordCount;
+  DOM.entropyTotalBits.innerText = numberOfBits;
+  DOM.entropyFiltered.innerText = entropy.cleanHtml;
+  DOM.entropyRawBinary.innerText = spacedBinaryStr;
+  DOM.entropyBinaryChecksum.innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // detect and warn of filtering
+  const rawNoSpaces = DOM.entropyInput.value.replace(/\s/g, '');
+  const cleanNoSpaces = entropy.cleanStr.replace(/\s/g, '');
+  const isFiltered = rawNoSpaces.length !== cleanNoSpaces.length;
+  if (isFiltered) {
+    DOM.entropyFilterWarning.classList.remove('hidden');
+  } else {
+    DOM.entropyFilterWarning.classList.add('hidden');
+  }
   const eg = {
     binaryStr:
       '00111110010101111100000111001110101010111111110110101111100100010111011111100001',
@@ -1289,6 +1353,49 @@ const getEntropyTypeStr = (entropy) => {
  */
 const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
+
+const showWordIndexes = () => {
+  var phrase = DOM.phrase.val();
+  var words = phraseToWordArray(phrase);
+  var wordIndexes = [];
+  var language = getLanguage();
+  for (var i = 0; i < words.length; i++) {
+    var word = words[i];
+    var wordIndex = WORDLISTS[language].indexOf(word);
+    wordIndexes.push(wordIndex);
+  }
+  var wordIndexesStr = wordIndexes.join(', ');
+  DOM.entropyWordIndexes.text(wordIndexesStr);
+};
+
+function showChecksum() {
+  var phrase = DOM.phrase.val();
+  var words = phraseToWordArray(phrase);
+  var checksumBitlength = words.length / 3;
+  var checksum = '';
+  var binaryStr = '';
+  var language = getLanguage();
+  for (var i = words.length - 1; i >= 0; i--) {
+    var word = words[i];
+    var wordIndex = WORDLISTS[language].indexOf(word);
+    var wordBinary = wordIndex.toString(2);
+    while (wordBinary.length < 11) {
+      wordBinary = '0' + wordBinary;
+    }
+    var binaryStr = wordBinary + binaryStr;
+    if (binaryStr.length >= checksumBitlength) {
+      var start = binaryStr.length - checksumBitlength;
+      var end = binaryStr.length;
+      checksum = binaryStr.substring(start, end);
+      // add spaces so the last group is 11 bits, not the first
+      checksum = checksum.split('').reverse().join('');
+      checksum = addSpacesEveryElevenBits(checksum);
+      checksum = checksum.split('').reverse().join('');
+      break;
+    }
+  }
+  DOM.entropyChecksum.text(checksum);
+}
 
 // Just here for testing
 /* cSpell:disable */

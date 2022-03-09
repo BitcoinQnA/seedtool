@@ -1,9 +1,58 @@
 /**
  * Setup the DOM for interaction
  */
-window.addEventListener('DOMContentLoaded', () => {
+const DOM = {};
+const setupDom = () => {
+  DOM.accordionButtons = document.querySelectorAll('.accordion');
+  DOM.accordionPanels = document.querySelectorAll('.panel');
+  DOM.allTabContents = document.querySelectorAll('.tabContent');
+  DOM.allTabLinks = document.querySelectorAll('.tabLinks');
+  DOM.generateRandomStrengthSelect = document.getElementById(
+    'generateRandomStrength'
+  );
+  DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
+  DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
+  DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
+  DOM.entropyInput = document.getElementById('entropy');
+  DOM.toastMessage = document.getElementById('toast');
+  DOM.entropyTimeToCrack = document.getElementById('entropyTimeToCrack');
+  DOM.entropyEventCount = document.getElementById('entropyEventCount');
+  DOM.entropyEntropyType = document.getElementById('entropyEntropyType');
+  DOM.entropyBitsPerEvent = document.getElementById('entropyBitsPerEvent');
+  DOM.entropyRawWords = document.getElementById('entropyRawWords');
+  DOM.entropyTotalBits = document.getElementById('entropyTotalBits');
+  DOM.entropyFiltered = document.getElementById('entropyFiltered');
+  DOM.entropyRawBinary = document.getElementById('entropyRawBinary');
+  DOM.entropyBinaryChecksum = document.getElementById('entropyBinaryChecksum');
+  DOM.entropyWordIndexes = document.getElementById('entropyWordIndexes');
+  DOM.entropyMnemonicLengthSelect = document.getElementById(
+    'entropyMnemonicLength'
+  );
+  DOM.entropyPBKDF2Rounds = document.getElementById('entropyPBKDF2Rounds');
+  DOM.pbkdf2CustomInput = document.getElementById('pbkdf2CustomInput');
+  DOM.entropyMethod = document.getElementById('entropyMethod');
+  DOM.bip32RootKey = document.getElementById('bip32RootKey');
+  DOM.bip39Phrase = document.getElementById('bip39Phrase');
+  DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
+  DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
+  DOM.bip39ShowSplitMnemonic = document.getElementById(
+    'bip39ShowSplitMnemonic'
+  );
+  DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
+  DOM.bip39Seed = document.getElementById('bip39Seed');
+  DOM.bip44Coin = document.getElementById('bip44Coin');
+  DOM.bip44Account = document.getElementById('bip44Account');
+  DOM.bip44Change = document.getElementById('bip44Change');
+  DOM.bip44AccountXprv = document.getElementById('bip44AccountXprv');
+  DOM.bip44AccountXpub = document.getElementById('bip44AccountXpub');
+  DOM.bip85Application = document.getElementById('bip85Application');
+  DOM.bip85MnemonicLength = document.getElementById('bip85MnemonicLength');
+  DOM.bip85Bytes = document.getElementById('bip85Bytes');
+  DOM.bip85Index = document.getElementById('bip85Index');
+  DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+
   // Accordion Sections
-  document.querySelectorAll('.accordion').forEach((btn) => {
+  DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
       event.preventDefault();
       btn.classList.toggle('accordion--active');
@@ -35,12 +84,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
   // Add event listener for displaying/hiding entropy details
-  const entropyDisplay = document.querySelector('input[id="entropyDetails"]');
-  entropyDisplay.addEventListener('click', () => {
-    displayEntropy(entropyDisplay.checked);
+  DOM.entropyDisplay.addEventListener('click', () => {
+    displayEntropy(DOM.entropyDisplay.checked);
   });
   // add event listener for entropy
-  document.getElementById('entropy').oninput = calculateEntropy;
+  DOM.entropyInput.oninput = calculateEntropy;
   // add template for derived addresses
   addDerivedAddressBlocks();
   // add fake csv for testing
@@ -49,13 +97,17 @@ window.addEventListener('DOMContentLoaded', () => {
   injectAddresses(testAddressData, 'bip47');
   injectAddresses(testAddressData, 'bip49');
   injectAddresses(testAddressData, 'bip84');
-});
+};
+
+// Run setupDom function when the page has loaded
+window.addEventListener('DOMContentLoaded', setupDom);
+
 // Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
-  document.querySelectorAll('.tabContent').forEach((contentElement) => {
+  DOM.allTabContents.forEach((contentElement) => {
     contentElement.style.display = 'none';
   });
-  document.querySelectorAll('.tabLinks').forEach((tabLink) => {
+  DOM.allTabLinks.forEach((tabLink) => {
     tabLink.classList.remove('tab--active');
   });
   document.getElementById(tabId).style.display = 'block';
@@ -65,14 +117,14 @@ window.tabSelect = (event, tabId) => {
 /**
  * QnA Explains dialog / Modal
  */
-const infoModal = document.getElementById('infoModal');
-const infoModalText = document.getElementById('infoModalText');
+DOM.infoModal = document.getElementById('infoModal');
+DOM.infoModalText = document.getElementById('infoModalText');
 /**
  * Hide the modal and clear it's text
  */
 const clearInfoModal = () => {
-  infoModal.style.display = 'none';
-  infoModalText.innerHTML = '';
+  DOM.infoModal.style.display = 'none';
+  DOM.infoModalText.innerHTML = '';
 };
 /**
  * Open the QnA Explains dialog
@@ -80,15 +132,15 @@ const clearInfoModal = () => {
  * @param {string} section string for the key to get value from info.js
  */
 window.openInfoModal = (_event, section) => {
-  infoModalText.innerHTML = window.infoHtml[section];
-  infoModal.style.display = 'block';
+  DOM.infoModalText.innerHTML = window.infoHtml[section];
+  DOM.infoModal.style.display = 'block';
 };
 /**
  * Function to close the dialog when user clicks on the outside
  * @param {Event} event Click Event on area outside the dialog
  */
 window.onclick = function (event) {
-  if (event.target == infoModal) {
+  if (event.target == DOM.infoModal) {
     clearInfoModal();
   }
 };
@@ -146,13 +198,12 @@ function copyTextToClipboard(text) {
  * @param {string} message Message to display in notification toast
  */
 function toast(message) {
-  const toastMessage = document.getElementById('toast');
-  toastMessage.innerText = message || 'ERROR: Unknown Message';
-  toastMessage.classList.add('show-toast');
+  DOM.toastMessage.innerText = message || 'ERROR: Unknown Message';
+  DOM.toastMessage.classList.add('show-toast');
   const background = document.getElementById('toast-background');
   background.classList.add('show-toast');
   setTimeout(() => {
-    toastMessage.classList.remove('show-toast');
+    DOM.toastMessage.classList.remove('show-toast');
     background.classList.remove('show-toast');
   }, 3000);
 }
@@ -161,12 +212,14 @@ function toast(message) {
  * @param {boolean} checked Is the checkbox checked
  */
 function displayEntropy(checked) {
-  const container = document.getElementById('entropyDetailsContainer');
+  DOM.entropyDetailsContainer = document.getElementById(
+    'entropyDetailsContainer'
+  );
   if (checked) {
     // show details
-    container.style.display = 'flex';
+    DOM.entropyDetailsContainer.style.display = 'flex';
   } else {
-    container.style.display = 'none';
+    DOM.entropyDetailsContainer.style.display = 'none';
   }
   adjustPanelHeight();
 }
@@ -174,7 +227,7 @@ function displayEntropy(checked) {
  * Whenever some CSS changes in an accordion panel, call this to fix the panel
  */
 function adjustPanelHeight() {
-  document.querySelectorAll('.panel').forEach((panel) => {
+  DOM.accordionPanels.forEach((panel) => {
     const isActive = panel.classList.contains('accordion-panel--active');
     if (isActive) {
       panel.style.maxHeight = panel.scrollHeight + 'px';
@@ -293,23 +346,32 @@ const calculateEntropy = (event) => {
     console.log('Error detecting entropy strength with zxcvbn:');
     console.log(e);
   }
-  document.getElementById('entropyTimeToCrack').innerText = timeToCrack;
-  document.getElementById('entropyEventCount').innerText =
-    entropy.base.events.length;
-  document.getElementById('entropyEntropyType').innerText =
-    getEntropyTypeStr(entropy);
-  document.getElementById('entropyBitsPerEvent').innerText = bitsPerEvent;
-  document.getElementById('entropyRawWords').innerText = wordCount;
-  document.getElementById('entropyTotalBits').innerText = numberOfBits;
-  document.getElementById('entropyFiltered').innerText = entropy.cleanHtml;
-  document.getElementById('entropyRawBinary').innerText = spacedBinaryStr;
-  document.getElementById('entropyBinaryChecksum').innerText = '... TODO ';
+
+  //
+  DOM.entropyTimeToCrack.innerText = timeToCrack;
+  DOM.entropyEventCount.innerText = entropy.base.events.length;
+  DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
+  DOM.entropyBitsPerEvent.innerText = bitsPerEvent;
+  DOM.entropyRawWords.innerText = wordCount;
+  DOM.entropyTotalBits.innerText = numberOfBits;
+  DOM.entropyFiltered.innerText = entropy.cleanHtml;
+  DOM.entropyRawBinary.innerText = spacedBinaryStr;
+  DOM.entropyBinaryChecksum.innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
   // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
+  // detect and warn of filtering
+  const rawNoSpaces = DOM.entropyInput.value.replace(/\s/g, '');
+  const cleanNoSpaces = entropy.cleanStr.replace(/\s/g, '');
+  const isFiltered = rawNoSpaces.length !== cleanNoSpaces.length;
+  if (isFiltered) {
+    DOM.entropyFilterWarning.classList.remove('hidden');
+  } else {
+    DOM.entropyFilterWarning.classList.add('hidden');
+  }
   const eg = {
     binaryStr:
       '00111110010101111100000111001110101010111111110110101111100100010111011111100001',
@@ -418,6 +480,49 @@ const getEntropyTypeStr = (entropy) => {
  */
 const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
+
+const showWordIndexes = () => {
+  var phrase = DOM.phrase.val();
+  var words = phraseToWordArray(phrase);
+  var wordIndexes = [];
+  var language = getLanguage();
+  for (var i = 0; i < words.length; i++) {
+    var word = words[i];
+    var wordIndex = WORDLISTS[language].indexOf(word);
+    wordIndexes.push(wordIndex);
+  }
+  var wordIndexesStr = wordIndexes.join(', ');
+  DOM.entropyWordIndexes.text(wordIndexesStr);
+};
+
+function showChecksum() {
+  var phrase = DOM.phrase.val();
+  var words = phraseToWordArray(phrase);
+  var checksumBitlength = words.length / 3;
+  var checksum = '';
+  var binaryStr = '';
+  var language = getLanguage();
+  for (var i = words.length - 1; i >= 0; i--) {
+    var word = words[i];
+    var wordIndex = WORDLISTS[language].indexOf(word);
+    var wordBinary = wordIndex.toString(2);
+    while (wordBinary.length < 11) {
+      wordBinary = '0' + wordBinary;
+    }
+    var binaryStr = wordBinary + binaryStr;
+    if (binaryStr.length >= checksumBitlength) {
+      var start = binaryStr.length - checksumBitlength;
+      var end = binaryStr.length;
+      checksum = binaryStr.substring(start, end);
+      // add spaces so the last group is 11 bits, not the first
+      checksum = checksum.split('').reverse().join('');
+      checksum = addSpacesEveryElevenBits(checksum);
+      checksum = checksum.split('').reverse().join('');
+      break;
+    }
+  }
+  DOM.entropyChecksum.text(checksum);
+}
 
 // Just here for testing
 /* cSpell:disable */
