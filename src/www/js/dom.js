@@ -4,8 +4,8 @@
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
-// let network = libs.bitcoin.networks.bitcoin;
-
+// let network = bitcoin.networks.bitcoin;
+let wordList = [];
 let showIndex = true;
 let showAddress = true;
 let showPubKey = true;
@@ -122,8 +122,9 @@ const setupDom = () => {
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // Generate random seed words
   DOM.generateButton.click();
+  // update pointer to word list
+  wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
   // add fake csv for testing
-  injectAddresses(testAddressData, 'bip32');
   injectAddresses(testAddressData, 'bip44');
   injectAddresses(testAddressData, 'bip47');
   injectAddresses(testAddressData, 'bip49');
@@ -132,6 +133,10 @@ const setupDom = () => {
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
+
+function getAddress(node, network) {
+  return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address;
+}
 
 /**
  * Debounce - from Underscore.js
@@ -387,6 +392,30 @@ const injectAddresses = (addressDataArray, addressListName) => {
   a.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
+const calculateAddresses = (bip, node) => {
+  const path = {
+    bip32: `m/0'/0'/`,
+  };
+  const addressDataArray = [];
+  for (let i = 0; i < 20; i++) {
+    const addressPath = path[bip] + i + `'`;
+    const addressNode = node.derivePath(addressPath);
+    const address = getAddress(addressNode);
+    const addressPubKey = addressNode.publicKey.toString('hex');
+    const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
+      addressNode.privateKey
+    ).toWIF();
+    console.log(addressNode, addressPubKey);
+    addressDataArray[i] = new AddressData(
+      addressPath,
+      address,
+      addressPubKey,
+      addressPrivKey
+    );
+  }
+  injectAddresses(addressDataArray, bip);
+};
+
 const calculateEntropy = () => {
   const unknown = 'Unknown';
   const entropy = window.Entropy.fromString(DOM.entropyInput.value);
@@ -557,6 +586,9 @@ const generateNewMnemonic = () => {
   mnemonicToSeedPopulate();
 };
 
+/**
+ * Called when mnemonic is updated
+ */
 const mnemonicToSeedPopulate = debounce(() => {
   const mnemonic = DOM.bip39Phrase.value;
   const passphrase = DOM.bip39Passphrase.value || '';
@@ -576,6 +608,7 @@ const mnemonicToSeedPopulate = debounce(() => {
   if (seed) {
     const node = bip32.fromSeed(seed);
     bip32RootKey = node.toBase58();
+    calculateAddresses('bip32', node);
   } else {
     bip32RootKey = null;
   }
