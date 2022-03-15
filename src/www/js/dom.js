@@ -69,6 +69,7 @@ const setupDom = () => {
   DOM.bip44Change = document.getElementById('bip44Change');
   DOM.bip44AccountXprv = document.getElementById('bip44AccountXprv');
   DOM.bip44AccountXpub = document.getElementById('bip44AccountXpub');
+  DOM.bip44Path = document.getElementById('bip44Path');
   DOM.bip85Application = document.getElementById('bip85Application');
   DOM.bip85MnemonicLength = document.getElementById('bip85MnemonicLength');
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
@@ -125,10 +126,9 @@ const setupDom = () => {
   // update pointer to word list
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
   // add fake csv for testing
-  injectAddresses(testAddressData, 'bip44');
-  injectAddresses(testAddressData, 'bip47');
-  injectAddresses(testAddressData, 'bip49');
-  injectAddresses(testAddressData, 'bip84');
+  // injectAddresses(testAddressData, 'bip47');
+  // injectAddresses(testAddressData, 'bip49');
+  // injectAddresses(testAddressData, 'bip84');
 };
 
 // Run setupDom function when the page has loaded
@@ -394,18 +394,18 @@ const injectAddresses = (addressDataArray, addressListName) => {
 
 const calculateAddresses = (bip, node) => {
   const path = {
-    bip32: `m/0'/0'/`,
+    bip32: () => `m/0'/0'/`,
+    bip44: () => DOM.bip44Path.value + '/',
   };
   const addressDataArray = [];
   for (let i = 0; i < 20; i++) {
-    const addressPath = path[bip] + i + `'`;
+    const addressPath = path[bip]() + i + `'`;
     const addressNode = node.derivePath(addressPath);
     const address = getAddress(addressNode);
     const addressPubKey = addressNode.publicKey.toString('hex');
     const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
       addressNode.privateKey
     ).toWIF();
-    console.log(addressNode, addressPubKey);
     addressDataArray[i] = new AddressData(
       addressPath,
       address,
@@ -608,7 +608,9 @@ const mnemonicToSeedPopulate = debounce(() => {
   if (seed) {
     const node = bip32.fromSeed(seed);
     bip32RootKey = node.toBase58();
-    calculateAddresses('bip32', node);
+    ['bip32', 'bip44'].forEach((bip) => {
+      calculateAddresses(bip, node);
+    });
   } else {
     bip32RootKey = null;
   }
