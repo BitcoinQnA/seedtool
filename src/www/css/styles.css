@@ -136,7 +136,7 @@ textarea {
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
-  width: calc(100% / 3);
+  width: calc(100% / 2);
 }
 .tab-addresses button {
   width: 50%;
@@ -169,6 +169,9 @@ textarea {
   padding: 1px;
   margin: 1px;
   text-align: center;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 .entropy-details--detail--text,
 .address-details-text {

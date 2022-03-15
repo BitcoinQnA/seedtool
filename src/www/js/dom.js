@@ -1,3 +1,24 @@
+// mnemonics is populated as required by getLanguage
+// const mnemonics = { english: new Mnemonic('english') };
+// const mnemonic = mnemonics['english'];
+let seed = null;
+let bip32RootKey = null;
+let bip32ExtendedKey = null;
+// let network = libs.bitcoin.networks.bitcoin;
+
+let showIndex = true;
+let showAddress = true;
+let showPubKey = true;
+let showPrivKey = true;
+let showQr = false;
+
+let entropyTypeAutoDetect = true;
+let entropyChangeTimeoutEvent = null;
+let phraseChangeTimeoutEvent = null;
+let seedChangedTimeoutEvent = null;
+let rootKeyChangedTimeoutEvent = null;
+
+const generationProcesses = [];
 /**
  * Setup the DOM for interaction
  */
@@ -10,7 +31,8 @@ const setupDom = () => {
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
-  DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
+  DOM.generateButton = document.querySelector('.btn.generate');
+  // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
   DOM.entropyInput = document.getElementById('entropy');
@@ -33,6 +55,7 @@ const setupDom = () => {
   DOM.entropyMethod = document.getElementById('entropyMethod');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
+  DOM.bip39PhraseWarn = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
   DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
   DOM.bip39ShowSplitMnemonic = document.getElementById(
@@ -83,14 +106,21 @@ const setupDom = () => {
       copyTextToClipboard(text);
     });
   });
+  // add template for derived addresses
+  addDerivedAddressBlocks();
   // Add event listener for displaying/hiding entropy details
   DOM.entropyDisplay.addEventListener('click', () => {
     displayEntropy(DOM.entropyDisplay.checked);
   });
   // add event listener for entropy
   DOM.entropyInput.oninput = calculateEntropy;
-  // add template for derived addresses
-  addDerivedAddressBlocks();
+  // add event listener for new mnemonic / passphrase
+  DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
+  DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
+  // Add event listener to generate new mnemonic
+  DOM.generateButton.addEventListener('click', generateNewMnemonic);
+  // Generate random seed words
+  DOM.generateButton.click();
   // add fake csv for testing
   injectAddresses(testAddressData, 'bip32');
   injectAddresses(testAddressData, 'bip44');
@@ -101,6 +131,33 @@ const setupDom = () => {
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
+
+/**
+ * Debounce - from Underscore.js
+ * @param {function} func The function to debounce
+ * @param {number} wait Number of ms to wait
+ * @param {boolean} immediate Override timeout and call now
+ * @returns {function}
+ */
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+function debounce(func, wait, immediate) {
+  let timeout;
+  return function () {
+    const context = this,
+      args = arguments;
+    const later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}
 
 // Event handler for switching tabs
 window.tabSelect = (event, tabId) => {
@@ -329,13 +386,17 @@ const injectAddresses = (addressDataArray, addressListName) => {
   a.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
-const calculateEntropy = (event) => {
-  const entropy = window.Entropy.fromString(event.target.value);
+const calculateEntropy = () => {
+  const unknown = 'Unknown';
+  const entropy = window.Entropy.fromString(DOM.entropyInput.value);
+  console.log(entropy);
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
-  const bitsPerEvent = entropy.bitsPerEvent.toFixed(2);
-  const spacedBinaryStr = addSpacesEveryElevenBits(entropy.binaryStr);
-  let timeToCrack = 'unknown';
+  const bitsPerEvent = entropy.bitsPerEvent?.toFixed(2) || unknown;
+  const spacedBinaryStr = entropy.binaryStr
+    ? addSpacesEveryElevenBits(entropy.binaryStr)
+    : unknown;
+  let timeToCrack = unknown;
   try {
     const z = window.zxcvbn(entropy.base.events.join(''));
     timeToCrack = z.crack_times_display.offline_fast_hashing_1e10_per_second;
@@ -372,49 +433,12 @@ const calculateEntropy = (event) => {
   } else {
     DOM.entropyFilterWarning.classList.add('hidden');
   }
-  const eg = {
-    binaryStr:
-      '00111110010101111100000111001110101010111111110110101111100100010111011111100001',
-    cleanStr: '3e57C1ceABFdAf9177E1',
-    cleanHtml: '3e57C1ceABFdAf9177E1',
-    bitsPerEvent: 4,
-    base: {
-      ints: [
-        3, 14, 5, 7, 12, 1, 12, 14, 10, 11, 15, 13, 10, 15, 9, 1, 7, 7, 14, 1,
-      ],
-      events: [
-        '3',
-        'e',
-        '5',
-        '7',
-        'C',
-        '1',
-        'c',
-        'e',
-        'A',
-        'B',
-        'F',
-        'd',
-        'A',
-        'f',
-        '9',
-        '1',
-        '7',
-        '7',
-        'E',
-        '1',
-      ],
-      asInt: 16,
-      bitsPerEvent: 4,
-      str: 'hexadecimal',
-    },
-  };
 };
 
 const getEntropyTypeStr = (entropy) => {
-  let typeStr = entropy.base.str;
+  let typeStr = entropy.base.str || 'Unknown';
   // Add some detail if these are cards
-  if (entropy.base.asInt == 52) {
+  if (entropy.base.asInt == 52 && entropy.binaryStr) {
     const cardDetail = []; // array of message strings
     // Detect duplicates
     const dupes = [];
@@ -523,6 +547,32 @@ function showChecksum() {
   }
   DOM.entropyChecksum.text(checksum);
 }
+
+const generateNewMnemonic = () => {
+  const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
+  const strength = (numWords / 3) * 32;
+  const mnemonic = bip39.generateMnemonic(strength);
+  DOM.bip39Phrase.value = mnemonic;
+  // DOM.knownInputTextarea.value = mnemonic;
+  mnemonicToSeedPopulate();
+};
+
+const mnemonicToSeedPopulate = debounce(() => {
+  const mnemonic = DOM.bip39Phrase.value;
+  const passphrase = DOM.bip39Passphrase.value || '';
+  let seed = '';
+  // Test if valid
+  if (bip39.validateMnemonic(mnemonic)) {
+    DOM.bip39PhraseWarn.classList.add('hidden');
+    seed = bip39.mnemonicToSeedSync(mnemonic, passphrase).toString('hex');
+  } else {
+    DOM.bip39PhraseWarn.classList.remove('hidden');
+  }
+  console.log(seed);
+  DOM.bip39Seed.value = seed;
+  DOM.entropyInput.value = seed;
+  calculateEntropy();
+}, 1000);
 
 // Just here for testing
 /* cSpell:disable */

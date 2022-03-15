@@ -73,12 +73,12 @@
         </div>
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong + random mnemonic</li>
-          <li>⌨️ Enter an existing BIP39 mnemonic</li>
+          <!-- <li>⌨️ Enter an existing BIP39 mnemonic</li> -->
           <li>🎲 Enter in your own entropy</li>
         </ul>
         <div class="tab">
           <button class="tabLinks" id="defaultOpenTab" onclick="tabSelect(event, 'Generate_Random')">🤖</button>
-          <button class="tabLinks" onclick="tabSelect(event, 'Input_Known')">⌨️</button>
+          <!-- <button class="tabLinks" onclick="tabSelect(event, 'Input_Known')">⌨️</button> -->
           <button class="tabLinks" onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
         </div>
         <div id="Generate_Random" class="tabContent">
@@ -96,20 +96,20 @@
           </p>
         </div>
 
-        <div id="Input_Known" class="tabContent">
-          <!-- TODO: Add other seed input types EG WIF, HEX, ETC -->
-          <p>
-            Typing your own random words will not
-            work since the words require a particular structure (the last word contains a checksum).
-          </p>
+        <!-- <div id="Input_Known" class="tabContent"> -->
+        <!-- TODO: Add other seed input types EG WIF, HEX, ETC -->
+        <!-- <p> -->
+        <!-- Typing your own random words will not -->
+        <!-- work since the words require a particular structure (the last word contains a checksum). -->
+        <!-- </p> -->
 
-          <label for="knownInputTextarea">Entropy</label>
-          <div class="textarea-wrapper">
-            <textarea id="knownInputTextarea" rows="4" class="textarea-input"
-              placeholder="Type in your mnemonic words separated by spaces" autocomplete="off" autocorrect="off"
-              autocapitalize="off" spellcheck="false"></textarea>
-          </div>
-        </div>
+        <!-- <label for="knownInputTextarea">Entropy</label> -->
+        <!-- <div class="textarea-wrapper"> -->
+        <!-- <textarea id="knownInputTextarea" rows="4" class="textarea-input" -->
+        <!-- placeholder="Type in your mnemonic words separated by spaces" autocomplete="off" autocorrect="off" -->
+        <!-- autocapitalize="off" spellcheck="false"></textarea> -->
+        <!-- </div> -->
+        <!-- </div> -->
 
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
@@ -240,6 +240,12 @@
           <div>
             <span>You are using a custom number of PBKDF2 iterations. Your BIP39 seed might not show the same addresses
               on different software.</span>
+          </div>
+        </div>
+        <div class="warning bip39-invalid-phrase hidden">
+          <label>INVALID BIP39 SEED PHRASE</label>
+          <div>
+            <span>The words require a specific format. Click on "More Information" above to learn about it.</span>
           </div>
         </div>
         <div>
@@ -499,10 +505,14 @@
     </div>
   </template>
   <script src="js/dom.js"></script>
+  <script src="js/lib/bitcoin.js"></script>
+  <script src="js/lib/bip32.js"></script>
+  <script src="js/lib/bip39.js"></script>
+  <!-- <script src="js/lib/ecpair.js"></script> -->
   <script src="js/info.js"></script>
   <script src="js/english.js"></script>
   <script src="js/entropy.js"></script>
-  <script src="js/zxcvbn.js"></script>
+  <script src="js/lib/zxcvbn.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;
     const setTimer = () => {
