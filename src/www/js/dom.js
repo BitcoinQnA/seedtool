@@ -32,6 +32,7 @@ const setupDom = () => {
     'generateRandomStrength'
   );
   DOM.generateButton = document.querySelector('.btn.generate');
+  DOM.bip32RootKey = document.getElementById('bip32RootKey');
   // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
@@ -389,7 +390,6 @@ const injectAddresses = (addressDataArray, addressListName) => {
 const calculateEntropy = () => {
   const unknown = 'Unknown';
   const entropy = window.Entropy.fromString(DOM.entropyInput.value);
-  console.log(entropy);
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
   const bitsPerEvent = entropy.bitsPerEvent?.toFixed(2) || unknown;
@@ -560,18 +560,26 @@ const generateNewMnemonic = () => {
 const mnemonicToSeedPopulate = debounce(() => {
   const mnemonic = DOM.bip39Phrase.value;
   const passphrase = DOM.bip39Passphrase.value || '';
-  let seed = '';
+  let seedHex = '';
+  let seed;
   // Test if valid
   if (bip39.validateMnemonic(mnemonic)) {
     DOM.bip39PhraseWarn.classList.add('hidden');
-    seed = bip39.mnemonicToSeedSync(mnemonic, passphrase).toString('hex');
+    seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
+    seedHex = seed.toString('hex');
   } else {
     DOM.bip39PhraseWarn.classList.remove('hidden');
   }
-  console.log(seed);
-  DOM.bip39Seed.value = seed;
-  DOM.entropyInput.value = seed;
+  DOM.bip39Seed.value = seedHex;
+  DOM.entropyInput.value = seedHex;
   calculateEntropy();
+  if (seed) {
+    const node = bip32.fromSeed(seed);
+    bip32RootKey = node.toBase58();
+  } else {
+    bip32RootKey = null;
+  }
+  DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey : 'unknown';
 }, 1000);
 
 // Just here for testing
