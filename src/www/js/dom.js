@@ -639,6 +639,7 @@ function showChecksum() {
 }
 
 const generateNewMnemonic = () => {
+  toast('Calculating...');
   const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
   const strength = (numWords / 3) * 32;
   const mnemonic = bip39.generateMnemonic(strength);
@@ -654,6 +655,7 @@ const mnemonicToSeedPopulate = debounce(() => {
   const mnemonic = DOM.bip39Phrase.value;
   const passphrase = DOM.bip39Passphrase.value || '';
   let seedHex = '';
+  resetEverything();
   seed = null;
   // Test if valid
   if (bip39.validateMnemonic(mnemonic)) {
@@ -674,3 +676,35 @@ const mnemonicToSeedPopulate = debounce(() => {
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
 }, 1000);
+
+const resetEverything = () => {
+  seed = null;
+  bip32RootKey = null;
+  DOM.bip32RootKey.value = '';
+  DOM.entropyInput.value = '';
+  DOM.entropyTimeToCrack.innerText = '...';
+  DOM.entropyEventCount.innerText = '...';
+  DOM.entropyEntropyType.innerText = '...';
+  DOM.entropyBitsPerEvent.innerText = '...';
+  DOM.entropyRawWords.innerText = '...';
+  DOM.entropyTotalBits.innerText = '...';
+  DOM.entropyFiltered.innerText = '...';
+  DOM.entropyRawBinary.innerText = '...';
+  DOM.entropyBinaryChecksum.innerText = '...';
+  DOM.entropyWordIndexes.innerText = '...';
+  DOM.entropyMnemonicLengthSelect.value = '12';
+  DOM.entropyPBKDF2Rounds.value = '2048';
+  DOM.pbkdf2CustomInput.value = '2048';
+  DOM.entropyMethod.value = 'binary';
+  DOM.bip39PhraseSplit.value = '';
+  DOM.bip39ShowSplitMnemonic.checked = false;
+  DOM.bip39Seed.value = '';
+  DOM.bip44AccountXprv.value = '';
+  DOM.bip44AccountXpub.value = '';
+  DOM.bip85Application.value = 'bip39';
+  DOM.bip85MnemonicLength.value = '12';
+  DOM.bip85Bytes.value = '64';
+  DOM.bip85Index.value = '0';
+  DOM.bip85ChildKey.value = '';
+  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
+};
