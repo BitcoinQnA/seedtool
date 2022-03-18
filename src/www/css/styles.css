@@ -192,7 +192,7 @@ textarea {
   border-radius: 5px;
 }
 .address-display {
-  height: 50vh;
+  max-height: 50vh;
   overflow-y: scroll;
   border-top: 1px solid;
   border-bottom: 1px solid;

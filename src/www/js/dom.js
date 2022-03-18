@@ -54,7 +54,6 @@ const setupDom = () => {
   DOM.entropyPBKDF2Rounds = document.getElementById('entropyPBKDF2Rounds');
   DOM.pbkdf2CustomInput = document.getElementById('pbkdf2CustomInput');
   DOM.entropyMethod = document.getElementById('entropyMethod');
-  DOM.bip32RootKey = document.getElementById('bip32RootKey');
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
   DOM.bip39PhraseWarn = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
@@ -319,7 +318,7 @@ const addDerivedAddressBlocks = () => {
   // Ensure not internet explorer!
   if (!('content' in document.createElement('template'))) {
     throw new Error(
-      'Browser Outdated! Unable to populate list and generate csv.'
+      'Browser Outdated! Unable to populate address list and generate csv.'
     );
   }
   bips.forEach((bip) => {
@@ -330,9 +329,13 @@ const addDerivedAddressBlocks = () => {
       console.error('Unable to insert Address block template for ' + bip);
       return;
     }
+    const gen = clone.querySelector('button');
+    gen.id = bip + 'GenerateBtn';
+    gen.addEventListener('click', generateAddresses);
     const a = clone.querySelector('a');
     a.className = bip + '-csv-download-link';
     a.download = bip + '_addresses.csv';
+    a.classList.add('hidden');
     clone
       .querySelector('.address-display-content')
       .classList.add(bip + '-address-display-content--list');
@@ -369,6 +372,7 @@ const injectAddresses = (addressDataArray, addressListName) => {
 `;
   // declare DOM elements
   const a = document.querySelector(`.${addressListName}-csv-download-link`);
+  a.classList.remove('hidden');
   const listContainer = document.querySelector(
     `.${addressListName}-address-display-content--list`
   );
@@ -400,22 +404,38 @@ const injectAddresses = (addressDataArray, addressListName) => {
     }
     // Add the clone to the DOM
     listContainer.appendChild(clone);
+    adjustPanelHeight();
   });
   a.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
-const calculateAddresses = (bip) => {
+const calculateAddresses = (bip, startIndex = 0, endIndex = 19) => {
   clearAddresses(bip);
-  if (!seed) {
+  if (!bip32RootKey) {
+    console.error('Unable to generate addresses while bip32RootKey is null');
     return;
   }
+  const node = bip32RootKey;
+  // console.log(seed);
+  // if (!seed) {
+  //   return;
+  // }
   const path = {
     bip32: () => `m/0'/0'/`,
     bip44: () => DOM.bip44Path.value + '/',
+    bip47: () => false,
+    bip49: () => false,
+    bip84: () => false,
+    bip85: () => false,
+    bip141: () => false,
   };
-  const node = bip32.fromSeed(seed);
+  if (!path[bip]()) {
+    console.error('Unable to generate addresses without valid path');
+    return;
+  }
+  // const node = bip32.fromSeed(seed);
   const addressDataArray = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = startIndex; i <= endIndex; i++) {
     const addressPath = path[bip]() + i + `'`;
     const addressNode = node.derivePath(addressPath);
     const address = getAddress(addressNode);
@@ -433,7 +453,29 @@ const calculateAddresses = (bip) => {
   injectAddresses(addressDataArray, bip);
 };
 
-const clearAddresses = (bip) => {};
+const generateAddresses = (event) => {
+  event.preventDefault();
+  const btn = event.target;
+  const parentEl = btn.parentElement;
+  const startIndex =
+    parseInt(parentEl.querySelector('.address-start-index')?.value) || 0;
+  const endIndex =
+    parseInt(parentEl.querySelector('.address-end-index')?.value) || 19;
+  const bip = btn.id.replace('GenerateBtn', '');
+  calculateAddresses(bip, startIndex, endIndex);
+};
+
+const clearAddresses = (bip) => {
+  const a = document.querySelector(`.${bip}-csv-download-link`);
+  a.classList.add('hidden');
+  const listContainer = document.querySelector(
+    `.${bip}-address-display-content--list`
+  );
+  while (listContainer.firstChild) {
+    listContainer.removeChild(listContainer.firstChild);
+  }
+  adjustPanelHeight();
+};
 
 const calculateEntropy = () => {
   const unknown = 'Unknown';
@@ -626,12 +668,9 @@ const mnemonicToSeedPopulate = debounce(() => {
   calculateEntropy();
   if (seed) {
     const node = bip32.fromSeed(seed);
-    bip32RootKey = node.toBase58();
-    ['bip32', 'bip44'].forEach((bip) => {
-      calculateAddresses(bip, node);
-    });
+    bip32RootKey = node;
   } else {
     bip32RootKey = null;
   }
-  DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey : 'unknown';
+  DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
 }, 1000);
