@@ -256,24 +256,6 @@
           </div>
         </div>
         <div>
-          <div class="splitMnemonic hidden">
-            <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
-            <div>
-              <textarea id="bip39PhraseSplit" class="phraseSplit private-data textarea-input"
-                title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
-              <p class="help-block">
-                <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
-              </p>
-            </div>
-          </div>
-          <div>
-            <label>
-              <input type="checkbox" id="bip39ShowSplitMnemonic">
-              Show split mnemonic cards
-            </label>
-          </div>
-        </div>
-        <div>
           <label for="bip39Passphrase">BIP39 Passphrase
             (optional)</label>
           <div>
@@ -286,6 +268,24 @@
           <div>
             <textarea id="bip39Seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <div>
+          <div>
+            <label>
+              <input type="checkbox" id="bip39ShowSplitMnemonic">
+              Show split mnemonic cards
+            </label>
+          </div>
+          <div id="splitMnemonic" class="hidden">
+            <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
+            <div>
+              <textarea id="bip39PhraseSplit" class="phraseSplit private-data textarea-input"
+                title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
+              <p>
+                <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

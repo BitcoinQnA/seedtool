@@ -61,6 +61,7 @@ const setupDom = () => {
   DOM.bip39ShowSplitMnemonic = document.getElementById(
     'bip39ShowSplitMnemonic'
   );
+  DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
   DOM.bip39Seed = document.getElementById('bip39Seed');
   DOM.bip44Coin = document.getElementById('bip44Coin');
@@ -74,6 +75,16 @@ const setupDom = () => {
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
   DOM.bip85Index = document.getElementById('bip85Index');
   DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+
+  // Show / hide split mnemonic cards
+  DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
+    if (DOM.bip39ShowSplitMnemonic.checked) {
+      DOM.bip39SplitMnemonicSection.classList.remove('hidden');
+    } else {
+      DOM.bip39SplitMnemonicSection.classList.add('hidden');
+    }
+    adjustPanelHeight();
+  });
 
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
@@ -161,7 +172,7 @@ function debounce(func, wait, immediate) {
       timeout = null;
       if (!immediate) func.apply(context, args);
     };
-    var callNow = immediate && !timeout;
+    const callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
     if (callNow) func.apply(context, args);
@@ -523,6 +534,9 @@ const calculateEntropy = () => {
   } else {
     DOM.entropyFilterWarning.classList.add('hidden');
   }
+  showWordIndexes();
+  showChecksum();
+  writeSplitPhrase();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -595,38 +609,59 @@ const getEntropyTypeStr = (entropy) => {
 const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
 
-const showWordIndexes = () => {
-  var phrase = DOM.phrase.val();
-  var words = phraseToWordArray(phrase);
-  var wordIndexes = [];
-  var language = getLanguage();
-  for (var i = 0; i < words.length; i++) {
-    var word = words[i];
-    var wordIndex = WORDLISTS[language].indexOf(word);
-    wordIndexes.push(wordIndex);
+const phraseToWordArray = () => {
+  const phrase = DOM.bip39Phrase.value;
+  const words = phrase.split(/\s/g);
+  const noBlanks = [];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (word.length > 0) {
+      noBlanks.push(word);
+    }
   }
-  var wordIndexesStr = wordIndexes.join(', ');
-  DOM.entropyWordIndexes.text(wordIndexesStr);
+  return noBlanks;
 };
 
-function showChecksum() {
-  var phrase = DOM.phrase.val();
-  var words = phraseToWordArray(phrase);
-  var checksumBitlength = words.length / 3;
-  var checksum = '';
-  var binaryStr = '';
-  var language = getLanguage();
-  for (var i = words.length - 1; i >= 0; i--) {
-    var word = words[i];
-    var wordIndex = WORDLISTS[language].indexOf(word);
-    var wordBinary = wordIndex.toString(2);
+/**
+ * Convert Array of seed words to the seed phrase string
+ * @param {String[]} words Array of seed words
+ * @returns {String} Joins the array into a string separated by spaces
+ */
+const wordArrayToPhrase = (words) => {
+  const phrase = words.join(' ');
+  // const language = getLanguageFromPhrase(phrase);
+  // if (language == 'japanese') {
+  //   phrase = words.join('\u3000');
+  // }
+  return phrase;
+};
+
+const showWordIndexes = () => {
+  const words = phraseToWordArray();
+  const wordIndexes = [];
+  words.forEach((word) => {
+    wordIndexes.push(wordList.indexOf(word));
+  });
+  const wordIndexesStr = wordIndexes.join(', ');
+  DOM.entropyWordIndexes.innerText = wordIndexesStr;
+};
+
+const showChecksum = () => {
+  const words = phraseToWordArray();
+  const checksumBitlength = words.length / 3;
+  let checksum = '';
+  let binaryStr = '';
+  for (let i = words.length - 1; i >= 0; i--) {
+    const word = words[i];
+    const wordIndex = wordList.indexOf(word);
+    let wordBinary = wordIndex.toString(2);
     while (wordBinary.length < 11) {
       wordBinary = '0' + wordBinary;
     }
-    var binaryStr = wordBinary + binaryStr;
+    binaryStr = wordBinary + binaryStr;
     if (binaryStr.length >= checksumBitlength) {
-      var start = binaryStr.length - checksumBitlength;
-      var end = binaryStr.length;
+      const start = binaryStr.length - checksumBitlength;
+      const end = binaryStr.length;
       checksum = binaryStr.substring(start, end);
       // add spaces so the last group is 11 bits, not the first
       checksum = checksum.split('').reverse().join('');
@@ -635,8 +670,8 @@ function showChecksum() {
       break;
     }
   }
-  DOM.entropyChecksum.text(checksum);
-}
+  DOM.entropyBinaryChecksum.innerText = checksum;
+};
 
 const generateNewMnemonic = () => {
   toast('Calculating...');
@@ -646,6 +681,56 @@ const generateNewMnemonic = () => {
   DOM.bip39Phrase.value = mnemonic;
   // DOM.knownInputTextarea.value = mnemonic;
   mnemonicToSeedPopulate();
+};
+
+const writeSplitPhrase = async () => {
+  const phrase = DOM.bip39Phrase.value;
+  const wordCount = phrase.split(/\s/g).length;
+  const msgUint8 = new TextEncoder().encode(phrase);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const left = [];
+  for (let i = 0; i < wordCount; i++) {
+    left.push(i);
+  }
+  const group = [[], [], []];
+  let groupI = -1;
+  let seedNum = Math.abs(hashArray[0]) % 2147483647;
+  while (left.length > 0) {
+    groupI = (groupI + 1) % 3;
+    seedNum = (seedNum * 16807) % 2147483647;
+    const selected = Math.floor((left.length * (seedNum - 1)) / 2147483646);
+    group[groupI].push(left[selected]);
+    left.splice(selected, 1);
+  }
+  const cards = [phrase.split(/\s/g), phrase.split(/\s/g), phrase.split(/\s/g)];
+  for (let i = 0; i < 3; i++) {
+    for (let ii = 0; ii < wordCount / 3; ii++) cards[i][group[i][ii]] = 'XXXX';
+    cards[i] = 'Card ' + (i + 1) + ': ' + wordArrayToPhrase(cards[i]);
+  }
+  DOM.bip39PhraseSplit.value = cards.join('\r\n');
+  const triesPerSecond = 10000000000;
+  let hackTime = Math.pow(2, (wordCount * 10) / 3) / triesPerSecond;
+  let displayRedText = false;
+  if (hackTime < 1) {
+    hackTime = '<1 second';
+    displayRedText = true;
+  } else if (hackTime < 86400) {
+    hackTime = Math.floor(hackTime) + ' seconds';
+    displayRedText = true;
+  } else if (hackTime < 31557600) {
+    hackTime = Math.floor(hackTime / 86400) + ' days';
+    displayRedText = true;
+  } else {
+    hackTime = Math.floor(hackTime / 31557600) + ' years';
+  }
+  DOM.bip39PhraseSplitWarn.innerText =
+    'Time to hack with only one card: ' + hackTime;
+  if (displayRedText) {
+    DOM.bip39PhraseSplitWarn.classList.add('warning');
+  } else {
+    DOM.bip39PhraseSplitWarn.classList.remove('warning');
+  }
 };
 
 /**
