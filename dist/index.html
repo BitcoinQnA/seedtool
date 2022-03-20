@@ -554,28 +554,19 @@ footer {
             <div class="entropy-details--flex-item">
               <label>Mnemonic Length: </label>
               <select class="entropy-details--detail--select" id="entropyMnemonicLength">
-                <option value="raw" selected>Use Raw Entropy (3 words per 32 bits)</option>
-                <option value="12">12 <span>Words</span></option>
-                <option value="15">15 <span>Words</span></option>
-                <option value="18">18 <span>Words</span></option>
-                <option value="21">21 <span>Words</span></option>
-                <option value="24">24 <span>Words</span></option>
+                <option value="12" selected>12 Words</option>
+                <option value="15">15 Words</option>
+                <option value="18">18 Words</option>
+                <option value="21">21 Words</option>
+                <option value="24">24 Words</option>
               </select>
+              <span id="weakEntropyOverrideWarning" class="warning hidden">
+                Insufficient entropy provided to make a seed for your selected Mnemonic Length.
+              </span>
+              <span id="weakEntropyWarning" class="warning hidden">
+                Unbiased entropy is too low. More entropy is highly advised!
+              </span>
             </div>
-            <div class="entropy-details--flex-item">
-              <label>PBKDF2 rounds: </label>
-              <select class="entropy-details--detail--select" id="entropyPBKDF2Rounds" style="width: 60%;float: left;">
-                <option value="2048" selected>2048 <span>(compatibility)</span></option>
-                <option value="4096">4096 <span>iterations</span></option>
-                <option value="8192">8192 <span>iterations</span></option>
-                <option value="16384">16384 <span>iterations</span></option>
-                <option value="32768">32768 <span>iterations</span></option>
-                <option value="custom">Custom <span>iterations</span></option>
-              </select>
-              <input type="number" class="entropy-details--detail--input hidden" id="pbkdf2CustomInput" value="2048"
-                min="1" pattern="[0-9]" style="float: right;width: 40%;">
-            </div>
-
             <div class="entropy-details--flex-item">
               <label>Entropy method: </label>
               <select class="entropy-details--detail--select" id="entropyMethod">
@@ -620,6 +611,7 @@ footer {
         <div class="warning bip39-invalid-phrase hidden">
           <label>INVALID BIP39 SEED PHRASE</label>
           <div>
+            <span id="bip39ValidationError"></span>
             <span>The words require a specific format. Click on "More Information" above to learn about it.</span>
           </div>
         </div>
@@ -926,11 +918,12 @@ const setupDom = () => {
   DOM.entropyMnemonicLengthSelect = document.getElementById(
     'entropyMnemonicLength'
   );
-  DOM.entropyPBKDF2Rounds = document.getElementById('entropyPBKDF2Rounds');
-  DOM.pbkdf2CustomInput = document.getElementById('pbkdf2CustomInput');
+  DOM.entropyWeakEntropyOverrideWarning = document.getElementById(
+    'weakEntropyOverrideWarning'
+  );
+  DOM.entropyWeakEntropyWarning = document.getElementById('weakEntropyWarning');
   DOM.entropyMethod = document.getElementById('entropyMethod');
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
-  DOM.bip39PhraseWarn = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
   DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
   DOM.bip39ShowSplitMnemonic = document.getElementById(
@@ -939,6 +932,8 @@ const setupDom = () => {
   DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
   DOM.bip39Seed = document.getElementById('bip39Seed');
+  DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
+  DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
   DOM.bip44Coin = document.getElementById('bip44Coin');
   DOM.bip44Account = document.getElementById('bip44Account');
   DOM.bip44Change = document.getElementById('bip44Change');
@@ -960,6 +955,9 @@ const setupDom = () => {
     }
     adjustPanelHeight();
   });
+
+  // listen for if entropy method changes
+  DOM.entropyMethod.oninput = entropyTypeChanged;
 
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
@@ -996,15 +994,16 @@ const setupDom = () => {
   // add template for derived addresses
   addDerivedAddressBlocks();
   // add listener for bip44 path inputs
-  DOM.bip44Coin.addEventListener('change', changeBip44Path);
-  DOM.bip44Account.addEventListener('change', changeBip44Path);
-  DOM.bip44Change.addEventListener('change', changeBip44Path);
+  DOM.bip44Coin.oninput = changeBip44Path;
+  DOM.bip44Account.oninput = changeBip44Path;
+  DOM.bip44Change.oninput = changeBip44Path;
   // Add event listener for displaying/hiding entropy details
   DOM.entropyDisplay.addEventListener('click', () => {
     displayEntropy(DOM.entropyDisplay.checked);
   });
   // add event listener for entropy
-  DOM.entropyInput.oninput = calculateEntropy;
+  DOM.entropyInput.oninput = entropyChanged;
+  DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
@@ -1064,6 +1063,12 @@ window.tabSelect = (event, tabId) => {
   });
   document.getElementById(tabId).style.display = 'block';
   event.currentTarget.classList.add('tab--active');
+  // make seed phrase read only if inputting own entropy
+  if (tabId === 'Input_Entropy') {
+    DOM.bip39Phrase.setAttribute('readonly', 'true');
+  } else {
+    DOM.bip39Phrase.removeAttribute('readonly');
+  }
   adjustPanelHeight();
 };
 /**
@@ -1363,12 +1368,122 @@ const clearAddresses = (bip) => {
   adjustPanelHeight();
 };
 
-const calculateEntropy = () => {
+const normalizeString = (str) => str.trim().normalize('NFKD');
+
+const getPhrase = () => normalizeString(DOM.bip39Phrase.value);
+
+const getPassphrase = () => normalizeString(DOM.bip39Passphrase.value);
+
+const getEntropy = () => normalizeString(DOM.entropyInput.value);
+
+const findNearestWord = (word) => {
+  let minDistance = 99;
+  let closestWord = wordList[0];
+  for (let i = 0; i < wordList.length; i++) {
+    const comparedTo = wordList[i];
+    if (comparedTo.indexOf(word) === 0) {
+      return comparedTo;
+    }
+    const distance = new window.Levenshtein(word, comparedTo).distance;
+    if (distance < minDistance) {
+      closestWord = comparedTo;
+      minDistance = distance;
+    }
+  }
+  return closestWord;
+};
+
+const findPhraseErrors = (phraseArg) => {
+  const phrase = normalizeString(phraseArg);
+  const words = phraseToWordArray(phrase);
+  // Detect blank phrase
+  if (words.length == 0) {
+    return 'Blank mnemonic';
+  }
+  // Check each word
+  for (let i = 0; i < words.length; i++) {
+    var word = words[i];
+    if (!wordList.includes(word)) {
+      const nearestWord = findNearestWord(word);
+      return `"${word}" was not found in the list, did you mean "${nearestWord}"`;
+    }
+  }
+  // Check the words are valid
+  const properPhrase = wordArrayToPhrase(words);
+  const isValid = window.bip39.validateMnemonic(properPhrase);
+  if (!isValid) {
+    return 'Invalid mnemonic';
+  }
+  return '';
+};
+
+const showValidationError = (errorText) => {
+  if (errorText) {
+    DOM.bip39InvalidMessage.innerText = errorText + '. ';
+    DOM.bip39Invalid.classList.remove('hidden');
+  } else {
+    DOM.bip39InvalidMessage.innerText = '';
+    DOM.bip39Invalid.classList.add('hidden');
+  }
+  adjustPanelHeight();
+};
+
+// const phraseChanged = () => {
+//   // Get the mnemonic phrase
+//   const phrase = normalizeString(DOM.bip39Phrase.value);
+//   const errorText = findPhraseErrors(phrase);
+//   showValidationError(errorText);
+//   if (errorText) {
+//     return;
+//   }
+//   // Calculate and display
+//   var passphrase = DOM.bip39Passphrase.value;
+//   // calcBip32RootKeyFromSeed(phrase, passphrase);
+//   // calcForDerivationPath();
+//   // calcBip85();
+//   // Show the word indexes
+//   showWordIndexes();
+//   writeSplitPhrase(phrase);
+// };
+
+const entropyChanged = async () => {
+  // debounce?
+  if (getEntropy().length === 0) {
+    resetEverything();
+    return;
+  }
+  // Get the current phrase to detect changes
+  const phrase = getPhrase();
+  // Set the phrase from the entropy
+  await setMnemonicFromEntropy();
+  // Recalculate addresses if the phrase has changed
+  const newPhrase = getPhrase();
+  if (newPhrase != phrase) {
+    if (newPhrase.length == 0) {
+      resetEverything();
+    } else {
+      mnemonicToSeedPopulate();
+    }
+  } else {
+    // hidePending();
+  }
+};
+
+const entropyTypeChanged = () => {
+  console.log('entropyTypeChanged :>> ', 'entropyTypeChanged');
+  entropyTypeAutoDetect = false;
+  entropyChanged();
+};
+
+const calculateEntropy = async () => {
   const unknown = 'Unknown';
-  const entropy = window.Entropy.fromString(DOM.entropyInput.value);
+  const input = getEntropy();
+  const entropy = window.Entropy.fromString(input);
+  const eventCount = entropy.base.events.length;
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
-  const bitsPerEvent = entropy.bitsPerEvent?.toFixed(2) || unknown;
+  const bitsPerEvent = entropy.base.bitsPerEvent?.toFixed(2) || unknown;
+  const biasedBits = Math.floor(bitsPerEvent * eventCount);
   const spacedBinaryStr = entropy.binaryStr
     ? addSpacesEveryElevenBits(entropy.binaryStr)
     : unknown;
@@ -1383,24 +1498,19 @@ const calculateEntropy = () => {
     console.log('Error detecting entropy strength with zxcvbn:');
     console.log(e);
   }
-
+  const reqWords = parseInt(DOM.entropyMnemonicLengthSelect.value);
   //
   DOM.entropyTimeToCrack.innerText = timeToCrack;
-  DOM.entropyEventCount.innerText = entropy.base.events.length;
+  DOM.entropyEventCount.innerText = eventCount;
   DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
+  DOM.entropyMethod.value = entropy.base.str;
   DOM.entropyBitsPerEvent.innerText = bitsPerEvent;
-  DOM.entropyRawWords.innerText = wordCount;
-  DOM.entropyTotalBits.innerText = numberOfBits;
-  DOM.entropyFiltered.innerText = entropy.cleanHtml;
+  DOM.entropyRawWords.innerText = wordCount + '/' + reqWords;
+  DOM.entropyTotalBits.innerText = `${numberOfBits}/${
+    (reqWords * 32) / 3
+  } (${biasedBits} with bias)`;
+  DOM.entropyFiltered.innerHTML = entropy.cleanHtml;
   DOM.entropyRawBinary.innerText = spacedBinaryStr;
-  DOM.entropyBinaryChecksum.innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // detect and warn of filtering
   const rawNoSpaces = DOM.entropyInput.value.replace(/\s/g, '');
   const cleanNoSpaces = entropy.cleanStr.replace(/\s/g, '');
   const isFiltered = rawNoSpaces.length !== cleanNoSpaces.length;
@@ -1412,6 +1522,72 @@ const calculateEntropy = () => {
   showWordIndexes();
   showChecksum();
   writeSplitPhrase();
+};
+
+const hash = async (text, algo = 'SHA-256') => {
+  const msgUint8 = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest(algo, msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hex;
+};
+
+const setMnemonicFromEntropy = async () => {
+  clearEntropyFeedback();
+  // Get entropy value
+  const entropyStr = getEntropy();
+  // Work out minimum base for entropy
+  let entropy = null;
+  if (entropyTypeAutoDetect) {
+    entropy = window.Entropy.fromString(entropyStr);
+  } else {
+    const base = DOM.entropyMethod.value;
+    entropy = window.Entropy.fromString(entropyStr, base);
+  }
+  // No entropy, no seed
+  if (entropy.binaryStr.length == 0) {
+    return;
+  }
+  // Show entropy details
+  calculateEntropy(entropy);
+  // Use biased bits to allow 99 dice roll
+  const bits = Math.ceil(
+    entropy.base.bitsPerEvent * entropy.base.events.length
+  );
+  console.log('bits :>> ', bits);
+  const mnemonicLength = parseInt(DOM.entropyMnemonicLengthSelect.value);
+  // Refuse to make a seed with insufficient entropy
+  if ((mnemonicLength / 3) * 32 > bits) {
+    DOM.entropyWeakEntropyOverrideWarning.classList.remove('hidden');
+    return;
+  } else {
+    DOM.entropyWeakEntropyOverrideWarning.classList.add('hidden');
+  }
+  // Warn if user is relying on biased bits
+  if ((mnemonicLength / 3) * 32 > entropy.binaryStr.length) {
+    DOM.entropyWeakEntropyWarning.classList.remove('hidden');
+  } else {
+    DOM.entropyWeakEntropyWarning.classList.add('hidden');
+  }
+  // Get bits by hashing entropy with SHA256
+  let hex = await hash(entropyStr);
+  // make sure the hash is at least 64 chars long
+  // It should be but just in case
+  while (hex.length % 64 !== 0) {
+    hex = `0${hex}`;
+  }
+  const start = hex.length - (mnemonicLength * 8) / 3;
+  const hexedBin = hex.slice(start);
+  console.log('hexedBin :>> ', hexedBin);
+  // Convert entropy array to mnemonic
+  const phrase = window.bip39.entropyToMnemonic(hexedBin);
+  // Set the mnemonic in the UI
+  DOM.bip39Phrase.value = phrase;
+  writeSplitPhrase();
+  // Show the word indexes
+  showWordIndexes();
+  // Show the checksum
+  showChecksum();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -1447,8 +1623,22 @@ const getEntropyTypeStr = (entropy) => {
     }
     // Detect missing cards
     /* cSpell:disable */
-    const values = 'A23456789TJQK';
-    const suits = 'CDHS';
+    const values = [
+      'A',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'T',
+      'J',
+      'Q',
+      'K',
+    ];
+    const suits = ['C', 'D', 'H', 'S'];
     /* cSpell:ensable */
     const missingCards = [];
     suits.forEach((suit) => {
@@ -1485,7 +1675,7 @@ const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
 
 const phraseToWordArray = () => {
-  const phrase = DOM.bip39Phrase.value;
+  const phrase = normalizeString(DOM.bip39Phrase.value);
   const words = phrase.split(/\s/g);
   const noBlanks = [];
   for (let i = 0; i < words.length; i++) {
@@ -1612,21 +1802,24 @@ const writeSplitPhrase = async () => {
  * Called when mnemonic is updated
  */
 const mnemonicToSeedPopulate = debounce(() => {
-  const mnemonic = DOM.bip39Phrase.value;
-  const passphrase = DOM.bip39Passphrase.value || '';
+  const mnemonic = getPhrase();
+  const passphrase = getPassphrase();
   let seedHex = '';
   resetEverything();
   seed = null;
   // Test if valid
-  if (bip39.validateMnemonic(mnemonic)) {
-    DOM.bip39PhraseWarn.classList.add('hidden');
+  const errorText = findPhraseErrors(mnemonic);
+  showValidationError(errorText);
+  if (!errorText) {
     seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
     seedHex = seed.toString('hex');
   } else {
-    DOM.bip39PhraseWarn.classList.remove('hidden');
+    return;
   }
   DOM.bip39Seed.value = seedHex;
-  DOM.entropyInput.value = seedHex;
+  if (!DOM.bip39Phrase.readOnly) {
+    DOM.entropyInput.value = seedHex;
+  }
   calculateEntropy();
   if (seed) {
     const node = bip32.fromSeed(seed);
@@ -1635,13 +1828,30 @@ const mnemonicToSeedPopulate = debounce(() => {
     bip32RootKey = null;
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
+  adjustPanelHeight();
 }, 1000);
 
 const resetEverything = () => {
   seed = null;
   bip32RootKey = null;
   DOM.bip32RootKey.value = '';
-  DOM.entropyInput.value = '';
+  if (!DOM.bip39Phrase.readOnly) {
+    DOM.entropyInput.value = '';
+  }
+  clearEntropyFeedback();
+  DOM.bip39PhraseSplit.value = '';
+  DOM.bip39Seed.value = '';
+  DOM.bip44AccountXprv.value = '';
+  DOM.bip44AccountXpub.value = '';
+  DOM.bip85Application.value = 'bip39';
+  DOM.bip85MnemonicLength.value = '12';
+  DOM.bip85Bytes.value = '64';
+  DOM.bip85Index.value = '0';
+  DOM.bip85ChildKey.value = '';
+  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
+};
+
+const clearEntropyFeedback = () => {
   DOM.entropyTimeToCrack.innerText = '...';
   DOM.entropyEventCount.innerText = '...';
   DOM.entropyEntropyType.innerText = '...';
@@ -1652,21 +1862,7 @@ const resetEverything = () => {
   DOM.entropyRawBinary.innerText = '...';
   DOM.entropyBinaryChecksum.innerText = '...';
   DOM.entropyWordIndexes.innerText = '...';
-  DOM.entropyMnemonicLengthSelect.value = '12';
-  DOM.entropyPBKDF2Rounds.value = '2048';
-  DOM.pbkdf2CustomInput.value = '2048';
-  DOM.entropyMethod.value = 'binary';
-  DOM.bip39PhraseSplit.value = '';
-  DOM.bip39ShowSplitMnemonic.checked = false;
-  DOM.bip39Seed.value = '';
-  DOM.bip44AccountXprv.value = '';
-  DOM.bip44AccountXpub.value = '';
-  DOM.bip85Application.value = 'bip39';
-  DOM.bip85MnemonicLength.value = '12';
-  DOM.bip85Bytes.value = '64';
-  DOM.bip85Index.value = '0';
-  DOM.bip85ChildKey.value = '';
-  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
+  // DOM.entropyMethod.value = 'hex';
 };
 
       </script>
@@ -59209,6 +59405,8 @@ const resetEverything = () => {
   <script>
       /**
  * The MIT License (MIT)
+ * Copyright (c) 2022 SuperPhatArrow
+ * Based on Ian Coleman's bip39 tool
  * Copyright (c) 2014-2016 Ian Coleman
  * https://github.com/iancoleman/bip39/blob/master/src/js/entropy.js
  */
@@ -59229,8 +59427,34 @@ const resetEverything = () => {
  * entropy.
  */
 
-window.Entropy = new (function () {
-  let eventBits = {
+/**
+ * For the question of biased vs unbiased entropy...
+ * Go make a stong cup of coffee and read:
+ * https://github.com/iancoleman/bip39/issues/435
+ */
+
+/**
+ * Details about the base of the input entropy
+ * @typedef {Object} BaseObject
+ * @property {number[]} ints - An array of integers
+ * @property {string[]} events - An array of each character input by user
+ * @property {string} str - The name of the base detected or user decided
+ * @property {number} asInt - The number of the base, ie binary=2 hex=16
+ * @property {number} bitsPerEvent - The number of bits per event
+ * @property {number} unbiasedBitsPerEvent - The unbiased number of bits per event
+ */
+
+/**
+ * The object returned containing entropy info
+ * @typedef {Object} EntropyObject
+ * @property {string} binaryStr - The entropy in a binary string
+ * @property {string} cleanStr - The entropy string normalized for display
+ * @property {string} cleanHtml - The cleanStr formatted for HTML
+ * @property {BaseObject} base - Details about the base of the input entropy
+ */
+
+class Entropy {
+  static eventBits = {
     binary: {
       0: '0',
       1: '1',
@@ -59253,13 +59477,13 @@ window.Entropy = new (function () {
     // 4 rolls give 2 bits each
     // 2 rolls give 1 bit each
     // Average (4*2 + 2*1) / 6 = 1.66 bits per roll without bias
-    'base 6 (dice)': {
-      0: '00', // equivalent to 0 in base 6
-      1: '01',
-      2: '10',
-      3: '11',
-      4: '0',
-      5: '1',
+    dice: {
+      1: '00', // equivalent to 0 in base 6
+      2: '01',
+      3: '10',
+      4: '11',
+      5: '0',
+      6: '1',
     },
 
     // log2(10) = 3.321928 bits per digit, with bias
@@ -59358,225 +59582,354 @@ window.Entropy = new (function () {
       ks: '11',
     },
   };
-
-  // matchers returns an array of the matched events for each type of entropy.
-  // eg
-  // matchers.binary("010") returns ["0", "1", "0"]
-  // matchers.binary("a10") returns ["1", "0"]
-  // matchers.hex("a10") returns ["a", "1", "0"]
-  var matchers = {
-    binary: function (str) {
-      return str.match(/[0-1]/gi) || [];
-    },
-    base6: function (str) {
-      return str.match(/[0-5]/gi) || [];
-    },
-    dice: function (str) {
-      return str.match(/[1-6]/gi) || []; // ie dice numbers
-    },
-    base10: function (str) {
-      return str.match(/[0-9]/gi) || [];
-    },
-    hex: function (str) {
-      return str.match(/[0-9A-F]/gi) || [];
-    },
-    card: function (str) {
-      // Format is NumberSuit, eg
-      // AH ace of hearts
-      // 8C eight of clubs
-      // TD ten of diamonds
-      // JS jack of spades
-      // QH queen of hearts
-      // KC king of clubs
-      return str.match(/([A2-9TJQK][CDHS])/gi) || [];
-    },
+  /**
+   * matchers returns an array of the matched events for each type of entropy.
+   * eg
+   * matchers.binary("010") returns ["0", "1", "0"]
+   * matchers.binary("a10") returns ["1", "0"]
+   * matchers.hex("a10") returns ["a", "1", "0"]
+   */
+  static matchers = {
+    binary: (str) => str.match(/[0-1]/gi) || [],
+    base6: (str) => str.match(/[0-5]/gi) || [],
+    dice: (str) => str.match(/[1-6]/gi) || [],
+    base10: (str) => str.match(/[0-9]/gi) || [],
+    hex: (str) => str.match(/[0-9A-F]/gi) || [],
+    card: (str) => str.match(/([A2-9TJQK][CDHS])/gi) || [],
   };
 
-  this.fromString = function (rawEntropyStr, baseStr) {
-    // Find type of entropy being used (binary, hex, dice etc)
-    var base = getBase(rawEntropyStr, baseStr);
-    // Convert dice to base6 entropy (ie 1-6 to 0-5)
-    // This is done by changing all 6s to 0s
-    if (base.str == 'dice') {
-      var newEvents = [];
-      for (var i = 0; i < base.events.length; i++) {
-        var c = base.events[i];
-        if ('12345'.indexOf(c) > -1) {
-          newEvents[i] = base.events[i];
-        } else {
-          newEvents[i] = '0';
-        }
-      }
-      base.str = 'base 6 (dice)';
-      base.events = newEvents;
-      base.matcher = matchers.base6;
-    }
-    // Detect empty entropy
-    if (base.events.length == 0) {
-      return {
-        binaryStr: '',
-        cleanStr: '',
-        cleanHtml: '',
-        base: base,
-      };
-    }
-    // Convert entropy events to binary
-    var entropyBin = base.events
-      .map(function (e) {
-        return eventBits[base.str][e.toLowerCase()];
-      })
-      .join('');
-    // Get average bits per event
-    // which may be adjusted for bias if log2(base) is fractional
-    var bitsPerEvent = base.bitsPerEvent;
-    // Supply a 'filtered' entropy string for display purposes
-    var entropyClean = base.events.join('');
-    var entropyHtml = base.events.join('');
-    if (base.asInt == 52) {
-      entropyClean = base.events.join(' ').toUpperCase();
-      entropyClean = entropyClean.replace(/C/g, '\u2663');
-      entropyClean = entropyClean.replace(/D/g, '\u2666');
-      entropyClean = entropyClean.replace(/H/g, '\u2665');
-      entropyClean = entropyClean.replace(/S/g, '\u2660');
-      entropyHtml = base.events.join(' ').toUpperCase();
-      entropyHtml = entropyHtml.replace(
-        /C/g,
-        "<span class='card-suit club'>\u2663</span>"
-      );
-      entropyHtml = entropyHtml.replace(
-        /D/g,
-        "<span class='card-suit diamond'>\u2666</span>"
-      );
-      entropyHtml = entropyHtml.replace(
-        /H/g,
-        "<span class='card-suit heart'>\u2665</span>"
-      );
-      entropyHtml = entropyHtml.replace(
-        /S/g,
-        "<span class='card-suit spade'>\u2660</span>"
-      );
-    }
-    // Return the result
-    var e = {
-      binaryStr: entropyBin,
-      cleanStr: entropyClean,
-      cleanHtml: entropyHtml,
-      bitsPerEvent: bitsPerEvent,
-      base: base,
-    };
-    return e;
-  };
+  constructor() {}
 
-  function getBase(str, baseStr) {
+  /**
+   * Private Static function to trim and normalize using NFKD any user input
+   * @param {String} str String to normalize
+   * @returns {String} Normalized String
+   */
+  static #normalize(str) {
+    return str.trim().normalize('NFKD');
+  }
+
+  /**
+   * getBase returns the base info
+   * @param {string} entropyStr Normalised raw entropy
+   * @param {string=} baseStr Type of radix
+   * @returns {BaseObject}
+   */
+  static #getBase(entropyStr, baseStr) {
     // Need to get the lowest base for the supplied entropy.
     // This prevents interpreting, say, dice rolls as hexadecimal.
-    var binaryMatches = matchers.binary(str);
-    var hexMatches = matchers.hex(str);
-    var autodetect = baseStr === undefined;
+    const binaryMatches = this.matchers.binary(entropyStr);
+    const hexMatches = this.matchers.hex(entropyStr);
+    const autodetect = baseStr === undefined;
+    let str = '',
+      ints = [],
+      events = [],
+      asInt = 0,
+      unbiasedBitsPerEvent = 0;
     // Find the lowest base that can be used, whilst ignoring any irrelevant chars
+    // Check for binary
     if (
       (binaryMatches.length == hexMatches.length &&
         hexMatches.length > 0 &&
         autodetect) ||
       baseStr === 'binary'
     ) {
-      var ints = binaryMatches.map(function (i) {
-        return parseInt(i, 2);
-      });
       return {
-        ints: ints,
+        ints: binaryMatches.map((n) => parseInt(n, 2)),
         events: binaryMatches,
-        matcher: matchers.binary,
         asInt: 2,
-        bitsPerEvent: 1,
+        bitsPerEvent: Math.log2(2),
+        unbiasedBitsPerEvent: 1,
         str: 'binary',
       };
     }
-    var cardMatches = matchers.card(str);
+    // check for cards
+    const cardMatches = this.matchers.card(entropyStr);
     if (
       (cardMatches.length >= hexMatches.length / 2 && autodetect) ||
       baseStr === 'card'
     ) {
+      const cardList = Object.keys(this.eventBits.card);
       return {
-        ints: ints,
+        ints: cardMatches.map((c) => cardList.indexOf(c.toLowerCase())),
         events: cardMatches,
-        matcher: matchers.card,
         asInt: 52,
-        bitsPerEvent: (32 * 5 + 16 * 4 + 4 * 2) / 52, // see cardBits
+        bitsPerEvent: Math.log2(52),
+        unbiasedBitsPerEvent: (32 * 5 + 16 * 4 + 4 * 2) / 52, // see cardBits
         str: 'card',
       };
     }
-    var diceMatches = matchers.dice(str);
+    // Check for dice
+    const diceMatches = this.matchers.dice(entropyStr);
     if (
       (diceMatches.length == hexMatches.length &&
         hexMatches.length > 0 &&
         autodetect) ||
       baseStr === 'dice'
     ) {
-      var ints = diceMatches.map(function (i) {
-        return parseInt(i);
-      });
       return {
-        ints: ints,
+        ints: diceMatches.map((n) => parseInt(n)),
         events: diceMatches,
-        matcher: matchers.dice,
         asInt: 6,
-        bitsPerEvent: (4 * 2 + 2 * 1) / 6, // see diceBits
+        bitsPerEvent: Math.log2(6),
+        unbiasedBitsPerEvent: (4 * 2 + 2 * 1) / 6, // see diceBits
         str: 'dice',
       };
     }
-    var base6Matches = matchers.base6(str);
+    // check for base 6
+    const base6Matches = this.matchers.base6(entropyStr);
     if (
       (base6Matches.length == hexMatches.length &&
         hexMatches.length > 0 &&
         autodetect) ||
       baseStr === 'base 6'
     ) {
-      var ints = base6Matches.map(function (i) {
-        return parseInt(i);
-      });
       return {
-        ints: ints,
+        ints: base6Matches.map((n) => parseInt(n)),
         events: base6Matches,
-        matcher: matchers.base6,
         asInt: 6,
-        bitsPerEvent: (4 * 2 + 2 * 1) / 6, // see diceBits
+        bitsPerEvent: Math.log2(6),
+        unbiasedBitsPerEvent: (4 * 2 + 2 * 1) / 6, // see diceBits
         str: 'base 6',
       };
     }
-    var base10Matches = matchers.base10(str);
+    // check for base 10
+    const base10Matches = this.matchers.base10(entropyStr);
     if (
       (base10Matches.length == hexMatches.length &&
         hexMatches.length > 0 &&
         autodetect) ||
       baseStr === 'base 10'
     ) {
-      var ints = base10Matches.map(function (i) {
-        return parseInt(i);
-      });
       return {
-        ints: ints,
+        ints: base10Matches.map((n) => parseInt(n)),
         events: base10Matches,
-        matcher: matchers.base10,
         asInt: 10,
-        bitsPerEvent: (8 * 3 + 2 * 1) / 10, // see b10Bits
+        bitsPerEvent: Math.log2(10),
+        unbiasedBitsPerEvent: (8 * 3 + 2 * 1) / 10, // see b10Bits
         str: 'base 10',
       };
     }
-    var ints = hexMatches.map(function (i) {
-      return parseInt(i, 16);
-    });
+    // fallback is hex
     return {
-      ints: ints,
+      ints: hexMatches.map((n) => parseInt(n, 16)),
       events: hexMatches,
-      matcher: matchers.hex,
       asInt: 16,
-      bitsPerEvent: 4,
+      bitsPerEvent: Math.log2(16),
+      unbiasedBitsPerEvent: 4,
       str: 'hexadecimal',
     };
   }
-})();
+
+  /**
+   *
+   * @param {String} rawEntropyStr Actual entropy submitted by the user
+   * @param {String=} baseStr 'binary' | 'card' | 'dice' | 'base 6' | 'base 10' | 'hexadecimal'
+   * @returns {EntropyObject}
+   */
+  static fromString(rawEntropyStr, baseStr) {
+    // normalize the arguments
+    rawEntropyStr = this.#normalize(rawEntropyStr);
+    // Find type of entropy being used (binary, hex, dice etc)
+    const base = this.#getBase(rawEntropyStr, baseStr);
+    // Detect empty entropy
+    if (base.events.length == 0) {
+      return {
+        binaryStr: '',
+        cleanStr: '',
+        cleanHtml: '',
+        base,
+      };
+    }
+    // convert entropy events to binary
+    const binaryStr = base.events
+      .map((e) => this.eventBits[base.str][e.toLowerCase()])
+      .join('');
+    // Supply a 'filtered' entropy string for display purposes
+    let cleanStr = base.events.join('');
+    let cleanHtml = base.events.join('');
+    // make cards pretty
+    if (base.asInt == 52) {
+      cleanStr = base.events.join(' ').toUpperCase();
+      cleanStr = cleanStr.replace(/C/g, '\u2663');
+      cleanStr = cleanStr.replace(/D/g, '\u2666');
+      cleanStr = cleanStr.replace(/H/g, '\u2665');
+      cleanStr = cleanStr.replace(/S/g, '\u2660');
+      cleanHtml = base.events.join(' ').toUpperCase();
+      cleanHtml = cleanHtml.replace(
+        /C/g,
+        "<span class='card-suit club'>\u2663</span>"
+      );
+      cleanHtml = cleanHtml.replace(
+        /D/g,
+        "<span class='card-suit diamond'>\u2666</span>"
+      );
+      cleanHtml = cleanHtml.replace(
+        /H/g,
+        "<span class='card-suit heart'>\u2665</span>"
+      );
+      cleanHtml = cleanHtml.replace(
+        /S/g,
+        "<span class='card-suit spade'>\u2660</span>"
+      );
+    }
+    return {
+      binaryStr,
+      cleanStr,
+      cleanHtml,
+      base,
+    };
+  }
+}
 /* cSpell:enable */
+window.Entropy = Entropy;
+
+      </script>
+  <script>
+      // Levenshtein Library
+// https://github.com/gf3/Levenshtein
+
+// This is free and unencumbered software released into the public domain.
+
+// Anyone is free to copy, modify, publish, use, compile, sell, or
+// distribute this software, either in source code form or as a compiled
+// binary, for any purpose, commercial or non-commercial, and by any
+// means.
+
+// In jurisdictions that recognize copyright laws, the author or authors
+// of this software dedicate any and all copyright interest in the
+// software to the public domain. We make this dedication for the benefit
+// of the public at large and to the detriment of our heirs and
+// successors. We intend this dedication to be an overt act of
+// relinquishment in perpetuity of all present and future rights to this
+// software under copyright law.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
+// For more information, please refer to <http://unlicense.org/>
+
+(function (root, factory) {
+  if (
+    typeof define == 'function' &&
+    typeof define.amd == 'object' &&
+    define.amd
+  ) {
+    define(function () {
+      return factory(root);
+    });
+  } else if (typeof module == 'object' && module && module.exports) {
+    module.exports = factory(root);
+  } else {
+    root.Levenshtein = factory(root);
+  }
+})(this, function (root) {
+  function forEach(array, fn) {
+    var i, length;
+    i = -1;
+    length = array.length;
+    while (++i < length) fn(array[i], i, array);
+  }
+
+  function map(array, fn) {
+    var result;
+    result = Array(array.length);
+    forEach(array, function (val, i, array) {
+      result[i] = fn(val, i, array);
+    });
+    return result;
+  }
+
+  function reduce(array, fn, accumulator) {
+    forEach(array, function (val, i, array) {
+      accumulator = fn(val, i, array);
+    });
+    return accumulator;
+  }
+
+  // Levenshtein distance
+  function Levenshtein(str_m, str_n) {
+    var previous, current, matrix;
+    // Constructor
+    matrix = this._matrix = [];
+
+    // Sanity checks
+    if (str_m == str_n) return (this.distance = 0);
+    else if (str_m == '') return (this.distance = str_n.length);
+    else if (str_n == '') return (this.distance = str_m.length);
+    else {
+      // Danger Will Robinson
+      previous = [0];
+      forEach(str_m, function (v, i) {
+        i++, (previous[i] = i);
+      });
+
+      matrix[0] = previous;
+      forEach(str_n, function (n_val, n_idx) {
+        current = [++n_idx];
+        forEach(str_m, function (m_val, m_idx) {
+          m_idx++;
+          if (str_m.charAt(m_idx - 1) == str_n.charAt(n_idx - 1))
+            current[m_idx] = previous[m_idx - 1];
+          else
+            current[m_idx] = Math.min(
+              previous[m_idx] + 1, // Deletion
+              current[m_idx - 1] + 1, // Insertion
+              previous[m_idx - 1] + 1 // Subtraction
+            );
+        });
+        previous = current;
+        matrix[matrix.length] = previous;
+      });
+
+      return (this.distance = current[current.length - 1]);
+    }
+  }
+
+  Levenshtein.prototype.toString = Levenshtein.prototype.inspect =
+    function inspect(no_print) {
+      var matrix, max, buff, sep, rows;
+      matrix = this.getMatrix();
+      max = reduce(
+        matrix,
+        function (m, o) {
+          return Math.max(m, reduce(o, Math.max, 0));
+        },
+        0
+      );
+      buff = Array((max + '').length).join(' ');
+
+      sep = [];
+      while (sep.length < ((matrix[0] && matrix[0].length) || 0))
+        sep[sep.length] = Array(buff.length + 1).join('-');
+      sep = sep.join('-+') + '-';
+
+      rows = map(matrix, function (row) {
+        var cells;
+        cells = map(row, function (cell) {
+          return (buff + cell).slice(-buff.length);
+        });
+        return cells.join(' |') + ' ';
+      });
+
+      return rows.join('\n' + sep + '\n');
+    };
+
+  Levenshtein.prototype.getMatrix = function () {
+    return this._matrix.slice();
+  };
+
+  Levenshtein.prototype.valueOf = function () {
+    return this.distance;
+  };
+
+  return Levenshtein;
+});
 
       </script>
   <script>

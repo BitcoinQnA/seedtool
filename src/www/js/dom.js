@@ -51,11 +51,12 @@ const setupDom = () => {
   DOM.entropyMnemonicLengthSelect = document.getElementById(
     'entropyMnemonicLength'
   );
-  DOM.entropyPBKDF2Rounds = document.getElementById('entropyPBKDF2Rounds');
-  DOM.pbkdf2CustomInput = document.getElementById('pbkdf2CustomInput');
+  DOM.entropyWeakEntropyOverrideWarning = document.getElementById(
+    'weakEntropyOverrideWarning'
+  );
+  DOM.entropyWeakEntropyWarning = document.getElementById('weakEntropyWarning');
   DOM.entropyMethod = document.getElementById('entropyMethod');
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
-  DOM.bip39PhraseWarn = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
   DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
   DOM.bip39ShowSplitMnemonic = document.getElementById(
@@ -64,6 +65,8 @@ const setupDom = () => {
   DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
   DOM.bip39Seed = document.getElementById('bip39Seed');
+  DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
+  DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
   DOM.bip44Coin = document.getElementById('bip44Coin');
   DOM.bip44Account = document.getElementById('bip44Account');
   DOM.bip44Change = document.getElementById('bip44Change');
@@ -85,6 +88,9 @@ const setupDom = () => {
     }
     adjustPanelHeight();
   });
+
+  // listen for if entropy method changes
+  DOM.entropyMethod.oninput = entropyTypeChanged;
 
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
@@ -121,15 +127,16 @@ const setupDom = () => {
   // add template for derived addresses
   addDerivedAddressBlocks();
   // add listener for bip44 path inputs
-  DOM.bip44Coin.addEventListener('change', changeBip44Path);
-  DOM.bip44Account.addEventListener('change', changeBip44Path);
-  DOM.bip44Change.addEventListener('change', changeBip44Path);
+  DOM.bip44Coin.oninput = changeBip44Path;
+  DOM.bip44Account.oninput = changeBip44Path;
+  DOM.bip44Change.oninput = changeBip44Path;
   // Add event listener for displaying/hiding entropy details
   DOM.entropyDisplay.addEventListener('click', () => {
     displayEntropy(DOM.entropyDisplay.checked);
   });
   // add event listener for entropy
-  DOM.entropyInput.oninput = calculateEntropy;
+  DOM.entropyInput.oninput = entropyChanged;
+  DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
@@ -189,6 +196,12 @@ window.tabSelect = (event, tabId) => {
   });
   document.getElementById(tabId).style.display = 'block';
   event.currentTarget.classList.add('tab--active');
+  // make seed phrase read only if inputting own entropy
+  if (tabId === 'Input_Entropy') {
+    DOM.bip39Phrase.setAttribute('readonly', 'true');
+  } else {
+    DOM.bip39Phrase.removeAttribute('readonly');
+  }
   adjustPanelHeight();
 };
 /**
@@ -488,12 +501,122 @@ const clearAddresses = (bip) => {
   adjustPanelHeight();
 };
 
-const calculateEntropy = () => {
+const normalizeString = (str) => str.trim().normalize('NFKD');
+
+const getPhrase = () => normalizeString(DOM.bip39Phrase.value);
+
+const getPassphrase = () => normalizeString(DOM.bip39Passphrase.value);
+
+const getEntropy = () => normalizeString(DOM.entropyInput.value);
+
+const findNearestWord = (word) => {
+  let minDistance = 99;
+  let closestWord = wordList[0];
+  for (let i = 0; i < wordList.length; i++) {
+    const comparedTo = wordList[i];
+    if (comparedTo.indexOf(word) === 0) {
+      return comparedTo;
+    }
+    const distance = new window.Levenshtein(word, comparedTo).distance;
+    if (distance < minDistance) {
+      closestWord = comparedTo;
+      minDistance = distance;
+    }
+  }
+  return closestWord;
+};
+
+const findPhraseErrors = (phraseArg) => {
+  const phrase = normalizeString(phraseArg);
+  const words = phraseToWordArray(phrase);
+  // Detect blank phrase
+  if (words.length == 0) {
+    return 'Blank mnemonic';
+  }
+  // Check each word
+  for (let i = 0; i < words.length; i++) {
+    var word = words[i];
+    if (!wordList.includes(word)) {
+      const nearestWord = findNearestWord(word);
+      return `"${word}" was not found in the list, did you mean "${nearestWord}"`;
+    }
+  }
+  // Check the words are valid
+  const properPhrase = wordArrayToPhrase(words);
+  const isValid = window.bip39.validateMnemonic(properPhrase);
+  if (!isValid) {
+    return 'Invalid mnemonic';
+  }
+  return '';
+};
+
+const showValidationError = (errorText) => {
+  if (errorText) {
+    DOM.bip39InvalidMessage.innerText = errorText + '. ';
+    DOM.bip39Invalid.classList.remove('hidden');
+  } else {
+    DOM.bip39InvalidMessage.innerText = '';
+    DOM.bip39Invalid.classList.add('hidden');
+  }
+  adjustPanelHeight();
+};
+
+// const phraseChanged = () => {
+//   // Get the mnemonic phrase
+//   const phrase = normalizeString(DOM.bip39Phrase.value);
+//   const errorText = findPhraseErrors(phrase);
+//   showValidationError(errorText);
+//   if (errorText) {
+//     return;
+//   }
+//   // Calculate and display
+//   var passphrase = DOM.bip39Passphrase.value;
+//   // calcBip32RootKeyFromSeed(phrase, passphrase);
+//   // calcForDerivationPath();
+//   // calcBip85();
+//   // Show the word indexes
+//   showWordIndexes();
+//   writeSplitPhrase(phrase);
+// };
+
+const entropyChanged = async () => {
+  // debounce?
+  if (getEntropy().length === 0) {
+    resetEverything();
+    return;
+  }
+  // Get the current phrase to detect changes
+  const phrase = getPhrase();
+  // Set the phrase from the entropy
+  await setMnemonicFromEntropy();
+  // Recalculate addresses if the phrase has changed
+  const newPhrase = getPhrase();
+  if (newPhrase != phrase) {
+    if (newPhrase.length == 0) {
+      resetEverything();
+    } else {
+      mnemonicToSeedPopulate();
+    }
+  } else {
+    // hidePending();
+  }
+};
+
+const entropyTypeChanged = () => {
+  console.log('entropyTypeChanged :>> ', 'entropyTypeChanged');
+  entropyTypeAutoDetect = false;
+  entropyChanged();
+};
+
+const calculateEntropy = async () => {
   const unknown = 'Unknown';
-  const entropy = window.Entropy.fromString(DOM.entropyInput.value);
+  const input = getEntropy();
+  const entropy = window.Entropy.fromString(input);
+  const eventCount = entropy.base.events.length;
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
-  const bitsPerEvent = entropy.bitsPerEvent?.toFixed(2) || unknown;
+  const bitsPerEvent = entropy.base.bitsPerEvent?.toFixed(2) || unknown;
+  const biasedBits = Math.floor(bitsPerEvent * eventCount);
   const spacedBinaryStr = entropy.binaryStr
     ? addSpacesEveryElevenBits(entropy.binaryStr)
     : unknown;
@@ -508,24 +631,19 @@ const calculateEntropy = () => {
     console.log('Error detecting entropy strength with zxcvbn:');
     console.log(e);
   }
-
+  const reqWords = parseInt(DOM.entropyMnemonicLengthSelect.value);
   //
   DOM.entropyTimeToCrack.innerText = timeToCrack;
-  DOM.entropyEventCount.innerText = entropy.base.events.length;
+  DOM.entropyEventCount.innerText = eventCount;
   DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
+  DOM.entropyMethod.value = entropy.base.str;
   DOM.entropyBitsPerEvent.innerText = bitsPerEvent;
-  DOM.entropyRawWords.innerText = wordCount;
-  DOM.entropyTotalBits.innerText = numberOfBits;
-  DOM.entropyFiltered.innerText = entropy.cleanHtml;
+  DOM.entropyRawWords.innerText = wordCount + '/' + reqWords;
+  DOM.entropyTotalBits.innerText = `${numberOfBits}/${
+    (reqWords * 32) / 3
+  } (${biasedBits} with bias)`;
+  DOM.entropyFiltered.innerHTML = entropy.cleanHtml;
   DOM.entropyRawBinary.innerText = spacedBinaryStr;
-  DOM.entropyBinaryChecksum.innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // document.getElementById('entropyTimeToCrack').innerText = '... TODO ';
-  // detect and warn of filtering
   const rawNoSpaces = DOM.entropyInput.value.replace(/\s/g, '');
   const cleanNoSpaces = entropy.cleanStr.replace(/\s/g, '');
   const isFiltered = rawNoSpaces.length !== cleanNoSpaces.length;
@@ -537,6 +655,72 @@ const calculateEntropy = () => {
   showWordIndexes();
   showChecksum();
   writeSplitPhrase();
+};
+
+const hash = async (text, algo = 'SHA-256') => {
+  const msgUint8 = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest(algo, msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hex;
+};
+
+const setMnemonicFromEntropy = async () => {
+  clearEntropyFeedback();
+  // Get entropy value
+  const entropyStr = getEntropy();
+  // Work out minimum base for entropy
+  let entropy = null;
+  if (entropyTypeAutoDetect) {
+    entropy = window.Entropy.fromString(entropyStr);
+  } else {
+    const base = DOM.entropyMethod.value;
+    entropy = window.Entropy.fromString(entropyStr, base);
+  }
+  // No entropy, no seed
+  if (entropy.binaryStr.length == 0) {
+    return;
+  }
+  // Show entropy details
+  calculateEntropy(entropy);
+  // Use biased bits to allow 99 dice roll
+  const bits = Math.ceil(
+    entropy.base.bitsPerEvent * entropy.base.events.length
+  );
+  console.log('bits :>> ', bits);
+  const mnemonicLength = parseInt(DOM.entropyMnemonicLengthSelect.value);
+  // Refuse to make a seed with insufficient entropy
+  if ((mnemonicLength / 3) * 32 > bits) {
+    DOM.entropyWeakEntropyOverrideWarning.classList.remove('hidden');
+    return;
+  } else {
+    DOM.entropyWeakEntropyOverrideWarning.classList.add('hidden');
+  }
+  // Warn if user is relying on biased bits
+  if ((mnemonicLength / 3) * 32 > entropy.binaryStr.length) {
+    DOM.entropyWeakEntropyWarning.classList.remove('hidden');
+  } else {
+    DOM.entropyWeakEntropyWarning.classList.add('hidden');
+  }
+  // Get bits by hashing entropy with SHA256
+  let hex = await hash(entropyStr);
+  // make sure the hash is at least 64 chars long
+  // It should be but just in case
+  while (hex.length % 64 !== 0) {
+    hex = `0${hex}`;
+  }
+  const start = hex.length - (mnemonicLength * 8) / 3;
+  const hexedBin = hex.slice(start);
+  console.log('hexedBin :>> ', hexedBin);
+  // Convert entropy array to mnemonic
+  const phrase = window.bip39.entropyToMnemonic(hexedBin);
+  // Set the mnemonic in the UI
+  DOM.bip39Phrase.value = phrase;
+  writeSplitPhrase();
+  // Show the word indexes
+  showWordIndexes();
+  // Show the checksum
+  showChecksum();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -572,8 +756,22 @@ const getEntropyTypeStr = (entropy) => {
     }
     // Detect missing cards
     /* cSpell:disable */
-    const values = 'A23456789TJQK';
-    const suits = 'CDHS';
+    const values = [
+      'A',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'T',
+      'J',
+      'Q',
+      'K',
+    ];
+    const suits = ['C', 'D', 'H', 'S'];
     /* cSpell:ensable */
     const missingCards = [];
     suits.forEach((suit) => {
@@ -610,7 +808,7 @@ const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
 
 const phraseToWordArray = () => {
-  const phrase = DOM.bip39Phrase.value;
+  const phrase = normalizeString(DOM.bip39Phrase.value);
   const words = phrase.split(/\s/g);
   const noBlanks = [];
   for (let i = 0; i < words.length; i++) {
@@ -737,21 +935,24 @@ const writeSplitPhrase = async () => {
  * Called when mnemonic is updated
  */
 const mnemonicToSeedPopulate = debounce(() => {
-  const mnemonic = DOM.bip39Phrase.value;
-  const passphrase = DOM.bip39Passphrase.value || '';
+  const mnemonic = getPhrase();
+  const passphrase = getPassphrase();
   let seedHex = '';
   resetEverything();
   seed = null;
   // Test if valid
-  if (bip39.validateMnemonic(mnemonic)) {
-    DOM.bip39PhraseWarn.classList.add('hidden');
+  const errorText = findPhraseErrors(mnemonic);
+  showValidationError(errorText);
+  if (!errorText) {
     seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
     seedHex = seed.toString('hex');
   } else {
-    DOM.bip39PhraseWarn.classList.remove('hidden');
+    return;
   }
   DOM.bip39Seed.value = seedHex;
-  DOM.entropyInput.value = seedHex;
+  if (!DOM.bip39Phrase.readOnly) {
+    DOM.entropyInput.value = seedHex;
+  }
   calculateEntropy();
   if (seed) {
     const node = bip32.fromSeed(seed);
@@ -760,13 +961,30 @@ const mnemonicToSeedPopulate = debounce(() => {
     bip32RootKey = null;
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
+  adjustPanelHeight();
 }, 1000);
 
 const resetEverything = () => {
   seed = null;
   bip32RootKey = null;
   DOM.bip32RootKey.value = '';
-  DOM.entropyInput.value = '';
+  if (!DOM.bip39Phrase.readOnly) {
+    DOM.entropyInput.value = '';
+  }
+  clearEntropyFeedback();
+  DOM.bip39PhraseSplit.value = '';
+  DOM.bip39Seed.value = '';
+  DOM.bip44AccountXprv.value = '';
+  DOM.bip44AccountXpub.value = '';
+  DOM.bip85Application.value = 'bip39';
+  DOM.bip85MnemonicLength.value = '12';
+  DOM.bip85Bytes.value = '64';
+  DOM.bip85Index.value = '0';
+  DOM.bip85ChildKey.value = '';
+  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
+};
+
+const clearEntropyFeedback = () => {
   DOM.entropyTimeToCrack.innerText = '...';
   DOM.entropyEventCount.innerText = '...';
   DOM.entropyEntropyType.innerText = '...';
@@ -777,19 +995,5 @@ const resetEverything = () => {
   DOM.entropyRawBinary.innerText = '...';
   DOM.entropyBinaryChecksum.innerText = '...';
   DOM.entropyWordIndexes.innerText = '...';
-  DOM.entropyMnemonicLengthSelect.value = '12';
-  DOM.entropyPBKDF2Rounds.value = '2048';
-  DOM.pbkdf2CustomInput.value = '2048';
-  DOM.entropyMethod.value = 'binary';
-  DOM.bip39PhraseSplit.value = '';
-  DOM.bip39ShowSplitMnemonic.checked = false;
-  DOM.bip39Seed.value = '';
-  DOM.bip44AccountXprv.value = '';
-  DOM.bip44AccountXpub.value = '';
-  DOM.bip85Application.value = 'bip39';
-  DOM.bip85MnemonicLength.value = '12';
-  DOM.bip85Bytes.value = '64';
-  DOM.bip85Index.value = '0';
-  DOM.bip85ChildKey.value = '';
-  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
+  // DOM.entropyMethod.value = 'hex';
 };

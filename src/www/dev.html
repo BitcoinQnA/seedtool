@@ -179,28 +179,19 @@
             <div class="entropy-details--flex-item">
               <label>Mnemonic Length: </label>
               <select class="entropy-details--detail--select" id="entropyMnemonicLength">
-                <option value="raw" selected>Use Raw Entropy (3 words per 32 bits)</option>
-                <option value="12">12 <span>Words</span></option>
-                <option value="15">15 <span>Words</span></option>
-                <option value="18">18 <span>Words</span></option>
-                <option value="21">21 <span>Words</span></option>
-                <option value="24">24 <span>Words</span></option>
+                <option value="12" selected>12 Words</option>
+                <option value="15">15 Words</option>
+                <option value="18">18 Words</option>
+                <option value="21">21 Words</option>
+                <option value="24">24 Words</option>
               </select>
+              <span id="weakEntropyOverrideWarning" class="warning hidden">
+                Insufficient entropy provided to make a seed for your selected Mnemonic Length.
+              </span>
+              <span id="weakEntropyWarning" class="warning hidden">
+                Unbiased entropy is too low. More entropy is highly advised!
+              </span>
             </div>
-            <div class="entropy-details--flex-item">
-              <label>PBKDF2 rounds: </label>
-              <select class="entropy-details--detail--select" id="entropyPBKDF2Rounds" style="width: 60%;float: left;">
-                <option value="2048" selected>2048 <span>(compatibility)</span></option>
-                <option value="4096">4096 <span>iterations</span></option>
-                <option value="8192">8192 <span>iterations</span></option>
-                <option value="16384">16384 <span>iterations</span></option>
-                <option value="32768">32768 <span>iterations</span></option>
-                <option value="custom">Custom <span>iterations</span></option>
-              </select>
-              <input type="number" class="entropy-details--detail--input hidden" id="pbkdf2CustomInput" value="2048"
-                min="1" pattern="[0-9]" style="float: right;width: 40%;">
-            </div>
-
             <div class="entropy-details--flex-item">
               <label>Entropy method: </label>
               <select class="entropy-details--detail--select" id="entropyMethod">
@@ -245,6 +236,7 @@
         <div class="warning bip39-invalid-phrase hidden">
           <label>INVALID BIP39 SEED PHRASE</label>
           <div>
+            <span id="bip39ValidationError"></span>
             <span>The words require a specific format. Click on "More Information" above to learn about it.</span>
           </div>
         </div>
@@ -502,7 +494,8 @@
   <script src="js/lib/bip32.js"></script>
   <script src="js/lib/bip39.js"></script>
   <script src="js/info.js"></script>
-  <script src="js/entropy.js"></script>
+  <script src="js/lib/entropy.js"></script>
+  <script src="js/lib/levenshtein.js"></script>
   <script src="js/lib/zxcvbn.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;
