@@ -132,9 +132,9 @@ const setupDom = () => {
   DOM.bip44Account.oninput = changeBip44Path;
   DOM.bip44Change.oninput = changeBip44Path;
   // Add event listener for displaying/hiding entropy details
-  DOM.entropyDisplay.addEventListener('click', () => {
-    displayEntropy(DOM.entropyDisplay.checked);
-  });
+  // DOM.entropyDisplay.addEventListener('click', () => {
+  //   displayEntropy(DOM.entropyDisplay.checked);
+  // });
   // add event listener for entropy
   DOM.entropyInput.oninput = entropyChanged;
   DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
@@ -298,18 +298,18 @@ function toast(message) {
  * Display / Hide Entropy details
  * @param {boolean} checked Is the checkbox checked
  */
-function displayEntropy(checked) {
-  DOM.entropyDetailsContainer = document.getElementById(
-    'entropyDetailsContainer'
-  );
-  if (checked) {
-    // show details
-    DOM.entropyDetailsContainer.style.display = 'flex';
-  } else {
-    DOM.entropyDetailsContainer.style.display = 'none';
-  }
-  adjustPanelHeight();
-}
+// function displayEntropy(checked) {
+//   DOM.entropyDetailsContainer = document.getElementById(
+//     'entropyDetailsContainer'
+//   );
+//   if (checked) {
+//     // show details
+//     DOM.entropyDetailsContainer.style.display = 'flex';
+//   } else {
+//     DOM.entropyDetailsContainer.style.display = 'none';
+//   }
+//   adjustPanelHeight();
+// }
 /**
  * Whenever some CSS changes in an accordion panel, call this to fix the panel
  */
@@ -606,18 +606,17 @@ const entropyTypeChanged = () => {
 };
 
 const calculateEntropy = async () => {
-  const unknown = 'Unknown';
   const input = getEntropy();
   const entropy = window.Entropy.fromString(input);
   const eventCount = entropy.base.events.length;
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
-  const bitsPerEvent = entropy.base.bitsPerEvent?.toFixed(2) || unknown;
+  const bitsPerEvent = entropy.base.bitsPerEvent?.toFixed(2) || '';
   const biasedBits = Math.floor(bitsPerEvent * eventCount);
   const spacedBinaryStr = entropy.binaryStr
     ? addSpacesEveryElevenBits(entropy.binaryStr)
-    : unknown;
-  let timeToCrack = unknown;
+    : '';
+  let timeToCrack = '';
   try {
     const z = window.zxcvbn(entropy.base.events.join(''));
     timeToCrack = z.crack_times_display.offline_fast_hashing_1e10_per_second;

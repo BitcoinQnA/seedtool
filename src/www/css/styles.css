@@ -96,7 +96,7 @@ textarea {
 }
 .accordion.accordion--active,
 .accordion:hover {
-  background-color: var(--q-blue);
+  background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
 .panel {
@@ -154,11 +154,12 @@ textarea {
   border: 1px solid var(--q-white);
   border-top: none;
 }
-.entropy-details--flex-container {
+/* .entropy-details--flex-container {
   display: none;
-}
+} */
 .entropy-details--flex-container,
 .bip85-flex-container {
+  display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;
 }
