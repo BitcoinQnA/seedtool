@@ -26,6 +26,7 @@ const DOM = {};
 const setupDom = () => {
   DOM.accordionButtons = document.querySelectorAll('.accordion');
   DOM.accordionPanels = document.querySelectorAll('.panel');
+  DOM.aboutPanel = document.getElementById('aboutPanel');
   DOM.allTabContents = document.querySelectorAll('.tabContent');
   DOM.allTabLinks = document.querySelectorAll('.tabLinks');
   DOM.generateRandomStrengthSelect = document.getElementById(
@@ -144,10 +145,8 @@ const setupDom = () => {
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // update pointer to word list
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
-  // add fake csv for testing
-  // injectAddresses(testAddressData, 'bip47');
-  // injectAddresses(testAddressData, 'bip49');
-  // injectAddresses(testAddressData, 'bip84');
+  // open the about panel on load
+  DOM.aboutPanel.click();
 };
 
 // Run setupDom function when the page has loaded
