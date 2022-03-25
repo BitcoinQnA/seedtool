@@ -350,16 +350,19 @@
               <th>Purpose</th>
               <th>Coin</th>
               <th>Account</th>
-              <th>External / Internal</th>
+              <th>Receive / Change</th>
             </tr>
             <tr>
               <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
               <td><select name="bip44Coin" id="bip44Coin">
-                  <option value="0">0 (Bitcoin)</option>
+                  <option value="0" selected>0 (Bitcoin)</option>
                   <option value="1">1 (Bitcoin TESTNET)</option>
                 </select></td>
-              <td><input id="bip44Account" type="text" class="bip44-text-input bip44-account" value="0"></td>
-              <td><input id="bip44Change" type="text" class="bip44-text-input bip44Change" value="0"></td>
+              <td><input id="bip44Account" type="number" min="0" class="bip44-text-input bip44-account" value="0"></td>
+              <td><select name="bip44Change" id="bip44Change">
+                  <option value="0" selected>0 (Receive)</option>
+                  <option value="1">1 (Change)</option>
+                </select></td>
             </tr>
           </table>
           <div>

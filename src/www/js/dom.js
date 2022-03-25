@@ -354,6 +354,7 @@ const changeBip44Path = () => {
   const change = DOM.bip44Change.value;
   const path = `m/44'/${coin}'/${account}'/${change}`;
   DOM.bip44Path.value = path;
+  calculateAddresses();
 };
 /**
  * Class representing address data
@@ -420,8 +421,8 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   }
   const node = bip32RootKey;
   const path = {
-    bip32: () => `m/0'/0'/`,
-    bip44: () => DOM.bip44Path.value + '/',
+    bip32: (i) => `m/0'/0'/${i}'`,
+    bip44: (i) => `${DOM.bip44Path.value}/${i}`,
     bip47: () => false,
     bip49: () => false,
     bip84: () => false,
@@ -435,7 +436,7 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   // const node = bip32.fromSeed(seed);
   const addressDataArray = [];
   for (let i = startIndex; i <= endIndex; i++) {
-    const addressPath = path[bip]() + i + `'`;
+    const addressPath = path[bip](i);
     const addressNode = node.derivePath(addressPath);
     const address = getAddress(addressNode);
     const addressPubKey = addressNode.publicKey.toString('hex');
