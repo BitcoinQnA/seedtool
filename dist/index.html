@@ -126,7 +126,8 @@ textarea {
 .tiny {
   font-size: xx-small;
 }
-.tab {
+.tab,
+.tabBips {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
@@ -135,19 +136,26 @@ textarea {
   height: 50px;
 }
 .tab button,
+.tabBips button,
 .tab-addresses button {
   background-color: inherit;
+  color: var(--q-white);
   float: left;
   border: none;
   outline: none;
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
-  width: calc(100% / 2);
 }
-.tab-addresses button {
+.tabBips button {
+  width: 20%;
+}
+.tab-addresses button,
+.tab button {
   width: 50%;
 }
+.tabBips button:hover,
+.tabBips button.tab--active,
 .tab button:hover,
 .tab button.tab--active,
 .tab-addresses button:hover,
@@ -435,11 +443,11 @@ footer {
         </p>
       </div>
       <hr>
-      <button class="accordion">Seed Generation/Input - BIP32: Hierarchical Deterministic Wallets</button>
+      <button class="accordion">Seed Generation/Input</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP32')">More Info</button>
         <ul style="list-style-type: none; padding-inline-start: 0;">
-          <li>🤖 Generate a cryptographically strong + random mnemonic</li>
+          <li>🤖 Generate a cryptographically strong random mnemonic</li>
           <!-- <li>⌨️ Enter an existing BIP39 mnemonic</li> -->
           <li>🎲 Enter in your own entropy</li>
         </ul>
@@ -579,16 +587,7 @@ footer {
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
-        <p>
-          Note these addresses are derived from the BIP32 Extended Key
-        </p>
-        <div class="derived-addresses-block-bip32">
-
-        </div>
-      </div>
-      <hr>
-      <button class="accordion">BIP39: Mnemonic code for generating deterministic keys</button>
-      <div class="panel">
+        <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
         <button class="btn" onclick="openInfoModal(event, 'BIP39')">More Info</button>
         <div class="warning PBKDF2-infos-danger hidden">
           <label>Warning</label>
@@ -646,71 +645,10 @@ footer {
         </div>
       </div>
       <hr>
-      <button class="accordion">BIP44: Multi-Account Hierarchy for Deterministic Wallets</button>
-      <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button>
-        <table>
-          <tr>
-            <th>Purpose</th>
-            <th>Coin</th>
-            <th>Account</th>
-            <th>External / Internal</th>
-          </tr>
-          <tr>
-            <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
-            <td><select name="bip44Coin" id="bip44Coin">
-                <option value="0">0 (Bitcoin)</option>
-                <option value="1">1 (Bitcoin TESTNET)</option>
-              </select></td>
-            <td><input id="bip44Account" type="text" class="bip44-text-input bip44-account" value="0"></td>
-            <td><input id="bip44Change" type="text" class="bip44-text-input bip44Change" value="0"></td>
-          </tr>
-        </table>
-        <div>
-          <p>The account extended keys can be used for importing to most BIP44 compatible
-            wallets, such as mycelium or electrum.</p>
-        </div>
-        <label for="bip44AccountXprv" class="col-sm-2 control-label">
-          <span>Account Extended Private Key</span>
-        </label>
-        <textarea id="bip44AccountXprv" type="text" class="account-xprv private-data form-control" readonly data-show-qr
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-        <label for="bip44AccountXpub" class="col-sm-2 control-label">
-          <span>Account Extended Public Key</span>
-        </label>
-        <textarea id="bip44AccountXpub" type="text" class="account-xpub form-control" readonly data-show-qr
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-        <div class="col-sm-10">
-          <p>The BIP32 derivation path and extended keys are the basis for the derived
-            addresses.</p>
-        </div>
-        <label for="bip44Path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
-        <input id="bip44Path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
-        <div class="derived-addresses-block-bip44">
-
-        </div>
-      </div>
-      <hr>
       <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
         <div class="derived-addresses-block-bip47">
-
-        </div>
-      </div>
-      <hr>
-      <button class="accordion">BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</button>
-      <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP49')">More Info</button>
-        <div class="derived-addresses-block-bip49">
-
-        </div>
-      </div>
-      <hr>
-      <button class="accordion">BIP84: Derivation scheme for P2WPKH based accounts</button>
-      <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP84')">More Info</button>
-        <div class="derived-addresses-block-bip84">
 
         </div>
       </div>
@@ -761,9 +699,103 @@ footer {
         </div>
       </div>
       <hr>
-      <button class="accordion">BIP141: Segregated Witness (Consensus layer)</button>
+      <button class="accordion">Derived Addresses</button>
       <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP141')">More Info</button>
+        <div class="tabBips">
+          <button class="tabLinksBips" id="defaultOpenTabBips" onclick="tabSelectBips(event, 'bip32')">BIP32</button>
+          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip44')">BIP44</button>
+          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip49')">BIP49</button>
+          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip84')">BIP84</button>
+          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip141')">BIP141</button>
+        </div>
+        <section id="bip32AddressSection" class="hidden tabBipsContent">
+          <h4>BIP32: Hierarchical Deterministic Wallets</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button>
+          <p>Path: <span>m/0'/0'</span></p>
+          <label for="bip32AccountXprv">
+            <span>Account Extended Private Key</span>
+          </label>
+          <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data" readonly autocomplete="off"
+            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <label for="bip32AccountXpub">
+            <span>Account Extended Public Key</span>
+          </label>
+          <textarea id="bip32AccountXpub" type="text" class="account-xpub" readonly autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false"></textarea>
+          <p>
+            Note these addresses are derived from the BIP32 Extended Key
+          </p>
+        </section>
+        <section id="bip44AddressSection" class="hidden tabBipsContent">
+          <h4>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button>
+          <table>
+            <tr>
+              <th>Purpose</th>
+              <th>Coin</th>
+              <th>Account</th>
+              <th>External / Internal</th>
+            </tr>
+            <tr>
+              <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
+              <td><select name="bip44Coin" id="bip44Coin">
+                  <option value="0">0 (Bitcoin)</option>
+                  <option value="1">1 (Bitcoin TESTNET)</option>
+                </select></td>
+              <td><input id="bip44Account" type="text" class="bip44-text-input bip44-account" value="0"></td>
+              <td><input id="bip44Change" type="text" class="bip44-text-input bip44Change" value="0"></td>
+            </tr>
+          </table>
+          <div>
+            <p>The account extended keys can be used for importing to most BIP44 compatible
+              wallets, such as mycelium or electrum.</p>
+          </div>
+          <label for="bip44AccountXprv" class="col-sm-2 control-label">
+            <span>Account Extended Private Key</span>
+          </label>
+          <textarea id="bip44AccountXprv" type="text" class="account-xprv private-data form-control" readonly
+            data-show-qr autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <label for="bip44AccountXpub" class="col-sm-2 control-label">
+            <span>Account Extended Public Key</span>
+          </label>
+          <textarea id="bip44AccountXpub" type="text" class="account-xpub form-control" readonly data-show-qr
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <div class="col-sm-10">
+            <p>The BIP32 derivation path and extended keys are the basis for the derived
+              addresses.</p>
+          </div>
+          <label for="bip44Path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
+          <input id="bip44Path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
+        </section>
+        <section id="bip49AddressSection" class="hidden tabBipsContent">
+          <h4>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP49')">More Info</button>
+        </section>
+        <section id="bip84AddressSection" class="hidden tabBipsContent">
+          <h4>BIP84: Derivation scheme for P2WPKH based accounts</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP84')">More Info</button>
+        </section>
+        <section id="bip141AddressSection" class="hidden tabBipsContent">
+          <h4>BIP141: Segregated Witness (Consensus layer)</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP141')">More Info</button>
+        </section>
+        <div>
+          <div>
+            <a class="csv-download-link hidden" href="data:text/csv;charset=utf-8,path,address,public key,private key"
+              target="_blank">Download CSV
+              file</a>
+          </div>
+          <div class="address-display address-display-content">
+            <!-- Populated By JavaScript -->
+          </div>
+          <div>
+            <span>Display addresses from index </span>
+            <input type="number" class="address-start-index" value="0">
+            <span>to index </span>
+            <input type="number" class="address-end-index" value="19">
+            <button class="address-button-generate btn">GENERATE</button>
+          </div>
+        </div>
       </div>
       <hr>
       <button class="accordion">Credits and licenses</button>
@@ -839,6 +871,7 @@ footer {
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
+let currentBip = 'bip32';
 // let network = bitcoin.networks.bitcoin;
 let wordList = [];
 let showIndex = true;
@@ -864,6 +897,8 @@ const setupDom = () => {
   DOM.aboutPanel = document.getElementById('aboutPanel');
   DOM.allTabContents = document.querySelectorAll('.tabContent');
   DOM.allTabLinks = document.querySelectorAll('.tabLinks');
+  DOM.allTabLinksBips = document.querySelectorAll('.tabLinksBips');
+  DOM.allTabBipsContents = document.querySelectorAll('.tabBipsContent');
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
@@ -914,7 +949,11 @@ const setupDom = () => {
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
   DOM.bip85Index = document.getElementById('bip85Index');
   DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
-
+  DOM.csvDownloadLink = document.querySelector('.csv-download-link');
+  DOM.addressListContainer = document.querySelector('.address-display-content');
+  DOM.addressGenerateButton = document.querySelector(
+    '.address-button-generate'
+  );
   // Show / hide split mnemonic cards
   DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
     if (DOM.bip39ShowSplitMnemonic.checked) {
@@ -927,6 +966,9 @@ const setupDom = () => {
 
   // listen for if entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
+
+  // listen for address generate button clicks
+  DOM.addressGenerateButton.onclick = generateAddresses;
 
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
@@ -952,6 +994,8 @@ const setupDom = () => {
   });
   // Make sure that the generate seed tab is open
   document.getElementById('defaultOpenTab').click();
+  // Make sure that the bip32 tab is open
+  document.getElementById('defaultOpenTabBips').click();
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
     textElement.addEventListener('click', (event) => {
@@ -960,8 +1004,6 @@ const setupDom = () => {
       copyTextToClipboard(text);
     });
   });
-  // add template for derived addresses
-  addDerivedAddressBlocks();
   // add listener for bip44 path inputs
   DOM.bip44Coin.oninput = changeBip44Path;
   DOM.bip44Account.oninput = changeBip44Path;
@@ -1034,6 +1076,20 @@ window.tabSelect = (event, tabId) => {
   } else {
     DOM.bip39Phrase.removeAttribute('readonly');
   }
+  adjustPanelHeight();
+};
+// Event handler for switching tabs
+window.tabSelectBips = (event, tabId) => {
+  DOM.allTabBipsContents.forEach((contentElement) => {
+    contentElement.style.display = 'none';
+  });
+  DOM.allTabLinksBips.forEach((tabLink) => {
+    tabLink.classList.remove('tab--active');
+  });
+  document.getElementById(tabId + 'AddressSection').style.display = 'block';
+  event.currentTarget.classList.add('tab--active');
+  currentBip = tabId;
+  calculateAddresses();
   adjustPanelHeight();
 };
 /**
@@ -1167,38 +1223,6 @@ const changeBip44Path = () => {
   DOM.bip44Path.value = path;
 };
 /**
- * Add derived address blocks to each section
- */
-const addDerivedAddressBlocks = () => {
-  const bips = ['bip32', 'bip44', 'bip47', 'bip49', 'bip84'];
-  // Ensure not internet explorer!
-  if (!('content' in document.createElement('template'))) {
-    throw new Error(
-      'Browser Outdated! Unable to populate address list and generate csv.'
-    );
-  }
-  bips.forEach((bip) => {
-    const container = document.querySelector('.derived-addresses-block-' + bip);
-    const template = document.querySelector('#derivedAddressTemplate');
-    const clone = template.content.firstElementChild.cloneNode(true);
-    if (!container || !template || !clone) {
-      console.error('Unable to insert Address block template for ' + bip);
-      return;
-    }
-    const gen = clone.querySelector('button');
-    gen.id = bip + 'GenerateBtn';
-    gen.addEventListener('click', generateAddresses);
-    const a = clone.querySelector('a');
-    a.className = bip + '-csv-download-link';
-    a.download = bip + '_addresses.csv';
-    a.classList.add('hidden');
-    clone
-      .querySelector('.address-display-content')
-      .classList.add(bip + '-address-display-content--list');
-    container.appendChild(clone);
-  });
-};
-/**
  * Class representing address data
  * Used to populate address lists
  */
@@ -1222,23 +1246,13 @@ class AddressData {
  * @param {AddressData[]} addressDataArray - an array of AddressData objects.
  * @param {string} addressListName - a string saying which address list to populate. e.g. 'bip32'
  */
-const injectAddresses = (addressDataArray, addressListName) => {
+const injectAddresses = (addressDataArray) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
 `;
   // declare DOM elements
-  const a = document.querySelector(`.${addressListName}-csv-download-link`);
-  a.classList.remove('hidden');
-  const listContainer = document.querySelector(
-    `.${addressListName}-address-display-content--list`
-  );
+  DOM.csvDownloadLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
-  // check we have the DOM elements
-  if (!listContainer || !template || !a) {
-    throw new Error(
-      'Address container not found! Unable to populate list and generate csv.'
-    );
-  }
   // Ensure not internet explorer!
   if (!('content' in document.createElement('template'))) {
     throw new Error(
@@ -1259,23 +1273,19 @@ const injectAddresses = (addressDataArray, addressListName) => {
       }
     }
     // Add the clone to the DOM
-    listContainer.appendChild(clone);
+    DOM.addressListContainer.appendChild(clone);
     adjustPanelHeight();
   });
-  a.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
+  DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
-const calculateAddresses = (bip, startIndex = 0, endIndex = 19) => {
-  clearAddresses(bip);
+const calculateAddresses = (startIndex = 0, endIndex = 19) => {
+  const bip = currentBip;
+  clearAddresses();
   if (!bip32RootKey) {
-    console.error('Unable to generate addresses while bip32RootKey is null');
     return;
   }
   const node = bip32RootKey;
-  // console.log(seed);
-  // if (!seed) {
-  //   return;
-  // }
   const path = {
     bip32: () => `m/0'/0'/`,
     bip44: () => DOM.bip44Path.value + '/',
@@ -1306,7 +1316,7 @@ const calculateAddresses = (bip, startIndex = 0, endIndex = 19) => {
       addressPrivKey
     );
   }
-  injectAddresses(addressDataArray, bip);
+  injectAddresses(addressDataArray);
 };
 
 const generateAddresses = (event) => {
@@ -1318,17 +1328,13 @@ const generateAddresses = (event) => {
   const endIndex =
     parseInt(parentEl.querySelector('.address-end-index')?.value) || 19;
   const bip = btn.id.replace('GenerateBtn', '');
-  calculateAddresses(bip, startIndex, endIndex);
+  calculateAddresses(startIndex, endIndex);
 };
 
-const clearAddresses = (bip) => {
-  const a = document.querySelector(`.${bip}-csv-download-link`);
-  a.classList.add('hidden');
-  const listContainer = document.querySelector(
-    `.${bip}-address-display-content--list`
-  );
-  while (listContainer.firstChild) {
-    listContainer.removeChild(listContainer.firstChild);
+const clearAddresses = () => {
+  DOM.csvDownloadLink.classList.add('hidden');
+  while (DOM.addressListContainer.firstChild) {
+    DOM.addressListContainer.removeChild(DOM.addressListContainer.firstChild);
   }
   adjustPanelHeight();
 };
@@ -1435,7 +1441,6 @@ const entropyChanged = async () => {
 };
 
 const entropyTypeChanged = () => {
-  console.log('entropyTypeChanged :>> ', 'entropyTypeChanged');
   entropyTypeAutoDetect = false;
   entropyChanged();
 };
@@ -1513,12 +1518,11 @@ const setMnemonicFromEntropy = async () => {
     return;
   }
   // Show entropy details
-  calculateEntropy(entropy);
+  await calculateEntropy(entropy);
   // Use biased bits to allow 99 dice roll
   const bits = Math.ceil(
     entropy.base.bitsPerEvent * entropy.base.events.length
   );
-  console.log('bits :>> ', bits);
   const mnemonicLength = parseInt(DOM.entropyMnemonicLengthSelect.value);
   // Refuse to make a seed with insufficient entropy
   if ((mnemonicLength / 3) * 32 > bits) {
@@ -1542,7 +1546,6 @@ const setMnemonicFromEntropy = async () => {
   }
   const start = hex.length - (mnemonicLength * 8) / 3;
   const hexedBin = hex.slice(start);
-  console.log('hexedBin :>> ', hexedBin);
   // Convert entropy array to mnemonic
   const phrase = window.bip39.entropyToMnemonic(hexedBin);
   // Set the mnemonic in the UI
@@ -1552,6 +1555,8 @@ const setMnemonicFromEntropy = async () => {
   showWordIndexes();
   // Show the checksum
   showChecksum();
+  // Calculate addresses
+  calculateAddresses();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -1765,7 +1770,7 @@ const writeSplitPhrase = async () => {
 /**
  * Called when mnemonic is updated
  */
-const mnemonicToSeedPopulate = debounce(() => {
+const mnemonicToSeedPopulate = debounce(async () => {
   const mnemonic = getPhrase();
   const passphrase = getPassphrase();
   let seedHex = '';
@@ -1784,7 +1789,7 @@ const mnemonicToSeedPopulate = debounce(() => {
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = seedHex;
   }
-  calculateEntropy();
+  await calculateEntropy();
   if (seed) {
     const node = bip32.fromSeed(seed);
     bip32RootKey = node;
@@ -1793,6 +1798,9 @@ const mnemonicToSeedPopulate = debounce(() => {
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
   adjustPanelHeight();
+  if (bip32RootKey) {
+    calculateAddresses();
+  }
 }, 1000);
 
 const resetEverything = () => {
