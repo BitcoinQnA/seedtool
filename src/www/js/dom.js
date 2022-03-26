@@ -6,6 +6,7 @@ let bip32RootKey = null;
 let bip32ExtendedKey = null;
 let currentBip = 'bip32';
 let network;
+let isTestnet = false;
 let wordList = [];
 let showIndex = true;
 let showAddress = true;
@@ -20,6 +21,55 @@ let seedChangedTimeoutEvent = null;
 let rootKeyChangedTimeoutEvent = null;
 
 const generationProcesses = [];
+const networks = {
+  bitcoin: {
+    bip49: {
+      messagePrefix: '\x18Bitcoin Signed Message:\n',
+      bip32: {
+        public: 0x049d7cb2,
+        private: 0x049d7878,
+      },
+      pubKeyHash: 0x00,
+      scriptHash: 0x05,
+      wif: 0x80,
+    },
+    bip84: {
+      messagePrefix: '\x18Bitcoin Signed Message:\n',
+      bech32: 'bc',
+      bip32: {
+        public: 0x04b24746,
+        private: 0x04b2430c,
+      },
+      pubKeyHash: 0x00,
+      scriptHash: 0x05,
+      wif: 0x80,
+    },
+  },
+  testnet: {
+    bip49: {
+      messagePrefix: '\x18Bitcoin Signed Message:\n',
+      bip32: {
+        public: 0x044a5262,
+        private: 0x044a4e28,
+      },
+      pubKeyHash: 0x6f,
+      scriptHash: 0xc4,
+      wif: 0xef,
+    },
+    bip84: {
+      messagePrefix: '\x18Bitcoin Signed Message:\n',
+      bech32: 'tb',
+      bip32: {
+        public: 0x045f1cf6,
+        private: 0x045f18bc,
+      },
+      pubKeyHash: 0x6f,
+      scriptHash: 0xc4,
+      wif: 0xef,
+    },
+  },
+};
+
 /**
  * Setup the DOM for interaction
  */
@@ -394,6 +444,7 @@ const changePath = () => {
   const coin = DOM.pathCoin.value;
   const account = DOM.pathAccount.value;
   const change = DOM.pathChange.value;
+  isTestnet = coin === '1';
   DOM.path.value = `m/${purpose}'/${coin}'/${account}'/${change}`;
   calculateAddresses();
   fillBip32Keys();
@@ -514,6 +565,23 @@ const clearAddresses = () => {
 const fillBip32Keys = () => {
   console.log('bip32RootKey :>> ', bip32RootKey);
   if (!bip32RootKey) return;
+  if (currentBip === 'bip49' || currentBip === 'bip84') {
+    if (isTestnet) {
+      network = networks.testnet[currentBip];
+      bip32RootKey.network = networks.testnet[currentBip];
+    } else {
+      network = networks.bitcoin[currentBip];
+      bip32RootKey.network = networks.bitcoin[currentBip];
+    }
+  } else {
+    if (isTestnet) {
+      network = bitcoin.networks.testnet;
+      bip32RootKey.network = bitcoin.networks.testnet;
+    } else {
+      network = bitcoin.networks.bitcoin;
+      bip32RootKey.network = bitcoin.networks.bitcoin;
+    }
+  }
   bip32ExtendedKey = bip32RootKey.derivePath(DOM.path.value);
   DOM.bip32AccountXprv.value = bip32ExtendedKey.toBase58();
   DOM.bip32AccountXpub.value = bip32ExtendedKey.neutered().toBase58();
