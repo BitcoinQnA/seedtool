@@ -264,9 +264,60 @@
       <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
-        <div class="derived-addresses-block-bip47">
-
+        <label><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work offline)</label>
+        <h4>My Details</h4>
+        <div>
+          <label for="bip47MyPaymentCode">Payment Code</label>
+          <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"></textarea>
         </div>
+        <div>
+          <label for="bip47MyNotificationAddress">Notification Address</label>
+          <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+        </div>
+        <div>
+          <label for="bip47MyNotificationPubKey">Notification Public Key (HEX)</label>
+          <textarea id="bip47MyNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+        </div>
+        <div>
+          <label for="bip47MyNotificationPrvKey">Notification Private Key (WIF)</label>
+          <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
+        </div>
+        <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
+        <h4>Counterparty Details</h4>
+        <div>
+          <label for="bip47CPPaymentCode">Payment Code</label>
+          <textarea id="bip47CPPaymentCode" class="textarea-input" rows="3"></textarea>
+        </div>
+        <section id="bip47CPGenSection" class="hidden">
+          <div>
+            <label for="bip47CPNotificationAddress">Notification Address</label>
+            <textarea id="bip47CPNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+          </div>
+          <div>
+            <label for="bip47CPNotificationPubKey">Notification Public Key (HEX)</label>
+            <textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+          </div>
+          <div class="hidden">
+            <p>
+              Note these addresses are derived from the BIP32 Extended Key
+            </p>
+            <div>
+              <a class="bip47-csv-download-link hidden"
+                href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
+                file</a>
+            </div>
+            <div class="bip47-address-display bip47-address-display-content">
+              <!-- Populated By JavaScript -->
+            </div>
+            <div>
+              <span>Display addresses from index </span>
+              <input type="number" class="bip47-address-start-index" value="0">
+              <span>to index </span>
+              <input type="number" class="bip47-address-end-index" value="19">
+              <button class="bip47-address-button-generate btn">GENERATE</button>
+            </div>
+          </div>
+        </section>
       </div>
       <hr>
       <button class="accordion">BIP85: Deterministic Entropy From BIP32 Keychains</button>
@@ -509,6 +560,7 @@
   <script src="js/lib/bitcoin.js"></script>
   <script src="js/lib/bip32.js"></script>
   <script src="js/lib/bip39.js"></script>
+  <script src="js/lib/bip47.js"></script>
   <script src="js/lib/bip85.js"></script>
   <script src="js/info.js"></script>
   <script src="js/lib/entropy.js"></script>

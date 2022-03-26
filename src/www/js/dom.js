@@ -133,6 +133,35 @@ const setupDom = () => {
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
   DOM.bip85Index = document.getElementById('bip85Index');
   DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+  DOM.bip47UsePaynym = document.getElementById('bip47UsePaynym');
+  DOM.bip47MyPaymentCode = document.getElementById('bip47MyPaymentCode');
+  DOM.bip47MyNotificationAddress = document.getElementById(
+    'bip47MyNotificationAddress'
+  );
+  DOM.bip47MyNotificationPubKey = document.getElementById(
+    'bip47MyNotificationPubKey'
+  );
+  DOM.bip47MyNotificationPrvKey = document.getElementById(
+    'bip47MyNotificationPrvKey'
+  );
+  DOM.bip47PaynymSection = document.getElementById('bip47PaynymSection');
+  DOM.bip47CPPaymentCode = document.getElementById('bip47CPPaymentCode');
+  DOM.bip47CPGenSection = document.getElementById('bip47CPGenSection');
+  DOM.bip47CPNotificationAddress = document.getElementById(
+    'bip47CPNotificationAddress'
+  );
+  DOM.bip47CPNotificationPubKey = document.getElementById(
+    'bip47CPNotificationPubKey'
+  );
+  DOM.bip47CsvDownloadLink = document.querySelector('.bip47-csv-download-link');
+  DOM.bip47AddressListContainer = document.querySelector(
+    '.bip47-address-display-content'
+  );
+  DOM.bip47IndexStart = document.querySelector('.bip47-address-start-index');
+  DOM.bip47IndexEnd = document.querySelector('.bip47-address-end-index');
+  DOM.bip47AddressGenerateButton = document.querySelector(
+    '.bip47-address-button-generate'
+  );
   DOM.csvDownloadLink = document.querySelector('.csv-download-link');
   DOM.addressListContainer = document.querySelector('.address-display-content');
   DOM.addressGenerateButton = document.querySelector(
@@ -165,6 +194,9 @@ const setupDom = () => {
   // listen for change in derivedPathSelect
   DOM.derivedPathSelect.oninput = derivedPathSelectChanged;
   derivedPathSelectChanged();
+  // listen for bip47 changes
+  DOM.bip47UsePaynym.oninput = togglePaynym;
+  DOM.bip47CPPaymentCode.oninput = calcBip47CounterParty;
   // listen for bip85 changes
   DOM.bip85Application.oninput = calcBip85;
   DOM.bip85MnemonicLength.oninput = calcBip85;
@@ -226,6 +258,57 @@ const setupDom = () => {
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
+
+// BIP47 functions
+const pc = () => {
+  DOM.bip47CPPaymentCode.value =
+    'PM8TJRjLzoTJ3ehbg4WaGjQ3sa2V7LqhYJqRQooTfC1fVfEpTMiqr2wDcBioUY5FdRNDqHwpFjNTMUAenu3Vi59VStPDx32VHvARmnwhLRt8SRjkXU3g';
+};
+
+const togglePaynym = () => {
+  if (DOM.bip47UsePaynym.checked) {
+    DOM.bip47PaynymSection.classList.remove('hidden');
+  } else {
+    DOM.bip47PaynymSection.classList.add('hidden');
+  }
+};
+const calcBip47 = () => {
+  if (!getPhrase()) return;
+  const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
+  const myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
+  const myNotify = myPayCode.derive(0);
+  const myPrvKey = myNotify.privateKey;
+  const myPubKey = myNotify.publicKey;
+  const myNotificationAddress = myPayCode.getNotificationAddress();
+  DOM.bip47MyPaymentCode.value = myPayCode.toBase58();
+  DOM.bip47MyNotificationAddress.value = myNotificationAddress;
+  DOM.bip47MyNotificationPrvKey.value =
+    bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
+  DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
+};
+const isValidPaymentCode = (paymentCode) => {
+  try {
+    bip47.fromBase58(paymentCode, network);
+    return true;
+  } catch (_error) {
+    return false;
+  }
+};
+const calcBip47CounterParty = () => {
+  const bobPcBase58 = normalizeString(DOM.bip47CPPaymentCode.value);
+  if (!isValidPaymentCode(bobPcBase58)) {
+    DOM.bip47CPGenSection.classList.add('hidden');
+    adjustPanelHeight();
+    return;
+  }
+  DOM.bip47CPGenSection.classList.remove('hidden');
+  adjustPanelHeight();
+  const bobPc = bip47.fromBase58(bobPcBase58, network);
+  const bobNotifyPubKey = bobPc.derive(0).publicKey;
+  const bobNotifyAddress = bobPc.getNotificationAddress();
+  DOM.bip47CPNotificationAddress.value = bobNotifyAddress;
+  DOM.bip47CPNotificationPubKey.value = bobNotifyPubKey.toString('hex');
+};
 
 function getAddress(node) {
   if (currentBip === 'bip49') {
@@ -860,6 +943,7 @@ const setMnemonicFromEntropy = async () => {
   calculateAddresses();
   fillBip32Keys();
   calcBip85();
+  calcBip47();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -1105,6 +1189,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
     calculateAddresses();
     fillBip32Keys();
     calcBip85();
+    calcBip47();
   }
 }, 1000);
 
