@@ -206,6 +206,13 @@ textarea {
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
+#bip141ScriptSemantics,
+#derivedPathSelect {
+  width: 100%;
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
+  padding: 8px;
+}
 .info-button {
   background-color: var(--q-blue);
   color: var(--q-orange);

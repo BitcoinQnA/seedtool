@@ -199,7 +199,7 @@
         <div>
           <label for="root-key">BIP32 Root Key</label>
           <div>
-            <textarea id="bip32RootKey" class="root-key private-data textarea-input" data-show-qr autocomplete="off"
+            <textarea id="bip32RootKey" class="root-key private-data textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
@@ -222,8 +222,8 @@
         <div>
           <label for="bip39Phrase">BIP39 Mnemonic (English)</label>
           <div>
-            <textarea id="bip39Phrase" class="phrase private-data textarea-input" data-show-qr autocomplete="off"
-              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <textarea id="bip39Phrase" class="phrase private-data textarea-input" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
@@ -237,8 +237,8 @@
         <div>
           <label for="bip39Seed">BIP39 Seed</label>
           <div>
-            <textarea id="bip39Seed" class="seed private-data textarea-input" data-show-qr autocomplete="off"
-              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <textarea id="bip39Seed" class="seed private-data textarea-input" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
@@ -309,42 +309,45 @@
 
           <div class="bip85-flex-child bip85">
             <label for="bip85ChildKey">BIP85 Child Key</label>
-            <textarea id="bip85ChildKey" data-show-qr class="bip85Field textarea-input private-data"
-              title="BIP85 Child Key" rows="3"></textarea>
+            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" title="BIP85 Child Key"
+              rows="3"></textarea>
           </div>
         </div>
       </div>
       <hr>
       <button class="accordion">Derived Addresses</button>
       <div class="panel">
-        <div class="tabBips">
-          <button class="tabLinksBips" id="defaultOpenTabBips" onclick="tabSelectBips(event, 'bip32')">BIP32</button>
-          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip44')">BIP44</button>
-          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip49')">BIP49</button>
-          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip84')">BIP84</button>
-          <button class="tabLinksBips" onclick="tabSelectBips(event, 'bip141')">BIP141</button>
-        </div>
-        <section id="bip32AddressSection" class="hidden tabBipsContent">
+        <br>
+        <select id="derivedPathSelect">
+          <option value="bip32" selected>BIP32</option>
+          <option value="bip44">BIP44</option>
+          <option value="bip49">BIP49</option>
+          <option value="bip84">BIP84</option>
+          <option value="bip141">BIP141</option>
+          <option value="custom">Custom Path</option>
+        </select>
+        <section id="bip32AddressSection" class="bipsContent">
           <h4>BIP32: Hierarchical Deterministic Wallets</h4>
-          <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button>
-          <p>Path: <span>m/0'/0'</span></p>
-          <label for="bip32AccountXprv">
-            <span>Account Extended Private Key</span>
-          </label>
-          <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data" readonly autocomplete="off"
-            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-          <label for="bip32AccountXpub">
-            <span>Account Extended Public Key</span>
-          </label>
-          <textarea id="bip32AccountXpub" type="text" class="account-xpub" readonly autocomplete="off" autocorrect="off"
-            autocapitalize="off" spellcheck="false"></textarea>
-          <p>
-            Note these addresses are derived from the BIP32 Extended Key
-          </p>
+          <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button><br>
         </section>
-        <section id="bip44AddressSection" class="hidden tabBipsContent">
+        <section id="bip44AddressSection" class="hidden bipsContent">
           <h4>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h4>
           <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button>
+        </section>
+        <section id="bip49AddressSection" class="hidden bipsContent">
+          <h4>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP49')">More Info</button>
+        </section>
+        <section id="bip84AddressSection" class="hidden bipsContent">
+          <h4>BIP84: Derivation scheme for P2WPKH based accounts</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP84')">More Info</button>
+        </section>
+        <section id="bip141AddressSection" class="hidden bipsContent">
+          <h4>BIP141: Segregated Witness (Consensus layer)</h4>
+          <button class="btn" onclick="openInfoModal(event, 'BIP141')">More Info</button>
+        </section>
+        <br>
+        <div id="pathInputSection" class="hidden">
           <table>
             <tr>
               <th>Purpose</th>
@@ -353,52 +356,63 @@
               <th>Receive / Change</th>
             </tr>
             <tr>
-              <td><input id="bip44-purpose" type="text" class="bip44-text-input bip44-purpose" value="44" readonly></td>
-              <td><select name="bip44Coin" id="bip44Coin">
+              <td><input id="pathPurpose" type="text" class="path-text-input path-purpose" value="44" readonly></td>
+              <td><select name="pathCoin" id="pathCoin">
                   <option value="0" selected>0 (Bitcoin)</option>
                   <option value="1">1 (Bitcoin TESTNET)</option>
                 </select></td>
-              <td><input id="bip44Account" type="number" min="0" class="bip44-text-input bip44-account" value="0"></td>
-              <td><select name="bip44Change" id="bip44Change">
+              <td><input id="pathAccount" type="number" min="0" class="path-text-input path-account" value="0"></td>
+              <td><select name="pathChange" id="pathChange">
                   <option value="0" selected>0 (Receive)</option>
                   <option value="1">1 (Change)</option>
                 </select></td>
             </tr>
           </table>
-          <div>
-            <p>The account extended keys can be used for importing to most BIP44 compatible
-              wallets, such as mycelium or electrum.</p>
-          </div>
-          <label for="bip44AccountXprv" class="col-sm-2 control-label">
+          <p>The account extended keys can be used for importing to most <span id="pathBipText">BIP32</span> compatible
+            wallets.</p>
+          <label for="pathAccountXprv">
             <span>Account Extended Private Key</span>
           </label>
-          <textarea id="bip44AccountXprv" type="text" class="account-xprv private-data form-control" readonly
-            data-show-qr autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-          <label for="bip44AccountXpub" class="col-sm-2 control-label">
+          <textarea id="pathAccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <label for="pathAccountXpub">
             <span>Account Extended Public Key</span>
           </label>
-          <textarea id="bip44AccountXpub" type="text" class="account-xpub form-control" readonly data-show-qr
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <textarea id="pathAccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
+            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           <div class="col-sm-10">
             <p>The BIP32 derivation path and extended keys are the basis for the derived
               addresses.</p>
           </div>
-          <label for="bip44Path" class="col-sm-2 control-label">BIP32 Derivation Path</label>
-          <input id="bip44Path" type="text" class="path form-control" value="m/44'/0'/0'/0" readonly="readonly">
-        </section>
-        <section id="bip49AddressSection" class="hidden tabBipsContent">
-          <h4>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h4>
-          <button class="btn" onclick="openInfoModal(event, 'BIP49')">More Info</button>
-        </section>
-        <section id="bip84AddressSection" class="hidden tabBipsContent">
-          <h4>BIP84: Derivation scheme for P2WPKH based accounts</h4>
-          <button class="btn" onclick="openInfoModal(event, 'BIP84')">More Info</button>
-        </section>
-        <section id="bip141AddressSection" class="hidden tabBipsContent">
-          <h4>BIP141: Segregated Witness (Consensus layer)</h4>
-          <button class="btn" onclick="openInfoModal(event, 'BIP141')">More Info</button>
-        </section>
+        </div>
+        <label for="path">
+          <span>BIP32 Derivation Path</span>
+        </label>
+        <textarea id="path" type="text" class="textarea-input" readonly autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false">m/0'/0'</textarea>
+        <div class="bip141-script-select hidden">
+          <label>Script Semantics</label>
+          <select id="bip141ScriptSemantics">
+            <option value="p2wpkh">P2WPKH</option>
+            <option value="p2wpkh-p2sh" selected>P2WPKH nested in P2SH</option>
+            <option value="p2wsh">P2WSH (1-of-1 multisig)</option>
+            <option value="p2wsh-p2sh">P2WSH nested in P2SH (1-of-1 multisig)</option>
+          </select>
+        </div>
+        <label for="bip32AccountXprv">
+          <span>BIP32 Extended Private Key</span>
+        </label>
+        <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <label for="bip32AccountXpub">
+          <span>BIP32 Extended Public Key</span>
+        </label>
+        <textarea id="bip32AccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
+          autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         <div>
+          <p>
+            Note these addresses are derived from the BIP32 Extended Key
+          </p>
           <div>
             <a class="csv-download-link hidden" href="data:text/csv;charset=utf-8,path,address,public key,private key"
               target="_blank">Download CSV

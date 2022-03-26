@@ -5,7 +5,7 @@ let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
 let currentBip = 'bip32';
-// let network = bitcoin.networks.bitcoin;
+let network;
 let wordList = [];
 let showIndex = true;
 let showAddress = true;
@@ -30,8 +30,7 @@ const setupDom = () => {
   DOM.aboutPanel = document.getElementById('aboutPanel');
   DOM.allTabContents = document.querySelectorAll('.tabContent');
   DOM.allTabLinks = document.querySelectorAll('.tabLinks');
-  DOM.allTabLinksBips = document.querySelectorAll('.tabLinksBips');
-  DOM.allTabBipsContents = document.querySelectorAll('.tabBipsContent');
+  DOM.allBipsContents = document.querySelectorAll('.bipsContent');
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
@@ -71,12 +70,14 @@ const setupDom = () => {
   DOM.bip39Seed = document.getElementById('bip39Seed');
   DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
-  DOM.bip44Coin = document.getElementById('bip44Coin');
-  DOM.bip44Account = document.getElementById('bip44Account');
-  DOM.bip44Change = document.getElementById('bip44Change');
-  DOM.bip44AccountXprv = document.getElementById('bip44AccountXprv');
-  DOM.bip44AccountXpub = document.getElementById('bip44AccountXpub');
-  DOM.bip44Path = document.getElementById('bip44Path');
+  DOM.pathCoin = document.getElementById('pathCoin');
+  DOM.pathAccount = document.getElementById('pathAccount');
+  DOM.pathChange = document.getElementById('pathChange');
+  DOM.pathAccountXprv = document.getElementById('pathAccountXprv');
+  DOM.pathAccountXpub = document.getElementById('pathAccountXpub');
+  DOM.pathPurpose = document.getElementById('pathPurpose');
+  DOM.pathInputSection = document.getElementById('pathInputSection');
+  DOM.path = document.getElementById('path');
   DOM.bip85Application = document.getElementById('bip85Application');
   DOM.bip85MnemonicLength = document.getElementById('bip85MnemonicLength');
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
@@ -87,6 +88,13 @@ const setupDom = () => {
   DOM.addressGenerateButton = document.querySelector(
     '.address-button-generate'
   );
+  DOM.derivedPathSelect = document.getElementById('derivedPathSelect');
+  DOM.bip141ScriptSelectDiv = document.querySelector('.bip141-script-select');
+  DOM.bip141ScriptSelect = document.getElementById('bip141ScriptSemantics');
+  DOM.bip32AccountXprv = document.getElementById('bip32AccountXprv');
+  DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
+
+  network = bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
   DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
     if (DOM.bip39ShowSplitMnemonic.checked) {
@@ -102,6 +110,10 @@ const setupDom = () => {
 
   // listen for address generate button clicks
   DOM.addressGenerateButton.onclick = generateAddresses;
+  DOM.path.oninput = generateAddresses;
+
+  // listen for change in derivedPathSelect
+  DOM.derivedPathSelect.oninput = derivedPathSelectChanged;
 
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
@@ -127,8 +139,6 @@ const setupDom = () => {
   });
   // Make sure that the generate seed tab is open
   document.getElementById('defaultOpenTab').click();
-  // Make sure that the bip32 tab is open
-  document.getElementById('defaultOpenTabBips').click();
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
     textElement.addEventListener('click', (event) => {
@@ -138,9 +148,9 @@ const setupDom = () => {
     });
   });
   // add listener for bip44 path inputs
-  DOM.bip44Coin.oninput = changeBip44Path;
-  DOM.bip44Account.oninput = changeBip44Path;
-  DOM.bip44Change.oninput = changeBip44Path;
+  DOM.pathCoin.oninput = changePath;
+  DOM.pathAccount.oninput = changePath;
+  DOM.pathChange.oninput = changePath;
   // Add event listener for displaying/hiding entropy details
   // DOM.entropyDisplay.addEventListener('click', () => {
   //   displayEntropy(DOM.entropyDisplay.checked);
@@ -162,7 +172,22 @@ const setupDom = () => {
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
 
-function getAddress(node, network) {
+function getAddress(node) {
+  if (currentBip === 'bip49') {
+    return bitcoin.payments.p2sh({
+      redeem: bitcoin.payments.p2wpkh({
+        pubkey: node.publicKey,
+        network,
+      }),
+      network,
+    }).address;
+  }
+  if (currentBip === 'bip84') {
+    return bitcoin.payments.p2wpkh({
+      pubkey: node.publicKey,
+      network,
+    }).address;
+  }
   return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address;
 }
 
@@ -211,18 +236,34 @@ window.tabSelect = (event, tabId) => {
   }
   adjustPanelHeight();
 };
-// Event handler for switching tabs
-window.tabSelectBips = (event, tabId) => {
-  DOM.allTabBipsContents.forEach((contentElement) => {
-    contentElement.style.display = 'none';
-  });
-  DOM.allTabLinksBips.forEach((tabLink) => {
-    tabLink.classList.remove('tab--active');
-  });
-  document.getElementById(tabId + 'AddressSection').style.display = 'block';
-  event.currentTarget.classList.add('tab--active');
-  currentBip = tabId;
-  calculateAddresses();
+// Event handler for switching bips
+const derivedPathSelectChanged = () => {
+  const bip = DOM.derivedPathSelect.value;
+  currentBip = bip;
+  DOM.allBipsContents.forEach((element) => element.classList.add('hidden'));
+  DOM.bip141ScriptSelectDiv.classList.add('hidden');
+  DOM.pathInputSection.classList.remove('hidden');
+  DOM.path.readOnly = true;
+  if (bip !== 'custom') {
+    document.getElementById(bip + 'AddressSection')?.classList.remove('hidden');
+  }
+  if (bip === 'custom') {
+    // hide everything and make the path editable
+    DOM.path.readOnly = false;
+    DOM.pathInputSection.classList.add('hidden');
+  } else if (bip === 'bip32') {
+    DOM.pathInputSection.classList.add('hidden');
+    DOM.path.value = `m/0'/0'`;
+  } else if (bip === 'bip141') {
+    DOM.bip141ScriptSelectDiv.classList.remove('hidden');
+    DOM.pathInputSection.classList.add('hidden');
+    DOM.path.readOnly = false;
+  } else {
+    DOM.pathPurpose.value = bip.slice(3);
+    document.getElementById('pathBipText').innerText = bip.toUpperCase();
+    changePath();
+  }
+  DOM.addressGenerateButton.click();
   adjustPanelHeight();
 };
 /**
@@ -348,13 +389,14 @@ function adjustPanelHeight() {
   });
 }
 
-const changeBip44Path = () => {
-  const coin = DOM.bip44Coin.value;
-  const account = DOM.bip44Account.value;
-  const change = DOM.bip44Change.value;
-  const path = `m/44'/${coin}'/${account}'/${change}`;
-  DOM.bip44Path.value = path;
+const changePath = () => {
+  const purpose = DOM.pathPurpose.value;
+  const coin = DOM.pathCoin.value;
+  const account = DOM.pathAccount.value;
+  const change = DOM.pathChange.value;
+  DOM.path.value = `m/${purpose}'/${coin}'/${account}'/${change}`;
   calculateAddresses();
+  fillBip32Keys();
 };
 /**
  * Class representing address data
@@ -414,43 +456,38 @@ const injectAddresses = (addressDataArray) => {
 };
 
 const calculateAddresses = (startIndex = 0, endIndex = 19) => {
-  const bip = currentBip;
   clearAddresses();
   if (!bip32RootKey) {
     return;
   }
-  const node = bip32RootKey;
-  const path = {
-    bip32: (i) => `m/0'/0'/${i}'`,
-    bip44: (i) => `${DOM.bip44Path.value}/${i}`,
-    bip47: () => false,
-    bip49: () => false,
-    bip84: () => false,
-    bip85: () => false,
-    bip141: () => false,
-  };
-  if (!path[bip]()) {
-    console.error('Unable to generate addresses without valid path');
-    return;
+  try {
+    const node = bip32RootKey;
+    const path = (i) => `${DOM.path.value}/${i}`;
+    // if (!path()) {
+    //   console.error('Unable to generate addresses without valid path');
+    //   return;
+    // }
+    // const node = bip32.fromSeed(seed);
+    const addressDataArray = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      const addressPath = path(i);
+      const addressNode = node.derivePath(addressPath);
+      const address = getAddress(addressNode);
+      const addressPubKey = addressNode.publicKey.toString('hex');
+      const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
+        addressNode.privateKey
+      ).toWIF();
+      addressDataArray[i] = new AddressData(
+        addressPath,
+        address,
+        addressPubKey,
+        addressPrivKey
+      );
+    }
+    injectAddresses(addressDataArray);
+  } catch (error) {
+    console.error(error?.message || error);
   }
-  // const node = bip32.fromSeed(seed);
-  const addressDataArray = [];
-  for (let i = startIndex; i <= endIndex; i++) {
-    const addressPath = path[bip](i);
-    const addressNode = node.derivePath(addressPath);
-    const address = getAddress(addressNode);
-    const addressPubKey = addressNode.publicKey.toString('hex');
-    const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
-      addressNode.privateKey
-    ).toWIF();
-    addressDataArray[i] = new AddressData(
-      addressPath,
-      address,
-      addressPubKey,
-      addressPrivKey
-    );
-  }
-  injectAddresses(addressDataArray);
 };
 
 const generateAddresses = (event) => {
@@ -463,6 +500,7 @@ const generateAddresses = (event) => {
     parseInt(parentEl.querySelector('.address-end-index')?.value) || 19;
   const bip = btn.id.replace('GenerateBtn', '');
   calculateAddresses(startIndex, endIndex);
+  fillBip32Keys();
 };
 
 const clearAddresses = () => {
@@ -471,6 +509,14 @@ const clearAddresses = () => {
     DOM.addressListContainer.removeChild(DOM.addressListContainer.firstChild);
   }
   adjustPanelHeight();
+};
+
+const fillBip32Keys = () => {
+  console.log('bip32RootKey :>> ', bip32RootKey);
+  if (!bip32RootKey) return;
+  bip32ExtendedKey = bip32RootKey.derivePath(DOM.path.value);
+  DOM.bip32AccountXprv.value = bip32ExtendedKey.toBase58();
+  DOM.bip32AccountXpub.value = bip32ExtendedKey.neutered().toBase58();
 };
 
 const normalizeString = (str) => str.trim().normalize('NFKD');
@@ -691,6 +737,7 @@ const setMnemonicFromEntropy = async () => {
   showChecksum();
   // Calculate addresses
   calculateAddresses();
+  fillBip32Keys();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -934,6 +981,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   adjustPanelHeight();
   if (bip32RootKey) {
     calculateAddresses();
+    fillBip32Keys();
   }
 }, 1000);
 
@@ -947,8 +995,8 @@ const resetEverything = () => {
   clearEntropyFeedback();
   DOM.bip39PhraseSplit.value = '';
   DOM.bip39Seed.value = '';
-  DOM.bip44AccountXprv.value = '';
-  DOM.bip44AccountXpub.value = '';
+  DOM.pathAccountXprv.value = '';
+  DOM.pathAccountXpub.value = '';
   DOM.bip85Application.value = 'bip39';
   DOM.bip85MnemonicLength.value = '12';
   DOM.bip85Bytes.value = '64';
