@@ -55,6 +55,8 @@ p {
   color: var(--q-blue);
   border: 1px solid var(--q-white);
   border-radius: 2px;
+  padding: 5px;
+  margin: 10px;
 }
 .warning {
   color: var(--q-blue);
@@ -165,14 +167,12 @@ textarea {
 /* .entropy-details--flex-container {
   display: none;
 } */
-.entropy-details--flex-container,
-.bip85-flex-container {
+.entropy-details--flex-container {
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;
 }
-.entropy-details--flex-item,
-.bip85-flex-child {
+.entropy-details--flex-item {
   border: 1px solid var(--q-white);
   border-radius: 3px;
   padding: 1px;
@@ -207,7 +207,9 @@ textarea {
   border-bottom: 1px solid;
 }
 #bip141ScriptSemantics,
-#derivedPathSelect {
+#derivedPathSelect,
+#bip85Application,
+#bip85MnemonicLength {
   width: 100%;
   background-color: var(--q-light-blue);
   color: var(--q-orange);

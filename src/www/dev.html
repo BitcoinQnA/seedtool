@@ -186,9 +186,9 @@
             <div class="entropy-details--flex-item">
               <label>Entropy method: </label>
               <select class="entropy-details--detail--select" id="entropyMethod">
-                <option value="binary" selected>Binary [0-1] eg. 101010011</option>
+                <option value="binary">Binary [0-1] eg. 101010011</option>
                 <option value="base 6">Base 6 [0-5] eg. 123434014</option>
-                <option value="dice">Dice [1-6] eg. 62535634</option>
+                <option value="dice" selected>Dice [1-6] eg. 62535634</option>
                 <option value="base 10">Base 10 (Coldcard) [0-9] eg. 90834528</option>
                 <option value="hexadecimal">Hex [0-9A-F] eg. 4187a8bfd9</option>
                 <option value="card">Card [A2-9TJQK][CDHS] eg.ahqs9dtc</option>
@@ -278,8 +278,8 @@
             This is an advanced feature and should only be used if you understand what it does.
           </div>
         </div>
-        <div class="bip85-flex-container">
-          <div class="bip85-flex-child">
+        <container class="bip85-container">
+          <div class="bip85-item">
             <label for="bip85Application">BIP85 Application</label>
             <select id="bip85Application">
               <option value="bip39" selected>BIP39</option>
@@ -288,7 +288,7 @@
               <option value="hex">Hex</option>
             </select>
           </div>
-          <div class="bip85-flex-child bip85-mnemonic-length-input">
+          <div class="bip85-item bip85-mnemonic-length-input">
             <label for="bip85MnemonicLength">BIP85 Mnemonic
               Length</label>
             <select id="bip85MnemonicLength" class="strength">
@@ -297,32 +297,32 @@
               <option value="24">24</option>
             </select>
           </div>
-          <div class="bip85-flex-child bip85-bytes-input bip85">
+          <div class="bip85-item bip85-bytes-input bip85">
             <label for="bip85Bytes">BIP85 Bytes</label>
-            <input id="bip85Bytes" type="text" class="change" value="64" />
+            <input id="bip85Bytes" class="textarea-input" type="number" min="16" max="64" class="change" value="64" />
           </div>
 
-          <div class="bip85-flex-child bip85 bip85-index-input">
+          <div class="bip85-item bip85 bip85-index-input">
             <label for="bip85Index">BIP85 Index</label>
-            <input id="bip85Index" type="text" class="change" value="0" />
+            <input id="bip85Index" class="textarea-input" type="number" min="0" class="change" value="0" />
           </div>
 
-          <div class="bip85-flex-child bip85">
+          <div class="bip85-item bip85">
             <label for="bip85ChildKey">BIP85 Child Key</label>
-            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" title="BIP85 Child Key"
+            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" readonly title="BIP85 Child Key"
               rows="3"></textarea>
           </div>
-        </div>
+        </container>
       </div>
       <hr>
       <button class="accordion">Derived Addresses</button>
       <div class="panel">
         <br>
         <select id="derivedPathSelect">
-          <option value="bip32" selected>BIP32</option>
+          <option value="bip32">BIP32</option>
           <option value="bip44">BIP44</option>
           <option value="bip49">BIP49</option>
-          <option value="bip84">BIP84</option>
+          <option value="bip84" selected>BIP84</option>
           <!-- <option value="bip141">BIP141</option> -->
           <!-- <option value="custom">Custom Path</option> -->
         </select>
@@ -501,6 +501,7 @@
   <script src="js/lib/bitcoin.js"></script>
   <script src="js/lib/bip32.js"></script>
   <script src="js/lib/bip39.js"></script>
+  <script src="js/lib/bip85.js"></script>
   <script src="js/info.js"></script>
   <script src="js/lib/entropy.js"></script>
   <script src="js/lib/levenshtein.js"></script>

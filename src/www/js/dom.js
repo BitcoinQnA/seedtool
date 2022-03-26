@@ -4,7 +4,7 @@
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
-let currentBip = 'bip32';
+let currentBip = 'bip84';
 let network;
 let isTestnet = false;
 let wordList = [];
@@ -164,7 +164,12 @@ const setupDom = () => {
 
   // listen for change in derivedPathSelect
   DOM.derivedPathSelect.oninput = derivedPathSelectChanged;
-
+  derivedPathSelectChanged();
+  // listen for bip85 changes
+  DOM.bip85Application.oninput = calcBip85;
+  DOM.bip85MnemonicLength.oninput = calcBip85;
+  DOM.bip85Bytes.oninput = calcBip85;
+  DOM.bip85Index.oninput = calcBip85;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -599,6 +604,42 @@ const displayAccountKeys = () => {
   DOM.pathAccountXpub.value = accountExtendedKey.neutered().toBase58();
 };
 
+const calcBip85 = () => {
+  const app = DOM.bip85Application.value;
+  DOM.bip85MnemonicLength.parentElement.classList.add('hidden');
+  DOM.bip85Bytes.parentElement.classList.add('hidden');
+  if (app === 'bip39') {
+    DOM.bip85MnemonicLength.parentElement.classList.remove('hidden');
+  } else if (app === 'hex') {
+    DOM.bip85Bytes.parentElement.classList.remove('hidden');
+  }
+  const rootKeyBase58 = DOM.bip32RootKey.value;
+  if (!rootKeyBase58) {
+    return;
+  }
+  try {
+    const master = bip85.BIP85.fromBase58(rootKeyBase58);
+    let result;
+    const index = parseInt(DOM.bip85Index.value);
+    if (app === 'bip39') {
+      const length = parseInt(DOM.bip85MnemonicLength.value);
+      result = master.deriveBIP39(0, length, index).toMnemonic();
+    } else if (app === 'wif') {
+      result = master.deriveWIF(index).toWIF();
+    } else if (app === 'xprv') {
+      result = master.deriveXPRV(index).toXPRV();
+    } else if (app === 'hex') {
+      const bytes = parseInt(DOM.bip85Bytes.value);
+
+      result = master.deriveHex(bytes, index).toEntropy();
+    }
+    DOM.bip85ChildKey.value = result;
+  } catch (e) {
+    toast('BIP85: ' + e.message);
+    DOM.bip85ChildKey.value = '';
+  }
+};
+
 const normalizeString = (str) => str.trim().normalize('NFKD');
 
 const getPhrase = () => normalizeString(DOM.bip39Phrase.value);
@@ -818,6 +859,7 @@ const setMnemonicFromEntropy = async () => {
   // Calculate addresses
   calculateAddresses();
   fillBip32Keys();
+  calcBip85();
 };
 
 const getEntropyTypeStr = (entropy) => {
@@ -1062,6 +1104,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   if (bip32RootKey) {
     calculateAddresses();
     fillBip32Keys();
+    calcBip85();
   }
 }, 1000);
 
@@ -1082,7 +1125,6 @@ const resetEverything = () => {
   DOM.bip85Bytes.value = '64';
   DOM.bip85Index.value = '0';
   DOM.bip85ChildKey.value = '';
-  ['bip32', 'bip44'].forEach((bip) => clearAddresses(bip));
 };
 
 const clearEntropyFeedback = () => {
