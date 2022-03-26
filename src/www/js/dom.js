@@ -563,7 +563,6 @@ const clearAddresses = () => {
 };
 
 const fillBip32Keys = () => {
-  console.log('bip32RootKey :>> ', bip32RootKey);
   if (!bip32RootKey) return;
   if (currentBip === 'bip49' || currentBip === 'bip84') {
     if (isTestnet) {
@@ -585,6 +584,19 @@ const fillBip32Keys = () => {
   bip32ExtendedKey = bip32RootKey.derivePath(DOM.path.value);
   DOM.bip32AccountXprv.value = bip32ExtendedKey.toBase58();
   DOM.bip32AccountXpub.value = bip32ExtendedKey.neutered().toBase58();
+  if (currentBip !== 'bip32') {
+    displayAccountKeys();
+  }
+};
+
+const displayAccountKeys = () => {
+  const purpose = DOM.pathPurpose.value;
+  const coin = DOM.pathCoin.value;
+  const account = DOM.pathAccount.value;
+  const accountPath = `m/${purpose}'/${coin}'/${account}'`;
+  const accountExtendedKey = bip32RootKey.derivePath(accountPath);
+  DOM.pathAccountXprv.value = accountExtendedKey.toBase58();
+  DOM.pathAccountXpub.value = accountExtendedKey.neutered().toBase58();
 };
 
 const normalizeString = (str) => str.trim().normalize('NFKD');
