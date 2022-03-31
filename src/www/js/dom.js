@@ -13,6 +13,8 @@ let showAddress = true;
 let showPubKey = true;
 let showPrivKey = true;
 let showQr = false;
+let myPayCode = null;
+let bobPayCode = null;
 
 let entropyTypeAutoDetect = true;
 let entropyChangeTimeoutEvent = null;
@@ -155,13 +157,13 @@ const setupDom = () => {
   );
   DOM.bip47CsvDownloadLink = document.querySelector('.bip47-csv-download-link');
   DOM.bip47AddressListContainer = document.querySelector(
-    '.bip47-address-display-content'
+    '#bip47AddressDisplay'
   );
-  DOM.bip47IndexStart = document.querySelector('.bip47-address-start-index');
-  DOM.bip47IndexEnd = document.querySelector('.bip47-address-end-index');
-  DOM.bip47AddressGenerateButton = document.querySelector(
-    '.bip47-address-button-generate'
-  );
+  DOM.bip47AddressType = document.querySelector('#bip47AddressType');
+  DOM.bip47SendReceive = document.querySelector('#bip47SendReceive');
+  DOM.bip47StartIndex = document.querySelector('#bip47StartIndex');
+  DOM.bip47NoOfAddresses = document.querySelector('#bip47NoOfAddresses');
+  DOM.bip47AddressSection = document.getElementById('bip47AddressSection');
   DOM.csvDownloadLink = document.querySelector('.csv-download-link');
   DOM.addressListContainer = document.querySelector('.address-display-content');
   DOM.addressGenerateButton = document.querySelector(
@@ -197,6 +199,10 @@ const setupDom = () => {
   // listen for bip47 changes
   DOM.bip47UsePaynym.oninput = togglePaynym;
   DOM.bip47CPPaymentCode.oninput = calcBip47CounterParty;
+  DOM.bip47AddressType.oninput = calculateBip47Addresses;
+  DOM.bip47SendReceive.oninput = calculateBip47Addresses;
+  DOM.bip47StartIndex.oninput = calculateBip47Addresses;
+  DOM.bip47NoOfAddresses.oninput = calculateBip47Addresses;
   // listen for bip85 changes
   DOM.bip85Application.oninput = calcBip85;
   DOM.bip85MnemonicLength.oninput = calcBip85;
@@ -275,7 +281,7 @@ const togglePaynym = () => {
 const calcBip47 = () => {
   if (!getPhrase()) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
-  const myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
+  myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
   const myNotify = myPayCode.derive(0);
   const myPrvKey = myNotify.privateKey;
   const myPubKey = myNotify.publicKey;
@@ -302,15 +308,145 @@ const calcBip47CounterParty = () => {
     return;
   }
   DOM.bip47CPGenSection.classList.remove('hidden');
-  adjustPanelHeight();
-  const bobPc = bip47.fromBase58(bobPcBase58, network);
-  const bobNotifyPubKey = bobPc.derive(0).publicKey;
-  const bobNotifyAddress = bobPc.getNotificationAddress();
+  bobPayCode = bip47.fromBase58(bobPcBase58, network);
+  const bobNotifyPubKey = bobPayCode.derive(0).publicKey;
+  const bobNotifyAddress = bobPayCode.getNotificationAddress();
   DOM.bip47CPNotificationAddress.value = bobNotifyAddress;
   DOM.bip47CPNotificationPubKey.value = bobNotifyPubKey.toString('hex');
+  calculateBip47Addresses();
+  adjustPanelHeight();
 };
 
-function getAddress(node) {
+const clearBip47Addresses = () => {
+  DOM.bip47CsvDownloadLink.classList.add('hidden');
+  while (DOM.bip47AddressListContainer.firstChild) {
+    DOM.bip47AddressListContainer.removeChild(
+      DOM.bip47AddressListContainer.firstChild
+    );
+  }
+  adjustPanelHeight();
+};
+
+/**
+ * Injects address data into the assigned address list
+ * @param {AddressData[]} addressDataArray - an array of AddressData objects.
+ * @param {string} addressListName - a string saying which address list to populate. e.g. 'bip32'
+ */
+const injectBip47Addresses = (addressDataArray) => {
+  // Init the csv string with the headers
+  let csv = `path,address,public key,private key
+`;
+  // declare DOM elements
+  DOM.bip47CsvDownloadLink.classList.remove('hidden');
+  const template = document.querySelector('#addressTemplate');
+  // Ensure not internet explorer!
+  if (!('content' in document.createElement('template'))) {
+    throw new Error(
+      'Browser Outdated! Unable to populate list and generate csv.'
+    );
+  }
+  addressDataArray.forEach((addressData) => {
+    // Append this address to csv
+    csv += `${addressData.path},${addressData.address},${addressData.pubKey},${
+      addressData.prvKey || ''
+    },
+`;
+    // clone the address list template HTML
+    const clone = template.content.firstElementChild.cloneNode(true);
+    // Insert the path, address, public key & private key into the clone
+    for (const data in addressData) {
+      if (Object.hasOwnProperty.call(addressData, data)) {
+        clone.querySelector(`.address-details--${data}`).innerText =
+          addressData[data];
+      }
+    }
+    // Add the clone to the DOM
+    DOM.bip47AddressListContainer.appendChild(clone);
+  });
+  adjustPanelHeight();
+  DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
+    csv
+  )}`;
+};
+
+const calculateBip47Addresses = () => {
+  clearBip47Addresses();
+  DOM.bip47AddressSection.classList.add('hidden');
+
+  if (
+    !DOM.bip47MyNotificationAddress.value ||
+    !DOM.bip47CPNotificationAddress.value
+  ) {
+    return;
+  }
+  // We have both notification addresses so the codes are valid
+  DOM.bip47AddressSection.classList.remove('hidden');
+  const addressType = DOM.bip47AddressType.value;
+  const sendReceive = DOM.bip47SendReceive.value;
+  const startIndex = parseInt(DOM.bip47StartIndex.value);
+  const endIndex = startIndex + parseInt(DOM.bip47NoOfAddresses.value);
+  try {
+    const addressDataArray = [];
+    for (let i = startIndex; i < endIndex; i++) {
+      const addressPath = `BIP47 ${addressType} ${sendReceive} #${i}`;
+      let pCode,
+        key,
+        prvKey = null;
+      if (sendReceive === 'send') {
+        // Derive from counter party payment code
+        pCode = bobPayCode;
+        key = myPayCode.derive(0).privateKey;
+      } else {
+        // Derive from my payment code
+        pCode = myPayCode;
+        key = bobPayCode.derive(0).publicKey;
+        prvKey = bitcoin.ECPair.fromPrivateKey(
+          pCode.derivePaymentPrivateKey(key, i)
+        ).toWIF();
+      }
+      const payPubKey = pCode.derivePaymentPublicKey(key, i);
+      let address;
+      switch (addressType) {
+        case 'P2PKH':
+          address = bitcoin.payments.p2pkh({
+            pubkey: payPubKey,
+            network: network,
+          }).address;
+          break;
+        case 'P2WPKH':
+          address = bitcoin.payments.p2wpkh({
+            pubkey: payPubKey,
+            network: network,
+          }).address;
+          break;
+        case 'P2WPKH/P2SH':
+          address = bitcoin.payments.p2sh({
+            redeem: bitcoin.payments.p2wpkh({
+              pubkey: payPubKey,
+              network: network,
+            }),
+            network: network,
+          }).address;
+          break;
+        default:
+          address = '';
+          break;
+      }
+      addressDataArray[i] = new AddressData(
+        addressPath,
+        address,
+        payPubKey.toString('hex'),
+        prvKey
+      );
+    }
+    injectBip47Addresses(addressDataArray);
+  } catch (error) {
+    console.error(error?.message || error);
+    console.error(error);
+  }
+};
+
+const getAddress = (node) => {
   if (currentBip === 'bip49') {
     return bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
@@ -327,7 +463,7 @@ function getAddress(node) {
     }).address;
   }
   return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address;
-}
+};
 
 /**
  * Debounce - from Underscore.js
@@ -534,8 +670,8 @@ const changePath = () => {
   const change = DOM.pathChange.value;
   isTestnet = coin === '1';
   DOM.path.value = `m/${purpose}'/${coin}'/${account}'/${change}`;
-  calculateAddresses();
   fillBip32Keys();
+  calculateAddresses();
 };
 /**
  * Class representing address data
@@ -547,7 +683,7 @@ class AddressData {
    * @param {string} path - The path used to generate the address.
    * @param {string} address - The address.
    * @param {string} pubKey - The public key.
-   * @param {string} prvKey - The private key.
+   * @param {string=} prvKey - The private key.
    */
   constructor(path, address, pubKey, prvKey) {
     this.path = path;
@@ -637,7 +773,6 @@ const generateAddresses = (event) => {
     parseInt(parentEl.querySelector('.address-start-index')?.value) || 0;
   const endIndex =
     parseInt(parentEl.querySelector('.address-end-index')?.value) || 19;
-  const bip = btn.id.replace('GenerateBtn', '');
   calculateAddresses(startIndex, endIndex);
   fillBip32Keys();
 };
@@ -1196,6 +1331,8 @@ const mnemonicToSeedPopulate = debounce(async () => {
 const resetEverything = () => {
   seed = null;
   bip32RootKey = null;
+  myPayCode = null;
+  bobPayCode = null;
   DOM.bip32RootKey.value = '';
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = '';
@@ -1210,6 +1347,13 @@ const resetEverything = () => {
   DOM.bip85Bytes.value = '64';
   DOM.bip85Index.value = '0';
   DOM.bip85ChildKey.value = '';
+  DOM.bip47MyPaymentCode.value = '';
+  DOM.bip47MyNotificationAddress.value = '';
+  DOM.bip47MyNotificationPrvKey.value = '';
+  DOM.bip47MyNotificationPubKey.value = '';
+  DOM.bip47CPPaymentCode.value = '';
+  DOM.bip47CPNotificationAddress.value = '';
+  DOM.bip47CPNotificationPubKey.value = '';
 };
 
 const clearEntropyFeedback = () => {

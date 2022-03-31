@@ -264,7 +264,8 @@
       <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
-        <label><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work offline)</label>
+        <label class="hidden"><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work
+          offline)</label>
         <h4>My Details</h4>
         <div>
           <label for="bip47MyPaymentCode">Payment Code</label>
@@ -297,26 +298,32 @@
             <label for="bip47CPNotificationPubKey">Notification Public Key (HEX)</label>
             <textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
           </div>
-          <div class="hidden">
+          <section id="bip47AddressSection" class="">
             <p>
-              Note these addresses are derived from the BIP32 Extended Key
+              Note these addresses are derived from your private key and the public key of your counterparty.
+            </p>
+            <p>
+              Display&nbsp;<input type="number" id="bip47NoOfAddresses" value="20" min="1" max="100">
+              <select id="bip47AddressType">
+                <option value="P2PKH">P2PKH</option>
+                <option value="P2WPKH" selected>P2WPKH</option>
+                <option value="P2WPKH/P2SH">P2WPKH/P2SH</option>
+              </select>&nbsp;
+              <select id="bip47SendReceive">
+                <option value="send" selected>SEND</option>
+                <option value="receive">RECEIVE</option>
+              </select>&nbsp;
+              addresses from index <input type="number" id="bip47StartIndex" value="0" min="0">
             </p>
             <div>
               <a class="bip47-csv-download-link hidden"
                 href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
                 file</a>
             </div>
-            <div class="bip47-address-display bip47-address-display-content">
+            <div id="bip47AddressDisplay">
               <!-- Populated By JavaScript -->
             </div>
-            <div>
-              <span>Display addresses from index </span>
-              <input type="number" class="bip47-address-start-index" value="0">
-              <span>to index </span>
-              <input type="number" class="bip47-address-end-index" value="19">
-              <button class="bip47-address-button-generate btn">GENERATE</button>
-            </div>
-          </div>
+          </section>
         </section>
       </div>
       <hr>

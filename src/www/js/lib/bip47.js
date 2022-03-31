@@ -7185,8 +7185,8 @@
                 case 'ascii':
                 case 'hex':
                   return enc;
-                default:
-                  if (retried) return; // undefined
+                default: // undefined
+                  if (retried) return;
                   enc = ('' + enc).toLowerCase();
                   retried = true;
               }
@@ -20179,7 +20179,7 @@
                       'Missing or wrong publicKey or chainCode'
                     );
                   pc = Buffer.concat([pc, reserved]); // reserved bytes
-
+                  pc[79] |= 1 << 0;
                   const pcode = new PaymentCode(pc, network);
                   pcode.root = root_bip47; // store the privkey
                   return pcode;
