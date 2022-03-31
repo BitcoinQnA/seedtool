@@ -20162,6 +20162,8 @@
                 static fromSeed(bSeed, id, network) {
                   network = network || networks.bitcoin;
                   const reserved = Buffer.alloc(13, 0);
+                  // const lastByte = reserved.slice(12);
+                  // lastByte[0] |= 1 << 0;
                   const root = fromSeed(bSeed);
                   const coinType =
                     network.pubKeyHash == networks.bitcoin.pubKeyHash
@@ -20179,8 +20181,7 @@
                       'Missing or wrong publicKey or chainCode'
                     );
                   pc = Buffer.concat([pc, reserved]); // reserved bytes
-                  /* prettier-ignore */ const setBit = (byte, pos) => byte | (1 << pos) | 0;
-                  pc[79] = setBit(pc[79], 0);
+                  // pc[79] = 0b00000001;
                   const pcode = new PaymentCode(pc, network);
                   pcode.root = root_bip47; // store the privkey
                   return pcode;

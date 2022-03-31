@@ -261,118 +261,6 @@
         </div>
       </div>
       <hr>
-      <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
-      <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
-        <label class="hidden"><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work
-          offline)</label>
-        <h4>My Details</h4>
-        <div>
-          <label for="bip47MyPaymentCode">Payment Code</label>
-          <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"></textarea>
-        </div>
-        <div>
-          <label for="bip47MyNotificationAddress">Notification Address</label>
-          <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
-        </div>
-        <div>
-          <label for="bip47MyNotificationPubKey">Notification Public Key (HEX)</label>
-          <textarea id="bip47MyNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
-        </div>
-        <div>
-          <label for="bip47MyNotificationPrvKey">Notification Private Key (WIF)</label>
-          <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
-        </div>
-        <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
-        <h4>Counterparty Details</h4>
-        <div>
-          <label for="bip47CPPaymentCode">Payment Code</label>
-          <textarea id="bip47CPPaymentCode" class="textarea-input" rows="3"></textarea>
-        </div>
-        <section id="bip47CPGenSection" class="hidden">
-          <div>
-            <label for="bip47CPNotificationAddress">Notification Address</label>
-            <textarea id="bip47CPNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
-          </div>
-          <div>
-            <label for="bip47CPNotificationPubKey">Notification Public Key (HEX)</label>
-            <textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
-          </div>
-          <section id="bip47AddressSection" class="">
-            <p>
-              Note these addresses are derived from your private key and the public key of your counterparty.
-            </p>
-            <p>
-              Display&nbsp;<input type="number" id="bip47NoOfAddresses" value="20" min="1" max="100">
-              <select id="bip47AddressType">
-                <option value="P2PKH">P2PKH</option>
-                <option value="P2WPKH" selected>P2WPKH</option>
-                <option value="P2WPKH/P2SH">P2WPKH/P2SH</option>
-              </select>&nbsp;
-              <select id="bip47SendReceive">
-                <option value="send" selected>SEND</option>
-                <option value="receive">RECEIVE</option>
-              </select>&nbsp;
-              addresses from index <input type="number" id="bip47StartIndex" value="0" min="0">
-            </p>
-            <div>
-              <a class="bip47-csv-download-link hidden"
-                href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
-                file</a>
-            </div>
-            <div id="bip47AddressDisplay">
-              <!-- Populated By JavaScript -->
-            </div>
-          </section>
-        </section>
-      </div>
-      <hr>
-      <button class="accordion">BIP85: Deterministic Entropy From BIP32 Keychains</button>
-      <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP85')">More Info</button>
-        <div class="warning">
-          <label>Warning</label>
-          <div>
-            This is an advanced feature and should only be used if you understand what it does.
-          </div>
-        </div>
-        <container class="bip85-container">
-          <div class="bip85-item">
-            <label for="bip85Application">BIP85 Application</label>
-            <select id="bip85Application">
-              <option value="bip39" selected>BIP39</option>
-              <option value="wif">WIF</option>
-              <option value="xprv">Xprv</option>
-              <option value="hex">Hex</option>
-            </select>
-          </div>
-          <div class="bip85-item bip85-mnemonic-length-input">
-            <label for="bip85MnemonicLength">BIP85 Mnemonic
-              Length</label>
-            <select id="bip85MnemonicLength" class="strength">
-              <option value="12" selected>12</option>
-              <option value="18">18</option>
-              <option value="24">24</option>
-            </select>
-          </div>
-          <div class="bip85-item bip85-bytes-input bip85">
-            <label for="bip85Bytes">BIP85 Bytes</label>
-            <input id="bip85Bytes" class="textarea-input" type="number" min="16" max="64" class="change" value="64" />
-          </div>
-
-          <div class="bip85-item bip85 bip85-index-input">
-            <label for="bip85Index">BIP85 Index</label>
-            <input id="bip85Index" class="textarea-input" type="number" min="0" class="change" value="0" />
-          </div>
-
-          <div class="bip85-item bip85">
-            <label for="bip85ChildKey">BIP85 Child Key</label>
-            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" readonly title="BIP85 Child Key"
-              rows="3"></textarea>
-          </div>
-        </container>
-      </div>
-      <hr>
       <button class="accordion">Derived Addresses</button>
       <div class="panel">
         <br>
@@ -487,6 +375,118 @@
             <button class="address-button-generate btn">GENERATE</button>
           </div>
         </div>
+      </div>
+      <hr>
+      <button class="accordion">BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</button>
+      <div class="panel">
+        <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
+        <label class="hidden"><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work
+          offline)</label>
+        <h4>My Details</h4>
+        <div>
+          <label for="bip47MyPaymentCode">Payment Code</label>
+          <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"></textarea>
+        </div>
+        <div>
+          <label for="bip47MyNotificationAddress">Notification Address</label>
+          <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+        </div>
+        <div>
+          <label for="bip47MyNotificationPubKey">Notification Public Key (HEX)</label>
+          <textarea id="bip47MyNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+        </div>
+        <div>
+          <label for="bip47MyNotificationPrvKey">Notification Private Key (WIF)</label>
+          <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
+        </div>
+        <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
+        <h4>Counterparty Details</h4>
+        <div>
+          <label for="bip47CPPaymentCode">Payment Code</label>
+          <textarea id="bip47CPPaymentCode" class="textarea-input" rows="3"></textarea>
+        </div>
+        <section id="bip47CPGenSection" class="hidden">
+          <div>
+            <label for="bip47CPNotificationAddress">Notification Address</label>
+            <textarea id="bip47CPNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+          </div>
+          <div>
+            <label for="bip47CPNotificationPubKey">Notification Public Key (HEX)</label>
+            <textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+          </div>
+          <section id="bip47AddressSection" class="">
+            <p>
+              Note these addresses are derived from your private key and the public key of your counterparty.
+            </p>
+            <p>
+              Display&nbsp;<input type="number" id="bip47NoOfAddresses" value="20" min="1" max="100">
+              <select id="bip47AddressType">
+                <option value="P2PKH">P2PKH</option>
+                <option value="P2WPKH" selected>P2WPKH</option>
+                <option value="P2WPKH/P2SH">P2WPKH/P2SH</option>
+              </select>&nbsp;
+              <select id="bip47SendReceive">
+                <option value="send" selected>SEND</option>
+                <option value="receive">RECEIVE</option>
+              </select>&nbsp;
+              addresses from index <input type="number" id="bip47StartIndex" value="0" min="0">
+            </p>
+            <div>
+              <a class="bip47-csv-download-link hidden"
+                href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
+                file</a>
+            </div>
+            <div id="bip47AddressDisplay">
+              <!-- Populated By JavaScript -->
+            </div>
+          </section>
+        </section>
+      </div>
+      <hr>
+      <button class="accordion">BIP85: Deterministic Entropy From BIP32 Keychains</button>
+      <div class="panel">
+        <button class="btn" onclick="openInfoModal(event, 'BIP85')">More Info</button>
+        <div class="warning">
+          <label>Warning</label>
+          <div>
+            This is an advanced feature and should only be used if you understand what it does.
+          </div>
+        </div>
+        <container class="bip85-container">
+          <div class="bip85-item">
+            <label for="bip85Application">BIP85 Application</label>
+            <select id="bip85Application">
+              <option value="bip39" selected>BIP39</option>
+              <option value="wif">WIF</option>
+              <option value="xprv">Xprv</option>
+              <option value="hex">Hex</option>
+            </select>
+          </div>
+          <div class="bip85-item bip85-mnemonic-length-input">
+            <label for="bip85MnemonicLength">BIP85 Mnemonic
+              Length</label>
+            <select id="bip85MnemonicLength" class="strength">
+              <option value="12" selected>12</option>
+              <option value="18">18</option>
+              <option value="24">24</option>
+            </select>
+          </div>
+          <div class="bip85-item bip85-bytes-input bip85">
+            <label for="bip85Bytes">BIP85 Bytes</label>
+            <input id="bip85Bytes" class="textarea-input" type="number" min="16" max="64" class="change" value="64" />
+          </div>
+
+          <div class="bip85-item bip85 bip85-index-input">
+            <label for="bip85Index">BIP85 Index</label>
+            <input id="bip85Index" class="textarea-input" type="number" min="0" class="change" value="0" />
+          </div>
+
+          <div class="bip85-item bip85">
+            <label for="bip85ChildKey">BIP85 Child Key</label>
+            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" readonly title="BIP85 Child Key"
+              rows="3"></textarea>
+          </div>
+        </container>
       </div>
       <hr>
       <button class="accordion">Credits and licenses</button>
