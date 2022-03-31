@@ -348,9 +348,10 @@ const injectBip47Addresses = (addressDataArray) => {
   addressDataArray.forEach((addressData) => {
     // Append this address to csv
     csv += `${addressData.path},${addressData.address},${addressData.pubKey},${
-      addressData.prvKey || ''
+      addressData.prvKey || 'N/A'
     },
 `;
+    console.log('csv :>> ', csv);
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
@@ -388,7 +389,7 @@ const calculateBip47Addresses = () => {
   try {
     const addressDataArray = [];
     for (let i = startIndex; i < endIndex; i++) {
-      const addressPath = `BIP47 ${addressType} ${sendReceive} #${i}`;
+      const addressPath = `BIP47_${addressType}_${sendReceive.toUpperCase()}_${i}`;
       let pCode,
         key,
         prvKey = null;

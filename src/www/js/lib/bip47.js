@@ -20179,7 +20179,8 @@
                       'Missing or wrong publicKey or chainCode'
                     );
                   pc = Buffer.concat([pc, reserved]); // reserved bytes
-                  pc[79] |= 1 << 0;
+                  /* prettier-ignore */ const setBit = (byte, pos) => byte | (1 << pos) | 0;
+                  pc[79] = setBit(pc[79], 0);
                   const pcode = new PaymentCode(pc, network);
                   pcode.root = root_bip47; // store the privkey
                   return pcode;
