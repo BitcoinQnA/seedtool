@@ -102,7 +102,7 @@ window.infoHtml = {
           About BIP
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BIP44 page</a>
         </p>`,
   BIP47: /*html*/ `
         <h3>BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</h3>
@@ -110,23 +110,32 @@ window.infoHtml = {
           About BIP
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BIP47 page</a>
         </p>`,
   BIP49: /*html*/ `
         <h3>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h3>
         <p>
-          About BIP
+        BIP49 defines the standard for deriving P2SH-P2WPKH addresses, typically referred to as 'Wrapped Segwit' addresses. This BIP
+        was introduced as a compatability fix to enable older wallets to send to wallets conforming to newer standards. Wrapped Segwit addresses beginning
+        with <b>'3'</b> save on transaction fees when compared to older legacy types. This saving, although not those gained by wallets adopting
+        Native Segwit, is achieve via an optimised transaction structure. <br/><br/>
+        BIP49 also defines that wallets adopting the standard should adopt the <b>'ypub'</b> or <b>'yprv'</b> prefixes when displaying extended public/private keys.
+        Wrapped Segwit addresses defined in this BIP are quickly being replaced in wallet software by those confirming to the BIP84 standard.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BIP49 page</a>
         </p>`,
   BIP84: /*html*/ `
         <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
         <p>
-          About BIP
+          BIP84 defines the standard for deriving P2WPKH addresses, typically referred to as 'Native Segwit' addresses.
+          Segwit addresses beginning with <b>'bc1q'</b> are the most commonly used address type for modern bitcoin wallets. This is due to their ability to construct
+          smaller transactions that save the user fees when spending. 
+
+          BIP84 also defines that wallets adopting the standard should adopt the <b>'zpub'</b> or <b>'zprv'</b> prefixes when displaying extended public/private keys.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BIP84 page</a>
         </p>`,
   BIP85: /*html*/ `
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
@@ -134,7 +143,7 @@ window.infoHtml = {
           About BIP
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BIP85 page</a>
         </p>`,
   BIP141: /*html*/ `
         <h3>BIP141: Segregated Witness (Consensus layer)</h3>
