@@ -83,7 +83,7 @@ window.infoHtml = {
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
-          About BIP
+          Test
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
