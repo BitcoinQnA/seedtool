@@ -103,13 +103,11 @@
         <!-- </div> -->
 
         <div id="Input_Entropy" class="tabContent">
-          <div class="warning">
-            <h4>Warning!</h4>
-            <p>Entropy is an advanced feature. Your mnemonic may be insecure if this
-              feature is used incorrectly.</p>
-          </div>
+          <p class="warning"><strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
+            this
+            feature is used incorrectly.</p>
           <label for="entropy">Enter your own entropy:</label>
-          <div class="textarea-wrapper">
+          <div class="textarea-wrapper copy-wrapper">
             <textarea id="entropy" rows="4" class="textarea-input"
               placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
@@ -198,20 +196,13 @@
         </div>
         <div>
           <label for="root-key">BIP32 Root Key</label>
-          <div>
+          <div class="copy-wrapper">
             <textarea id="bip32RootKey" class="root-key private-data textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
         <button class="btn" onclick="openInfoModal(event, 'BIP39')">More Info</button>
-        <div class="warning PBKDF2-infos-danger hidden">
-          <label>Warning</label>
-          <div>
-            <span>You are using a custom number of PBKDF2 iterations. Your BIP39 seed might not show the same addresses
-              on different software.</span>
-          </div>
-        </div>
         <div class="warning bip39-invalid-phrase hidden">
           <label>INVALID BIP39 SEED PHRASE</label>
           <div>
@@ -221,7 +212,7 @@
         </div>
         <div>
           <label for="bip39Phrase">BIP39 Mnemonic (English)</label>
-          <div>
+          <div class="copy-wrapper">
             <textarea id="bip39Phrase" class="phrase private-data textarea-input" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false"></textarea>
           </div>
@@ -229,14 +220,14 @@
         <div>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
-          <div>
+          <div class="copy-wrapper">
             <textarea id="bip39Passphrase" class="passphrase private-data textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
           <label for="bip39Seed">BIP39 Seed</label>
-          <div>
+          <div class="copy-wrapper">
             <textarea id="bip39Seed" class="seed private-data textarea-input" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false"></textarea>
           </div>
@@ -250,13 +241,13 @@
           </div>
           <div id="splitMnemonic" class="hidden">
             <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
-            <div>
+            <div class="copy-wrapper">
               <textarea id="bip39PhraseSplit" class="phraseSplit private-data textarea-input"
                 title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
-              <p>
-                <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
-              </p>
             </div>
+            <p>
+              <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
+            </p>
           </div>
         </div>
       </div>
@@ -319,23 +310,27 @@
           <label for="pathAccountXprv">
             <span>Account Extended Private Key</span>
           </label>
-          <textarea id="pathAccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <div class="copy-wrapper">
+            <textarea id="pathAccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
           <label for="pathAccountXpub">
             <span>Account Extended Public Key</span>
           </label>
-          <textarea id="pathAccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
-            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-          <div class="col-sm-10">
-            <p>The BIP32 derivation path and extended keys are the basis for the derived
-              addresses.</p>
+          <div class="copy-wrapper">
+            <textarea id="pathAccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
+          <p>The BIP32 derivation path and extended keys are the basis for the derived
+            addresses.</p>
         </div>
         <label for="path">
           <span>BIP32 Derivation Path</span>
         </label>
-        <textarea id="path" type="text" class="textarea-input" readonly autocomplete="off" autocorrect="off"
-          autocapitalize="off" spellcheck="false">m/0'/0'</textarea>
+        <div class="copy-wrapper">
+          <textarea id="path" type="text" class="textarea-input" readonly autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false">m/0'/0'</textarea>
+        </div>
         <div class="bip141-script-select hidden">
           <label>Script Semantics</label>
           <select id="bip141ScriptSemantics">
@@ -348,13 +343,17 @@
         <label for="bip32AccountXprv">
           <span>BIP32 Extended Private Key</span>
         </label>
-        <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div class="copy-wrapper">
+          <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        </div>
         <label for="bip32AccountXpub">
           <span>BIP32 Extended Public Key</span>
         </label>
-        <textarea id="bip32AccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
-          autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div class="copy-wrapper">
+          <textarea id="bip32AccountXpub" type="text" class="account-xpub textarea-input" readonly autocomplete="off"
+            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        </div>
         <div>
           <p>
             Note these addresses are derived from the BIP32 Extended Key
@@ -385,34 +384,42 @@
         <h4>My Details</h4>
         <div>
           <label for="bip47MyPaymentCode">Payment Code</label>
-          <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"></textarea>
+          <div class="copy-wrapper">
+            <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"></textarea>
+          </div>
         </div>
         <div>
           <label for="bip47MyNotificationAddress">Notification Address</label>
-          <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+          <div class="copy-wrapper">
+            <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+          </div>
         </div>
         <div>
           <label for="bip47MyNotificationPubKey">Notification Public Key (HEX)</label>
-          <textarea id="bip47MyNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+          <div class="copy-wrapper"><textarea id="bip47MyNotificationPubKey" class="textarea-input" readonly
+              rows="2"></textarea></div>
         </div>
         <div>
           <label for="bip47MyNotificationPrvKey">Notification Private Key (WIF)</label>
-          <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
+          <div class="copy-wrapper"><textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly
+              rows="2"></textarea></div>
         </div>
         <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
         <h4>Counterparty Details</h4>
         <div>
           <label for="bip47CPPaymentCode">Payment Code</label>
-          <textarea id="bip47CPPaymentCode" class="textarea-input" rows="3"></textarea>
+          <div class="copy-wrapper"><textarea id="bip47CPPaymentCode" class="textarea-input" rows="3"></textarea></div>
         </div>
         <section id="bip47CPGenSection" class="hidden">
           <div>
             <label for="bip47CPNotificationAddress">Notification Address</label>
-            <textarea id="bip47CPNotificationAddress" class="textarea-input" readonly rows="1"></textarea>
+            <div class="copy-wrapper"><textarea id="bip47CPNotificationAddress" class="textarea-input" readonly
+                rows="1"></textarea></div>
           </div>
           <div>
             <label for="bip47CPNotificationPubKey">Notification Public Key (HEX)</label>
-            <textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly rows="2"></textarea>
+            <div class="copy-wrapper"><textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly
+                rows="2"></textarea></div>
           </div>
           <section id="bip47AddressSection" class="">
             <p>
@@ -447,10 +454,7 @@
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP85')">More Info</button>
         <div class="warning">
-          <label>Warning</label>
-          <div>
-            This is an advanced feature and should only be used if you understand what it does.
-          </div>
+          <em>Warning!</em> This is an advanced feature and should only be used if you understand what it does.
         </div>
         <container class="bip85-container">
           <div class="bip85-item">
@@ -483,8 +487,8 @@
 
           <div class="bip85-item bip85">
             <label for="bip85ChildKey">BIP85 Child Key</label>
-            <textarea id="bip85ChildKey" class="bip85Field textarea-input private-data" readonly title="BIP85 Child Key"
-              rows="3"></textarea>
+            <div class="copy-wrapper"><textarea id="bip85ChildKey" class="bip85Field textarea-input private-data"
+                readonly title="BIP85 Child Key" rows="3"></textarea></div>
           </div>
         </container>
       </div>
@@ -537,13 +541,14 @@
     <div class="address-block">
       Path: <span class="address-details-text address-details--path">m/0/0'</span> <br>
       Address: <wbr>
-      <span class="address-details-text address-details--address">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
+      <span class="address-details-text address-details--address address-copy"
+        onclick="copyEventHandler(event)">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
       Public Key: <wbr>
-      <span
-        class="address-details-text address-details--pubKey">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+      <span class="address-details-text address-details--pubKey address-copy"
+        onclick="copyEventHandler(event)">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
       Private Key: <wbr>
-      <span
-        class="address-details-text address-details--prvKey">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+      <span class="address-details-text address-details--prvKey address-copy"
+        onclick="copyEventHandler(event)">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
     </div>
   </template>
   <template id="derivedAddressTemplate">
@@ -561,6 +566,19 @@
         <input type="number" class="address-end-index" value="19">
         <button class="address-button-generate btn">GENERATE</button>
       </div>
+    </div>
+  </template>
+  <template id="copyButtonTemplate">
+    <div class="copy-button hidden">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true"
+        class="copy-icon">
+        <path fill-rule="evenodd"
+          d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z">
+        </path>
+        <path fill-rule="evenodd"
+          d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z">
+        </path>
+      </svg>
     </div>
   </template>
   <script src="js/dom.js"></script>

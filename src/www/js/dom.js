@@ -86,6 +86,7 @@ const setupDom = () => {
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
+  DOM.copyWrapper = document.querySelectorAll('.copy-wrapper');
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
   // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
@@ -218,6 +219,8 @@ const setupDom = () => {
       adjustPanelHeight();
     });
   });
+  // Copy button
+  DOM.copyWrapper.forEach(setupCopyButton);
   // FOOTER: calculate copyright year
   document.querySelectorAll('.cYear').forEach((yearSpan) => {
     let output = '';
@@ -234,11 +237,7 @@ const setupDom = () => {
   document.getElementById('defaultOpenTab').click();
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
-    textElement.addEventListener('click', (event) => {
-      event.preventDefault();
-      const text = textElement.innerText || textElement.value;
-      copyTextToClipboard(text);
-    });
+    textElement.addEventListener('click', copyEventHandler);
   });
   // add listener for bip44 path inputs
   DOM.pathCoin.oninput = changePath;
@@ -264,6 +263,34 @@ const setupDom = () => {
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
+
+// Add Copy Buttons
+const setupCopyButton = (element) => {
+  if (!('content' in document.createElement('template'))) return;
+  const template = document.getElementById('copyButtonTemplate');
+  const clone = template.content.firstElementChild.cloneNode(true);
+
+  element.addEventListener('mouseenter', () => {
+    clone.classList.remove('hidden');
+  });
+  element.addEventListener('mouseleave', () => {
+    clone.classList.add('hidden');
+  });
+  clone.addEventListener('click', () => {
+    const textarea = element.querySelector('.textarea-input');
+    const text = normalizeString(textarea.value);
+    copyTextToClipboard(text);
+  });
+  element.appendChild(clone);
+};
+
+//
+const copyEventHandler = (event) => {
+  event.preventDefault();
+  const textElement = event.currentTarget;
+  const text = textElement.innerText || textElement.value;
+  copyTextToClipboard(text);
+};
 
 // BIP47 functions
 const pc = () => {
@@ -596,7 +623,6 @@ function fallbackCopyTextToClipboard(text) {
   try {
     const successful = document.execCommand('copy');
     let msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Fallback: Copying text command was ' + msg);
     toast('Copied to clipboard');
   } catch (err) {
     console.error('Fallback: Oops, unable to copy', err);
@@ -615,7 +641,6 @@ function copyTextToClipboard(text) {
   } else {
     navigator.clipboard.writeText(text).then(
       function () {
-        console.log('Async: Copying to clipboard was successful!');
         toast('Copied to clipboard');
       },
       function (err) {
@@ -989,8 +1014,8 @@ const calculateEntropy = async () => {
       timeToCrack = timeToCrack + ' - ' + z.feedback.warning;
     }
   } catch (e) {
-    console.log('Error detecting entropy strength with zxcvbn:');
-    console.log(e);
+    console.error('Error detecting entropy strength with zxcvbn:');
+    console.error(e);
   }
   const reqWords = parseInt(DOM.entropyMnemonicLengthSelect.value);
   //

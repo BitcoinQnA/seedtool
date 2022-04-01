@@ -227,7 +227,8 @@ textarea {
   background-color: #002933;
   color: var(--q-orange);
 }
-.one-click-copy {
+.one-click-copy,
+.address-copy {
   cursor: copy;
 }
 /* The Modal (background) */
@@ -280,6 +281,22 @@ footer {
   height: 50px;
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
+}
+.copy-icon {
+  color: var(--q-orange);
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+.copy-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 8px;
+  background: var(--q-blue);
+  box-shadow: 0 0 0 5px var(--q-blue);
+}
+.copy-wrapper {
+  position: relative;
 }
 #toast {
   visibility: hidden; /* Hidden by default. Visible on click */
