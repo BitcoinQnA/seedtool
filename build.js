@@ -21,7 +21,7 @@ console.log('Building HTML file...');
       const js = await readFile(scriptLocation, 'utf8');
       result = result.replace(
         array1[0],
-        `<script>
+        `<script async>
       ${js}
       <`
       );
