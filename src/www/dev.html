@@ -102,73 +102,75 @@
             </p>
           </div>
           <!-- Entropy Details -->
-          <div class="entropy-details--flex-container private-data" id="entropyDetailsContainer">
-            <div class="entropy-details--flex-item">
-              <label>Time to crack (zxcvbn using Filtered Entropy): </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Event count: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyEventCount"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Entropy type: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyEntropyType"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Avg Bits Per Event: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyBitsPerEvent"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Raw Entropy Words: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyRawWords"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Total Bits: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyTotalBits"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Filtered Entropy: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyFiltered"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Raw Binary: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyRawBinary"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Binary Checksum: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyBinaryChecksum"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Word Indexes: </label>
-              <span class="entropy-details--detail--text one-click-copy" id="entropyWordIndexes"></span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Mnemonic Length: </label>
-              <select class="entropy-details--detail--select" id="entropyMnemonicLength">
-                <option value="12" selected>12 Words</option>
-                <option value="15">15 Words</option>
-                <option value="18">18 Words</option>
-                <option value="21">21 Words</option>
-                <option value="24">24 Words</option>
-              </select>
-              <span id="weakEntropyOverrideWarning" class="warning hidden">
-                Insufficient entropy provided to make a seed for your selected Mnemonic Length.
-              </span>
-              <span id="weakEntropyWarning" class="warning hidden">
-                Unbiased entropy is too low. More entropy is highly advised!
-              </span>
-            </div>
-            <div class="entropy-details--flex-item">
-              <label>Entropy method: </label>
-              <select class="entropy-details--detail--select" id="entropyMethod">
-                <option value="binary">Binary [0-1] eg. 101010011</option>
-                <option value="base 6">Base 6 [0-5] eg. 123434014</option>
-                <option value="dice" selected>Dice [1-6] eg. 62535634</option>
-                <option value="base 10">Base 10 [0-9] eg. 90834528</option>
-                <option value="hexadecimal">Hex [0-9A-F] eg. 4187a8bfd9</option>
-                <option value="card">Card [A2-9TJQK][CDHS] eg.ahqs9dtc</option>
-              </select>
+          <div class="private-data">
+            <div class="entropy-details--flex-container" id="entropyDetailsContainer">
+              <div class="entropy-details--flex-item">
+                <label>Time to crack (zxcvbn using Filtered Entropy): </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Event count: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyEventCount"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Entropy type: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyEntropyType"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Avg Bits Per Event: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyBitsPerEvent"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Raw Entropy Words: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyRawWords"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Total Bits: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyTotalBits"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Filtered Entropy: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyFiltered"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Raw Binary: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyRawBinary"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Binary Checksum: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyBinaryChecksum"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Word Indexes: </label>
+                <span class="entropy-details--detail--text one-click-copy" id="entropyWordIndexes"></span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Mnemonic Length: </label>
+                <select class="entropy-details--detail--select" id="entropyMnemonicLength">
+                  <option value="12" selected>12 Words</option>
+                  <option value="15">15 Words</option>
+                  <option value="18">18 Words</option>
+                  <option value="21">21 Words</option>
+                  <option value="24">24 Words</option>
+                </select>
+                <span id="weakEntropyOverrideWarning" class="warning hidden">
+                  Insufficient entropy provided to make a seed for your selected Mnemonic Length.
+                </span>
+                <span id="weakEntropyWarning" class="warning hidden">
+                  Unbiased entropy is too low. More entropy is highly advised!
+                </span>
+              </div>
+              <div class="entropy-details--flex-item">
+                <label>Entropy method: </label>
+                <select class="entropy-details--detail--select" id="entropyMethod">
+                  <option value="binary">Binary [0-1] eg. 101010011</option>
+                  <option value="base 6">Base 6 [0-5] eg. 123434014</option>
+                  <option value="dice" selected>Dice [1-6] eg. 62535634</option>
+                  <option value="base 10">Base 10 [0-9] eg. 90834528</option>
+                  <option value="hexadecimal">Hex [0-9A-F] eg. 4187a8bfd9</option>
+                  <option value="card">Card [A2-9TJQK][CDHS] eg.ahqs9dtc</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
