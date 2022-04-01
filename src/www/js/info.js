@@ -13,15 +13,7 @@ window.infoHtml = {
     <li>this reason</li>
   </ul>
   `,
-  BIP32: /*html*/ `
-<h3>BIP32: Hierarchical Deterministic Wallets</h3>
-<p>
-  About BIP
-</p>
-<p>
-  Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki"
-    target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
-</p>
+  entropy: /*html*/ `
 <h3>Entropy</h3>
 <h4>What is Entropy?</h4>
 <p>
@@ -180,7 +172,18 @@ window.infoHtml = {
 <p>
   TODO: find a way to explain this... <a href="https://github.com/iancoleman/bip39/issues/435" target="_blank">Bias in
     dice based entropy #435</a>
-</p>`,
+</p>
+  `,
+  BIP32: /*html*/ `
+        <h3>BIP32: Hierarchical Deterministic Wallets</h3>
+        <p>
+          About BIP
+        </p>
+        <p>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki"
+            target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>
+        `,
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
