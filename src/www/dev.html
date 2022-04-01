@@ -64,12 +64,10 @@
         <button class="btn" onclick="openInfoModal(event, 'BIP32')">More Info</button>
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
-          <!-- <li>⌨️ Enter an existing BIP39 mnemonic</li> -->
           <li>🎲 Enter in your own entropy</li>
         </ul>
         <div class="tab">
           <button class="tabLinks" id="defaultOpenTab" onclick="tabSelect(event, 'Generate_Random')">🤖</button>
-          <!-- <button class="tabLinks" onclick="tabSelect(event, 'Input_Known')">⌨️</button> -->
           <button class="tabLinks" onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
         </div>
         <div id="Generate_Random" class="tabContent">
@@ -86,28 +84,12 @@
             <button class="btn generate"><b>GENERATE</b></button>
           </p>
         </div>
-
-        <!-- <div id="Input_Known" class="tabContent"> -->
-        <!-- TODO: Add other seed input types EG WIF, HEX, ETC -->
-        <!-- <p> -->
-        <!-- Typing your own random words will not -->
-        <!-- work since the words require a particular structure (the last word contains a checksum). -->
-        <!-- </p> -->
-
-        <!-- <label for="knownInputTextarea">Entropy</label> -->
-        <!-- <div class="textarea-wrapper"> -->
-        <!-- <textarea id="knownInputTextarea" rows="4" class="textarea-input" -->
-        <!-- placeholder="Type in your mnemonic words separated by spaces" autocomplete="off" autocorrect="off" -->
-        <!-- autocapitalize="off" spellcheck="false"></textarea> -->
-        <!-- </div> -->
-        <!-- </div> -->
-
         <div id="Input_Entropy" class="tabContent">
           <p class="warning"><strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
             this
             feature is used incorrectly.</p>
           <label for="entropy">Enter your own entropy:</label>
-          <div class="textarea-wrapper copy-wrapper">
+          <div class="textarea-wrapper copy-wrapper private-data">
             <textarea id="entropy" rows="4" class="textarea-input"
               placeholder="Accepts either binary, base 6, 6-sided dice, base 10, hexadecimal or cards"
               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
@@ -119,12 +101,8 @@
               </strong>
             </p>
           </div>
-          <div>
-            <!-- <input type="checkbox" id="entropyDetails" name="entropyDetails"> -->
-            <!-- <label for="entropyDetails">Show entropy details (for Cypherpunks!)</label> -->
-          </div>
           <!-- Entropy Details -->
-          <div class="entropy-details--flex-container" id="entropyDetailsContainer">
+          <div class="entropy-details--flex-container private-data" id="entropyDetailsContainer">
             <div class="entropy-details--flex-item">
               <label>Time to crack (zxcvbn using Filtered Entropy): </label>
               <span class="entropy-details--detail--text one-click-copy" id="entropyTimeToCrack"></span>
@@ -196,13 +174,14 @@
         </div>
         <div>
           <label for="root-key">BIP32 Root Key</label>
-          <div class="copy-wrapper">
-            <textarea id="bip32RootKey" class="root-key private-data textarea-input" autocomplete="off"
-              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <div class="copy-wrapper private-data">
+            <textarea id="bip32RootKey" class="root-key textarea-input" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
         <button class="btn" onclick="openInfoModal(event, 'BIP39')">More Info</button>
+        <label style="float: right;"><input type="checkbox" id="hidePrivateData">Hide all private information</label>
         <div class="warning bip39-invalid-phrase hidden">
           <label>INVALID BIP39 SEED PHRASE</label>
           <div>
@@ -212,23 +191,23 @@
         </div>
         <div>
           <label for="bip39Phrase">BIP39 Mnemonic (English)</label>
-          <div class="copy-wrapper">
-            <textarea id="bip39Phrase" class="phrase private-data textarea-input" autocomplete="off" autocorrect="off"
+          <div class="copy-wrapper private-data">
+            <textarea id="bip39Phrase" class="phrase textarea-input" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
-          <div class="copy-wrapper">
-            <textarea id="bip39Passphrase" class="passphrase private-data textarea-input" autocomplete="off"
-              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <div class="copy-wrapper private-data">
+            <textarea id="bip39Passphrase" class="passphrase textarea-input" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
         <div>
           <label for="bip39Seed">BIP39 Seed</label>
-          <div class="copy-wrapper">
-            <textarea id="bip39Seed" class="seed private-data textarea-input" autocomplete="off" autocorrect="off"
+          <div class="copy-wrapper private-data">
+            <textarea id="bip39Seed" class="seed textarea-input" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false"></textarea>
           </div>
         </div>
@@ -241,8 +220,8 @@
           </div>
           <div id="splitMnemonic" class="hidden">
             <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
-            <div class="copy-wrapper">
-              <textarea id="bip39PhraseSplit" class="phraseSplit private-data textarea-input"
+            <div class="copy-wrapper private-data">
+              <textarea id="bip39PhraseSplit" class="phraseSplit textarea-input"
                 title="Only 2 of 3 cards needed to recover." rows="3"></textarea>
             </div>
             <p>
@@ -310,9 +289,9 @@
           <label for="pathAccountXprv">
             <span>Account Extended Private Key</span>
           </label>
-          <div class="copy-wrapper">
-            <textarea id="pathAccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
-              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          <div class="copy-wrapper private-data">
+            <textarea id="pathAccountXprv" type="text" class="account-xprv textarea-input" readonly autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
           <label for="pathAccountXpub">
             <span>Account Extended Public Key</span>
@@ -343,9 +322,9 @@
         <label for="bip32AccountXprv">
           <span>BIP32 Extended Private Key</span>
         </label>
-        <div class="copy-wrapper">
-          <textarea id="bip32AccountXprv" type="text" class="account-xprv private-data textarea-input" readonly
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div class="copy-wrapper private-data">
+          <textarea id="bip32AccountXprv" type="text" class="account-xprv textarea-input" readonly autocomplete="off"
+            autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
         </div>
         <label for="bip32AccountXpub">
           <span>BIP32 Extended Public Key</span>
@@ -359,8 +338,8 @@
             Note these addresses are derived from the BIP32 Extended Key
           </p>
           <div>
-            <a class="csv-download-link hidden" href="data:text/csv;charset=utf-8,path,address,public key,private key"
-              target="_blank">Download CSV
+            <a class="csv-download-link hidden private-data"
+              href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
               file</a>
           </div>
           <div class="address-display address-display-content">
@@ -401,8 +380,9 @@
         </div>
         <div>
           <label for="bip47MyNotificationPrvKey">Notification Private Key (WIF)</label>
-          <div class="copy-wrapper"><textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly
-              rows="2"></textarea></div>
+          <div class="copy-wrapper private-data">
+            <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
+          </div>
         </div>
         <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
         <h4>Counterparty Details</h4>
@@ -439,7 +419,7 @@
               addresses from index <input type="number" id="bip47StartIndex" value="0" min="0">
             </p>
             <div>
-              <a class="bip47-csv-download-link hidden"
+              <a class="bip47-csv-download-link hidden private-data"
                 href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV
                 file</a>
             </div>
@@ -487,7 +467,7 @@
 
           <div class="bip85-item bip85">
             <label for="bip85ChildKey">BIP85 Child Key</label>
-            <div class="copy-wrapper"><textarea id="bip85ChildKey" class="bip85Field textarea-input private-data"
+            <div class="copy-wrapper private-data"><textarea id="bip85ChildKey" class="bip85Field textarea-input"
                 readonly title="BIP85 Child Key" rows="3"></textarea></div>
           </div>
         </container>
@@ -547,25 +527,8 @@
       <span class="address-details-text address-details--pubKey address-copy"
         onclick="copyEventHandler(event)">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
       Private Key: <wbr>
-      <span class="address-details-text address-details--prvKey address-copy"
+      <span class="address-details-text address-details--prvKey address-copy private-data"
         onclick="copyEventHandler(event)">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
-    </div>
-  </template>
-  <template id="derivedAddressTemplate">
-    <div>
-      <div>
-        <a href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank">Download CSV file</a>
-      </div>
-      <div class="address-display address-display-content">
-        <!-- Populated By JavaScript -->
-      </div>
-      <div>
-        <span>Display addresses from index </span>
-        <input type="number" class="address-start-index" value="0">
-        <span>to index </span>
-        <input type="number" class="address-end-index" value="19">
-        <button class="address-button-generate btn">GENERATE</button>
-      </div>
     </div>
   </template>
   <template id="copyButtonTemplate">

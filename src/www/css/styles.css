@@ -44,7 +44,8 @@ p {
   text-align: justify;
   text-justify: inter-word;
 }
-.hidden {
+.hidden,
+.private-data--hidden {
   display: none;
 }
 .small {
@@ -200,7 +201,8 @@ textarea {
   padding: 2px;
   border-radius: 5px;
 }
-.address-display {
+.address-display,
+#bip47AddressDisplay {
   max-height: 50vh;
   overflow-y: scroll;
   border-top: 1px solid;

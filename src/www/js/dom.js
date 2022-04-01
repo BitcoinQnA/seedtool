@@ -175,6 +175,7 @@ const setupDom = () => {
   DOM.bip141ScriptSelect = document.getElementById('bip141ScriptSemantics');
   DOM.bip32AccountXprv = document.getElementById('bip32AccountXprv');
   DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
+  DOM.hidePrivateData = document.getElementById('hidePrivateData');
 
   network = bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
@@ -219,6 +220,8 @@ const setupDom = () => {
       adjustPanelHeight();
     });
   });
+  // hide private data
+  DOM.hidePrivateData.oninput = hideAllPrivateData;
   // Copy button
   DOM.copyWrapper.forEach(setupCopyButton);
   // FOOTER: calculate copyright year
@@ -263,6 +266,20 @@ const setupDom = () => {
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
+
+// Hide all private data
+const hideAllPrivateData = () => {
+  if (DOM.hidePrivateData.checked) {
+    document.querySelectorAll('.private-data').forEach((el) => {
+      el.classList.add('private-data--hidden');
+    });
+  } else {
+    document.querySelectorAll('.private-data').forEach((el) => {
+      el.classList.remove('private-data--hidden');
+    });
+  }
+  adjustPanelHeight();
+};
 
 // Add Copy Buttons
 const setupCopyButton = (element) => {
@@ -396,7 +413,7 @@ const injectBip47Addresses = (addressDataArray) => {
     // Add the clone to the DOM
     DOM.bip47AddressListContainer.appendChild(clone);
   });
-  adjustPanelHeight();
+  hideAllPrivateData();
   DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
     csv
   )}`;
@@ -756,8 +773,8 @@ const injectAddresses = (addressDataArray) => {
     }
     // Add the clone to the DOM
     DOM.addressListContainer.appendChild(clone);
-    adjustPanelHeight();
   });
+  hideAllPrivateData();
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
