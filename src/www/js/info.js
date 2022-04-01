@@ -99,7 +99,15 @@ window.infoHtml = {
   BIP44: /*html*/ `
         <h3>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h3>
         <p>
-          About BIP
+        BIP44 defines the standard for deriving P2PKH (Pay to Public Key Hash) addresses, typically referred to as 'Legacy' addresses. This BIP was introduced 
+        to solidify the five level hierarchy used on top of the BIP32 'Hieracrhical Deterministic structure' used most modern bitcoin wallets. The five levels
+        under the master private key (m) are:-
+
+        <pre>m / purpose’ / coin_type’ / account’ / change / address_index</pre>
+        
+        BIP44 also uses similar address types to BIP32, beginning with a <b>'1'</b> and defines that wallets adopting the standard should adopt the <b>'xpub'</b> or <b>'xprv'</b>
+        prefixes when displaying extended public/private keys. These legacy tpye addresses are rarely used in modern bitcoin wallets due to
+        their larger transaction size resulting in larger fees.
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BIP44 page</a>
@@ -107,7 +115,12 @@ window.infoHtml = {
   BIP47: /*html*/ `
         <h3>BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</h3>
         <p>
-          About BIP
+        BIP47 defines the standard for creating a payment code which can be publicly advertised and associated with a real-life identity (or pseudonym) without 
+        creating the loss of security or privacy inherent to address re-use. BIP47 does not define an address type, but does define a way for Alice to generate
+        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. 
+        At the time of writing, the only wallets supporting BIP47 are Samourai and Sparrow. Although here is active development for implementations
+        into BDK and BlueWallet.  
+
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BIP47 page</a>
@@ -115,10 +128,10 @@ window.infoHtml = {
   BIP49: /*html*/ `
         <h3>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h3>
         <p>
-        BIP49 defines the standard for deriving P2SH-P2WPKH addresses, typically referred to as 'Wrapped Segwit' addresses. This BIP
-        was introduced as a compatability fix to enable older wallets to send to wallets conforming to newer standards. Wrapped Segwit addresses beginning
-        with <b>'3'</b> save on transaction fees when compared to older legacy types. This saving, although not those gained by wallets adopting
-        Native Segwit, is achieve via an optimised transaction structure. <br/><br/>
+        BIP49 defines the standard for deriving P2SH-P2WPKH (Pay to Script Hash - Pay to Witness Public Key Hash) addresses, typically referred to as 
+        'Wrapped Segwit' addresses. This BIP was introduced as a compatability fix to enable older wallets to send to wallets conforming to newer standards.
+        Wrapped Segwit addresses beginning with <b>'3'</b> save on transaction fees when compared to older legacy types. This saving, although not as large as
+        those gained by wallets adopting Native Segwit, is achieved via an optimised transaction structure. <br/><br/>
         BIP49 also defines that wallets adopting the standard should adopt the <b>'ypub'</b> or <b>'yprv'</b> prefixes when displaying extended public/private keys.
         Wrapped Segwit addresses defined in this BIP are quickly being replaced in wallet software by those confirming to the BIP84 standard.
         </p>
@@ -128,7 +141,7 @@ window.infoHtml = {
   BIP84: /*html*/ `
         <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
         <p>
-          BIP84 defines the standard for deriving P2WPKH addresses, typically referred to as 'Native Segwit' addresses.
+          BIP84 defines the standard for deriving P2WPKH (Pay to Withness Public Key Hash) addresses, typically referred to as 'Native Segwit' addresses.
           Segwit addresses beginning with <b>'bc1q'</b> are the most commonly used address type for modern bitcoin wallets. This is due to their ability to construct
           smaller transactions that save the user fees when spending. 
 
@@ -140,7 +153,10 @@ window.infoHtml = {
   BIP85: /*html*/ `
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
         <p>
-          About BIP
+         BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can derive multiple 'Child Seeds' from a single master mnemonic seed.
+         This enables a user to populate the seed words of many wallets whilst only having a physical backup of a single master mnemonic. Should a child seed 
+         be lost with no offline backup, it can be regenerated in any BIP85 compatible hardware or software, so long as the user knows the master mnemonic 
+         and index number of the lost child seed.    
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BIP85 page</a>
