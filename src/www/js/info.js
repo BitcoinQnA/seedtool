@@ -175,62 +175,98 @@ window.infoHtml = {
 </p>
   `,
   BIP32: /*html*/ `
-        <h3>BIP32: Hierarchical Deterministic Wallets</h3>
-        <p>
-          About BIP
-        </p>
-        <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki"
-            target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
-        </p>
-        `,
+  <h3>BIP32: Mnemonic code for generating deterministic keys</h3>
+  <p>
+    BIP32 defines the standard for generating 'Hierarchical Deterministic (HD)' wallets in bitcoin.
+    This BIP enables users to derive an infinite amount of public/private key pairs that are all dererministically 
+    linked and recoverable from a single master seed. <br/><br/>BIP32 also enables watch-only wallets in which a 
+    user case receive bitcoin and monitor a entire wallet without the need to interact directly
+    with a private key. Due to these advancements, BIP32 forms the basis of all modern bitcoin wallets.    
+        
+  </p>
+  <p>
+    Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">BIP32 page </a>
+  </p>`,
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
-          About BIP
+          BIP39 defines a standard for generating a human readable 'Mnemonic Code' (also known as your 'Seed Words') from the generated raw binary. Seed words
+          are much easier for humans to manage than the long string of letters and numbers defined in BIP32. Due to the simplified nature of Mnemonics, BIP39 has
+          seen wide adoption across 99% of Bitcoin wallets. <br/><br/>Want to move your funds from one wallet to another? Just enter your seed words 
+          (and passphrase if applicable) to the new wallet software. Below demonstrates the difference in readability between a root key and a BIP39 Mnemonic.   
+          
+          <h4>Here is an example of a BIP32 root key :-</h4> <pre>xprv9s21ZrQH143K2zHHcPMaoE4yw75u2TErFbGjLNuGfFrjnJCA9XuqXwsE8eitS3yp9XPhB3s2EdA4yWCkez2oXp249tBLBsKA7sDS9bhfMoQ</pre> 
+          
+          <h4>Here is the BIP39 Mnemonic of the same key:-</h4> <pre>pass hidden viable analyst disagree secret web cruise dumb offer dune reveal</pre><br/>   
+              
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP39 page </a>
         </p>`,
   BIP44: /*html*/ `
         <h3>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h3>
         <p>
-          About BIP
+        BIP44 defines the standard for deriving P2PKH (Pay to Public Key Hash) addresses, typically referred to as 'Legacy' addresses. This BIP was introduced 
+        to solidify the five level hierarchy used on top of the BIP32 'Hieracrhical Deterministic structure' used most modern bitcoin wallets. The five levels
+        under the master private key (m) are:-
+
+        <pre>m / purpose’ / coin_type’ / account’ / change / address_index</pre>
+        
+        BIP44 also uses similar address types to BIP32, beginning with a <b>'1'</b> and defines that wallets adopting the standard should adopt the <b>'xpub'</b> or <b>'xprv'</b>
+        prefixes when displaying extended public/private keys. These legacy tpye addresses are rarely used in modern bitcoin wallets due to
+        their larger transaction size resulting in larger fees.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BIP44 page</a>
         </p>`,
   BIP47: /*html*/ `
         <h3>BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</h3>
         <p>
-          About BIP
+        BIP47 defines the standard for creating a payment code which can be publicly advertised and associated with a real-life identity (or pseudonym) without 
+        creating the loss of security or privacy inherent to address re-use. BIP47 does not define an address type, but does define a way for Alice to generate
+        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. <br/><br/> 
+        At the time of writing, the only wallets supporting BIP47 are Samourai and Sparrow. Although here is active development for implementations
+        into BDK and BlueWallet.  
+
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BIP47 page</a>
         </p>`,
   BIP49: /*html*/ `
         <h3>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h3>
         <p>
-          About BIP
+        BIP49 defines the standard for deriving P2SH-P2WPKH (Pay to Script Hash - Pay to Witness Public Key Hash) addresses, typically referred to as 
+        'Wrapped Segwit' addresses. This BIP was introduced as a compatability fix to enable older wallets to send to wallets conforming to newer standards.
+        Wrapped Segwit addresses beginning with <b>'3'</b> save on transaction fees when compared to older legacy types. This saving, although not as large as
+        those gained by wallets adopting Native Segwit, is achieved via an optimised transaction structure. <br/><br/>
+        BIP49 also defines that wallets adopting the standard should adopt the <b>'ypub'</b> or <b>'yprv'</b> prefixes when displaying extended public/private keys.
+        Wrapped Segwit addresses defined in this BIP are quickly being replaced in wallet software by those confirming to the BIP84 standard.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BIP49 page</a>
         </p>`,
   BIP84: /*html*/ `
         <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
         <p>
-          About BIP
+          BIP84 defines the standard for deriving P2WPKH (Pay to Withness Public Key Hash) addresses, typically referred to as 'Native Segwit' addresses.
+          Segwit addresses beginning with <b>'bc1q'</b> are the most commonly used address type for modern bitcoin wallets. This is due to their ability to construct
+          smaller transactions that save the user fees when spending. <br/><br/>
+
+          BIP84 also defines that wallets adopting the standard should adopt the <b>'zpub'</b> or <b>'zprv'</b> prefixes when displaying extended public/private keys.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BIP84 page</a>
         </p>`,
   BIP85: /*html*/ `
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
         <p>
-          About BIP
+         BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can derive multiple 'Child Seeds' from a single master mnemonic seed.
+         This enables a user to populate the seed words of many wallets whilst only having a physical backup of a single master mnemonic. <br/><br/> Should a child seed 
+         be lost with no offline backup, it can be regenerated in any BIP85 compatible hardware or software, so long as the user knows the master mnemonic 
+         and index number of the lost child seed.    
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BIP85 page</a>
         </p>`,
   BIP141: /*html*/ `
         <h3>BIP141: Segregated Witness (Consensus layer)</h3>
