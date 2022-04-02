@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head lang="en">
   <meta charset="utf-8" />
@@ -63,7 +63,7 @@
       <hr>
       <button class="accordion">Seed Generation/Input</button>
       <div class="panel">
-        <button class="btn" onclick="openInfoModal(event, 'BIP32')">More Info</button>
+        <button class="btn" onclick="openInfoModal(event, 'entropy')">More Info</button>
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
           <li>🎲 Enter in your own entropy</li>
@@ -88,8 +88,7 @@
         </div>
         <div id="Input_Entropy" class="tabContent">
           <p class="warning"><strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
-            this
-            feature is used incorrectly.</p>
+            this feature is used incorrectly.Click on More Info above to learn about it.</p>
           <label for="entropy">Enter your own entropy:</label>
           <div class="textarea-wrapper copy-wrapper private-data">
             <textarea id="entropy" rows="4" class="textarea-input"
@@ -248,7 +247,7 @@
         </select>
         <section id="bip32AddressSection" class="bipsContent">
           <h4>BIP32: Hierarchical Deterministic Wallets</h4>
-          <button class="btn" onclick="openInfoModal(event, 'BIP44')">More Info</button><br>
+          <button class="btn" onclick="openInfoModal(event, 'BIP32')">More Info</button><br>
         </section>
         <section id="bip44AddressSection" class="hidden bipsContent">
           <h4>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h4>
@@ -437,9 +436,8 @@
       <button class="accordion">BIP85: Deterministic Entropy</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP85')">More Info</button>
-        <div class="warning">
-          <em>Warning!</em> This is an advanced feature and should only be used if you understand what it does.
-        </div>
+        <p class="warning"><strong>Warning!</strong> This is an advanced feature and should only be used if you
+          understand what it does. Click on More Info above to learn about it.</p>
         <container class="bip85-container">
           <div class="bip85-item">
             <label for="bip85Application">BIP85 Application</label>
@@ -548,7 +546,6 @@
       </svg>
     </div>
   </template>
-  <script src="js/dom.js"></script>
   <script src="js/lib/bitcoin.js"></script>
   <script src="js/lib/bip32.js"></script>
   <script src="js/lib/bip39.js"></script>
@@ -558,6 +555,7 @@
   <script src="js/lib/entropy.js"></script>
   <script src="js/lib/levenshtein.js"></script>
   <script src="js/lib/zxcvbn.js"></script>
+  <script src="js/dom.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;
     const setTimer = () => {

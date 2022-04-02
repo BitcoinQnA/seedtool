@@ -208,6 +208,9 @@ textarea {
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
+.bip85-item {
+  margin-top: 5px;
+}
 #bip141ScriptSemantics,
 #derivedPathSelect,
 #bip85Application,
