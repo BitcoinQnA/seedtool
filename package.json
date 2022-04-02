@@ -6,11 +6,18 @@
   "scripts": {
     "dev": "nodemon ./src/server.js",
     "build": "node ./build.js",
+    "git": "npm run build && git add . && git commit -m \"$MSG\" && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SuperPhatArrow",
   "license": "MIT",
   "devDependencies": {
+    "@samouraiwallet/bip47": "^0.6.1",
+    "bip32": "^1.0.4",
+    "bip39": "^3.0.4",
+    "bip85": "^0.0.3",
+    "bitcoinjs-lib": "^4.0.5",
+    "browserify": "^17.0.0",
     "fastify": "^3.27.2",
     "fastify-static": "^4.5.0",
     "nodemon": "^2.0.15",

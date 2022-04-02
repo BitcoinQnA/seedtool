@@ -26,7 +26,7 @@ body {
 }
 .content {
   padding: 40px;
-  max-width: 650px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 h1 {
@@ -44,7 +44,8 @@ p {
   text-align: justify;
   text-justify: inter-word;
 }
-.hidden {
+.hidden,
+.private-data--hidden {
   display: none;
 }
 .small {
@@ -55,6 +56,8 @@ p {
   color: var(--q-blue);
   border: 1px solid var(--q-white);
   border-radius: 2px;
+  padding: 5px;
+  margin: 10px;
 }
 .warning {
   color: var(--q-blue);
@@ -79,6 +82,10 @@ textarea {
   width: 100%;
   height: auto;
 }
+.textarea-input {
+  background-color: var(--q-light-blue);
+  color: var(--q-white);
+}
 .accordion {
   color: var(--q-white);
   background-color: var(--q-blue);
@@ -90,9 +97,9 @@ textarea {
   outline: none;
   transition: 0.4s;
 }
-.accordion.active,
+.accordion.accordion--active,
 .accordion:hover {
-  background-color: var(--q-blue);
+  background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
 .panel {
@@ -100,7 +107,7 @@ textarea {
   background-color: var(--q-blue);
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.2s ease-out;
+  transition: max-height 0.2s ease-in-out;
 }
 .accordion:after {
   content: '\02795';
@@ -109,29 +116,46 @@ textarea {
   float: right;
   margin-left: 5px;
 }
-.accordion.active:after {
+.accordion.accordion--active:after {
   content: '\2796';
 }
 .tiny {
   font-size: xx-small;
 }
-.tab {
+.tab,
+.tabBips {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
 }
-.tab button {
+.tab-addresses {
+  height: 50px;
+}
+.tab button,
+.tabBips button,
+.tab-addresses button {
   background-color: inherit;
+  color: var(--q-white);
   float: left;
   border: none;
   outline: none;
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
-  width: calc(100% / 3);
 }
+.tabBips button {
+  width: 20%;
+}
+.tab-addresses button,
+.tab button {
+  width: 50%;
+}
+.tabBips button:hover,
+.tabBips button.tab--active,
 .tab button:hover,
-.tab button.active {
+.tab button.tab--active,
+.tab-addresses button:hover,
+.tab-addresses button.tab-addresses--active {
   background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
@@ -141,6 +165,9 @@ textarea {
   border: 1px solid var(--q-white);
   border-top: none;
 }
+/* .entropy-details--flex-container {
+  display: none;
+} */
 .entropy-details--flex-container {
   display: flex;
   flex-flow: row wrap;
@@ -152,13 +179,46 @@ textarea {
   padding: 1px;
   margin: 1px;
   text-align: center;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-.entropy-details--detail--text {
-  background-color: var(--q-white);
-  color: var(--q-blue);
+.entropy-details--detail--text,
+.address-details-text {
+  background-color: var(--q-light-blue);
+  color: var(--q-white);
   font-family: monospace;
   border-radius: 2px;
   padding: 2px;
+}
+.bip44-text-input {
+  width: 50px;
+}
+.address-block {
+  border: 1px solid var(--q-white);
+  overflow: hidden;
+  margin-top: 3px;
+  padding: 2px;
+  border-radius: 5px;
+}
+.address-display,
+#bip47AddressDisplay {
+  max-height: 50vh;
+  overflow-y: scroll;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+}
+.bip85-item {
+  margin-top: 5px;
+}
+#bip141ScriptSemantics,
+#derivedPathSelect,
+#bip85Application,
+#bip85MnemonicLength {
+  width: 100%;
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
+  padding: 8px;
 }
 .info-button {
   background-color: var(--q-blue);
@@ -171,6 +231,10 @@ textarea {
 .info-button:hover {
   background-color: #002933;
   color: var(--q-orange);
+}
+.one-click-copy,
+.address-copy {
+  cursor: copy;
 }
 /* The Modal (background) */
 .modal {
@@ -223,6 +287,104 @@ footer {
   border-top: 1px solid var(--q-orange);
   background-color: var(--q-blue);
 }
+.copy-icon {
+  color: var(--q-orange);
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+.copy-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 8px;
+  background: var(--q-blue);
+  box-shadow: 0 0 0 5px var(--q-blue);
+}
+.copy-wrapper {
+  position: relative;
+}
+#toast {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; /* Set a default minimum width */
+  margin-left: -125px; /* Divide value of min-width by 2 */
+  background-color: var(--q-orange); /* Black background color */
+  color: var(--q-blue); /* White text color */
+  text-align: center; /* Centered text */
+  border-radius: 20px; /* Rounded borders */
+  padding: 16px; /* Padding */
+  position: fixed; /* Sit on top of the screen */
+  z-index: 2; /* Add a z-index if needed */
+  left: 50%; /* Center the toast */
+  bottom: 30px; /* 30px from the bottom */
+  box-shadow: 0 0 4px 2px var(--q-white); /* glow */
+}
+#toast-background {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+  cursor: not-allowed;
+}
+/* Show the toast when clicking on a button (class added with JavaScript) */
+#toast.show-toast,
+#toast-background.show-toast {
+  visibility: visible; /* Show the toast */
+  /* Add animation: Take 0.5 seconds to fade in and out the toast.
+  However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+  animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
+}
+
+/* Animations to fade the toast in and out */
+@-webkit-keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeIn {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
 .chip {
   display: inline-block;
   padding: 0 25px;
@@ -235,6 +397,10 @@ footer {
   box-shadow: 0 0 4px 2px var(--q-orange);
   margin: 4px;
   cursor: pointer;
+}
+
+.chip:hover {
+  background-color: var(--q-light-blue);
 }
 
 .chip-img {

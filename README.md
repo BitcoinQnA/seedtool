@@ -44,6 +44,11 @@ npm run build
 ```
 builds the output html file to the dist directory for distribution
 
+### GIT add, commit and push
+```
+MSG="Added this awesome new feature" npm run git
+```
+
 ### Test
 ```
 npm test
