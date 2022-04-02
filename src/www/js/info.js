@@ -14,78 +14,24 @@ window.infoHtml = {
   </ul>
   `,
   BIP32: /*html*/ `
-        <h3>BIP32: Hierarchical Deterministic Wallets</h3>
-        <p>
-          About BIP
-        </p>
-        <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
-        </p>
-        <h4>Entropy</h4>
-        <p>
-          <span>Entropy values should not include the BIP39 checksum. This is automatically added by the tool.</span>
-        </p>
-        <p>
-          <span>
-            Entropy values must be sourced from a
-            <a href="https://en.wikipedia.org/wiki/Random_number_generation" target="_blank">strong source of
-              randomness</a>.
-          </span>
-          <span>This means flipping a fair coin, rolling a fair dice, noise measurements etc.</span>
-          <span>
-            Do <strong>NOT</strong> use phrases from books, lyrics from songs, your birthday or street address,
-            keyboard mashing, or anything you <i>think</i> is random, because chances are overwhelming it isn't
-            random enough for the needs of this tool.
-          </span>
-        </p>
-        <p>
-          <strong><span>Do not store entropy.</span></strong>
-        </p>
-        <p>
-          <span>Storing entropy (such as keeping a deck of cards in a specific shuffled order) is unreliable compared to
-            storing a mnemonic.</span>
-          <span>Instead of storing entropy, store the mnemonic generated from the entropy.</span>
-          <span><a href="https://en.wikipedia.org/wiki/Steganography#Physical" target="_blank">Steganography</a> may be
-            beneficial when storing the mnemonic.</span>
-        </p>
-        <p>
-          <span>
-            The random mnemonic generator on this page uses a
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues"
-              target="_blank">cryptographically secure random number generator</a>.
-          </span>
-          <span>The built in random generator can generally be trusted more than your own intuition about
-            randomness.</span>
-          <span>If cryptographic randomness isn't available in your browser, this page will show a warning and the
-            generate
-            button will not work.</span>
-          <span>In that case you might choose to use your own source of entropy.</span>
-        </p>
-        <p>
-          <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank">You are not a
-            good
-            source of entropy.</a>
-        </p>
-        <p>
-          <span>Card entropy has been implemented assuming cards are replaced, not drawn one after another.</span>
-          <span>A full deck with replacement generates 232 bits of entropy (21 words). A full deck without replacement
-            generates 225 bits of entropy (21 words).</span>
-          <span>Card entropy changed significantly from v0.4.3 to v0.5.0. The old version can be accessed at
-            <a href="https://github.com/iancoleman/bip39/releases/tag/0.4.3">
-              here
-            </a>
-            or
-            <a href="https://web.archive.org/web/20201018232020/https://iancoleman.io/bip39/">
-              here
-            </a>
-          </span>
-        </p>`,
+  <h3>BIP32: Mnemonic code for generating deterministic keys</h3>
+  <p>
+    BIP32 defines the standard for generating 'Hierarchical Deterministic (HD)' wallets in bitcoin.
+    This BIP enables users to derive an infinite amount of public/private key pairs that are all dererministically 
+    linked and recoverable from a single master seed. <br/><br/>BIP32 also enables watch-only wallets in which a 
+    user case receive bitcoin and monitor a entire wallet without the need to interact directly
+    with a private key. Due to these advancements, BIP32 forms the basis of all modern bitcoin wallets.    
+        
+  </p>
+  <p>
+    Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">BIP32 page </a>
+  </p>`,
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
           BIP39 defines a standard for generating a human readable 'Mnemonic Code' (also known as your 'Seed Words') from the generated raw binary. Seed words
           are much easier for humans to manage than the long string of letters and numbers defined in BIP32. Due to the simplified nature of Mnemonics, BIP39 has
-          seen universal adoption across 99% of the Bitcoin wallet ecosystem. Want to move your funds from one wallet to another? Just enter your seed words 
+          seen wide adoption across 99% of Bitcoin wallets. <br/><br/>Want to move your funds from one wallet to another? Just enter your seed words 
           (and passphrase if applicable) to the new wallet software. Below demonstrates the difference in readability between a root key and a BIP39 Mnemonic.   
           
           <h4>Here is an example of a BIP32 root key :-</h4> <pre>xprv9s21ZrQH143K2zHHcPMaoE4yw75u2TErFbGjLNuGfFrjnJCA9XuqXwsE8eitS3yp9XPhB3s2EdA4yWCkez2oXp249tBLBsKA7sDS9bhfMoQ</pre> 
@@ -117,7 +63,7 @@ window.infoHtml = {
         <p>
         BIP47 defines the standard for creating a payment code which can be publicly advertised and associated with a real-life identity (or pseudonym) without 
         creating the loss of security or privacy inherent to address re-use. BIP47 does not define an address type, but does define a way for Alice to generate
-        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. 
+        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. <br/><br/> 
         At the time of writing, the only wallets supporting BIP47 are Samourai and Sparrow. Although here is active development for implementations
         into BDK and BlueWallet.  
 
@@ -143,7 +89,7 @@ window.infoHtml = {
         <p>
           BIP84 defines the standard for deriving P2WPKH (Pay to Withness Public Key Hash) addresses, typically referred to as 'Native Segwit' addresses.
           Segwit addresses beginning with <b>'bc1q'</b> are the most commonly used address type for modern bitcoin wallets. This is due to their ability to construct
-          smaller transactions that save the user fees when spending. 
+          smaller transactions that save the user fees when spending. <br/><br/>
 
           BIP84 also defines that wallets adopting the standard should adopt the <b>'zpub'</b> or <b>'zprv'</b> prefixes when displaying extended public/private keys.
         </p>
@@ -154,7 +100,7 @@ window.infoHtml = {
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
         <p>
          BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can derive multiple 'Child Seeds' from a single master mnemonic seed.
-         This enables a user to populate the seed words of many wallets whilst only having a physical backup of a single master mnemonic. Should a child seed 
+         This enables a user to populate the seed words of many wallets whilst only having a physical backup of a single master mnemonic. <br/><br/> Should a child seed 
          be lost with no offline backup, it can be regenerated in any BIP85 compatible hardware or software, so long as the user knows the master mnemonic 
          and index number of the lost child seed.    
         </p>
