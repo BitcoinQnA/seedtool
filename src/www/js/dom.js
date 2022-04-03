@@ -1,6 +1,20 @@
-// mnemonics is populated as required by getLanguage
-// const mnemonics = { english: new Mnemonic('english') };
-// const mnemonic = mnemonics['english'];
+/**
+______ _ _            _       _____        ___  
+| ___ (_) |          (_)     |  _  |      / _ \ 
+| |_/ /_| |_ ___ ___  _ _ __ | | | |_ __ / /_\ \
+| ___ \ | __/ __/ _ \| | '_ \| | | | '_ \|  _  |
+| |_/ / | || (_| (_) | | | | \ \/' / | | | | | |
+\____/|_|\__\___\___/|_|_| |_|\_/\_\_| |_\_| |_/
+                                                
+                                                
+ _____               _   _____           _ 
+/  ___|             | | |_   _|         | |
+\ `--.  ___  ___  __| |   | | ___   ___ | |
+ `--. \/ _ \/ _ \/ _` |   | |/ _ \ / _ \| |
+/\__/ /  __/  __/ (_| |   | | (_) | (_) | |
+\____/ \___|\___|\__,_|   \_/\___/ \___/|_|
+                                           
+*/
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
@@ -8,20 +22,10 @@ let currentBip = 'bip84';
 let network;
 let isTestnet = false;
 let wordList = [];
-let showIndex = true;
-let showAddress = true;
-let showPubKey = true;
-let showPrivKey = true;
-let showQr = false;
 let myPayCode = null;
 let bobPayCode = null;
-
 let entropyTypeAutoDetect = true;
-let entropyChangeTimeoutEvent = null;
-let phraseChangeTimeoutEvent = null;
-let seedChangedTimeoutEvent = null;
-let rootKeyChangedTimeoutEvent = null;
-
+const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
   bitcoin: {
