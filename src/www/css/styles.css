@@ -208,6 +208,13 @@ textarea {
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
+.bip47-robot {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border-radius: 50%;
+  border: 5px solid var(--q-orange);
+}
 .bip85-item {
   margin-top: 5px;
 }
