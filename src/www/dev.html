@@ -361,7 +361,8 @@
       <button class="accordion">BIP47: Reusable Payment Codes</button>
       <div class="panel">
         <button class="btn" onclick="openInfoModal(event, 'BIP47')">More Info</button>
-        <label class="hidden"><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't work
+        <label style="float: right;"><input type="checkbox" id="bip47UsePaynym"> Use paynym.is online directory (won't
+          work
           offline)</label>
         <h4>My Details</h4>
         <div>
@@ -387,7 +388,7 @@
             <textarea id="bip47MyNotificationPrvKey" class="textarea-input" readonly rows="2"></textarea>
           </div>
         </div>
-        <section id="bip47PaynymSection" class="hidden">Paynym.is details</section>
+        <section class="bip47PaynymSection hidden" id="bip47MyRobotSection">Paynym.is details</section>
         <h4>Counterparty Details</h4>
         <div>
           <label for="bip47CPPaymentCode">Payment Code</label>
@@ -404,6 +405,7 @@
             <div class="copy-wrapper"><textarea id="bip47CPNotificationPubKey" class="textarea-input" readonly
                 rows="2"></textarea></div>
           </div>
+          <section class="bip47PaynymSection hidden" id="bip47CPRobotSection"></section>
           <section id="bip47AddressSection" class="">
             <p>
               Note these addresses are derived from your private key and the public key of your counterparty.

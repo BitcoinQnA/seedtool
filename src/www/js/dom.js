@@ -147,7 +147,7 @@ const setupDom = () => {
   DOM.bip47MyNotificationPrvKey = document.getElementById(
     'bip47MyNotificationPrvKey'
   );
-  DOM.bip47PaynymSection = document.getElementById('bip47PaynymSection');
+  DOM.bip47PaynymSections = document.querySelectorAll('.bip47PaynymSection');
   DOM.bip47CPPaymentCode = document.getElementById('bip47CPPaymentCode');
   DOM.bip47CPGenSection = document.getElementById('bip47CPGenSection');
   DOM.bip47CPNotificationAddress = document.getElementById(
@@ -322,12 +322,56 @@ const ph = () => {
 };
 
 const togglePaynym = () => {
-  if (DOM.bip47UsePaynym.checked) {
-    DOM.bip47PaynymSection.classList.remove('hidden');
-  } else {
-    DOM.bip47PaynymSection.classList.add('hidden');
-  }
+  DOM.bip47PaynymSections.forEach((element) => {
+    if (DOM.bip47UsePaynym.checked) {
+      element.classList.remove('hidden');
+    } else {
+      element.classList.add('hidden');
+    }
+  });
+  fetchRobotImages();
 };
+
+const fetchRobotImages = async () => {
+  const url = 'https://paynym.is/preview/';
+  const myPayCode = normalizeString(DOM.bip47MyPaymentCode.value);
+  const bobPayCode = normalizeString(DOM.bip47CPPaymentCode.value);
+  // Only if user wants it and there is at least one payment code
+  if (!DOM.bip47UsePaynym.checked || !myPayCode) return;
+  // wrap in try catch in case offline
+  try {
+    if (window.navigator.onLine) {
+      // remove any old robot images if they exist and add new ones
+      DOM.bip47PaynymSections.forEach((element) => {
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+        const robotUrl =
+          url + (element.id === 'bip47MyRobotSection' ? myPayCode : bobPayCode);
+        // dont add an image without a payCode
+        if (robotUrl.length > url.length) {
+          const img = document.createElement('img');
+          img.src = robotUrl;
+          img.className = 'bip47-robot';
+          img.style.height = '300px';
+          element.appendChild(img);
+        }
+      });
+    } else {
+      // remove robot images if they exist and add text explaining why
+      DOM.bip47PaynymSections.forEach((element) => {
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+        element.innerText = 'Unable to display a Robot, you may be offline.';
+      });
+    }
+  } catch (error) {
+    console.error(error); // TODO remove this for prod
+  }
+  adjustPanelHeight();
+};
+
 const calcBip47 = () => {
   if (!getPhrase()) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
@@ -341,6 +385,7 @@ const calcBip47 = () => {
   DOM.bip47MyNotificationPrvKey.value =
     bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
+  fetchRobotImages();
 };
 const isValidPaymentCode = (paymentCode) => {
   try {
@@ -365,6 +410,7 @@ const calcBip47CounterParty = () => {
   DOM.bip47CPNotificationPubKey.value = bobNotifyPubKey.toString('hex');
   calculateBip47Addresses();
   adjustPanelHeight();
+  fetchRobotImages();
 };
 
 const clearBip47Addresses = () => {
@@ -375,6 +421,7 @@ const clearBip47Addresses = () => {
     );
   }
   adjustPanelHeight();
+  fetchRobotImages();
 };
 
 /**
