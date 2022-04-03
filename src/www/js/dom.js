@@ -176,6 +176,7 @@ const setupDom = () => {
   DOM.bip32AccountXprv = document.getElementById('bip32AccountXprv');
   DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
   DOM.hidePrivateData = document.getElementById('hidePrivateData');
+  DOM.onlineIcon = document.getElementById('networkIndicator');
 
   network = bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
@@ -262,6 +263,17 @@ const setupDom = () => {
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
   // open the about panel on load
   DOM.aboutPanel.click();
+  // show user when connected to a network for security
+  window.addEventListener('offline', (event) => {
+    DOM.onlineIcon.classList.add('hidden');
+  });
+  window.addEventListener('online', (event) => {
+    DOM.onlineIcon.classList.remove('hidden');
+  });
+  // set it now
+  if (window.navigator.onLine) {
+    DOM.onlineIcon.classList.remove('hidden');
+  }
 };
 
 // Run setupDom function when the page has loaded

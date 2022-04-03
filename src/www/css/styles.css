@@ -243,6 +243,14 @@ textarea {
 .address-copy {
   cursor: copy;
 }
+#networkIndicator {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  fill: var(--q-orange);
+  z-index: 5;
+  width: 25px;
+}
 /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
