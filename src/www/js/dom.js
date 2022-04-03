@@ -1014,7 +1014,13 @@ const entropyTypeChanged = () => {
 
 const calculateEntropy = async () => {
   const input = getEntropy();
-  const entropy = window.Entropy.fromString(input);
+  let entropy = null;
+  if (entropyTypeAutoDetect) {
+    entropy = window.Entropy.fromString(input);
+  } else {
+    const base = DOM.entropyMethod.value;
+    entropy = window.Entropy.fromString(input, base);
+  }
   const eventCount = entropy.base.events.length;
   const numberOfBits = entropy.binaryStr.length;
   const wordCount = Math.floor(numberOfBits / 32) * 3;
