@@ -59,6 +59,12 @@ p {
   padding: 5px;
   margin: 10px;
 }
+.btn:disabled {
+  background-color: var(--q-blue);
+  color: var(--q-white);
+  border: 1px solid var(--q-white);
+  cursor: not-allowed;
+}
 .warning {
   color: var(--q-blue);
   background-color: var(--q-orange);
@@ -428,9 +434,9 @@ footer {
 }
 
 pre {
-  white-space: pre-wrap;       /* css-3 */
-  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-  white-space: -pre-wrap;      /* Opera 4-6 */
-  white-space: -o-pre-wrap;    /* Opera 7 */
-  word-wrap: break-word;       /* Internet Explorer 5.5+ */
- }
+  white-space: pre-wrap; /* css-3 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
