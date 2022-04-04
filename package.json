@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon ./src/server.js",
     "build": "node ./build.js",
-    "git": "npm run build && git add . && git commit -m \"$MSG\" && git push",
+    "git": "npm run build && git pull && git add . && git commit -m \"$MSG\" && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SuperPhatArrow",
