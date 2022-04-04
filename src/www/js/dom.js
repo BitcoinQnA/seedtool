@@ -1,6 +1,20 @@
-// mnemonics is populated as required by getLanguage
-// const mnemonics = { english: new Mnemonic('english') };
-// const mnemonic = mnemonics['english'];
+/**
+______ _ _            _       _____        ___  
+| ___ (_) |          (_)     |  _  |      / _ \ 
+| |_/ /_| |_ ___ ___  _ _ __ | | | |_ __ / /_\ \
+| ___ \ | __/ __/ _ \| | '_ \| | | | '_ \|  _  |
+| |_/ / | || (_| (_) | | | | \ \/' / | | | | | |
+\____/|_|\__\___\___/|_|_| |_|\_/\_\_| |_\_| |_/
+                                                
+                                                
+ _____               _   _____           _ 
+/  ___|             | | |_   _|         | |
+\ `--.  ___  ___  __| |   | | ___   ___ | |
+ `--. \/ _ \/ _ \/ _` |   | |/ _ \ / _ \| |
+/\__/ /  __/  __/ (_| |   | | (_) | (_) | |
+\____/ \___|\___|\__,_|   \_/\___/ \___/|_|
+                                           
+*/
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
@@ -8,20 +22,10 @@ let currentBip = 'bip84';
 let network;
 let isTestnet = false;
 let wordList = [];
-let showIndex = true;
-let showAddress = true;
-let showPubKey = true;
-let showPrivKey = true;
-let showQr = false;
 let myPayCode = null;
 let bobPayCode = null;
-
 let entropyTypeAutoDetect = true;
-let entropyChangeTimeoutEvent = null;
-let phraseChangeTimeoutEvent = null;
-let seedChangedTimeoutEvent = null;
-let rootKeyChangedTimeoutEvent = null;
-
+const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
   bitcoin: {
@@ -136,6 +140,8 @@ const setupDom = () => {
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
   DOM.bip85Index = document.getElementById('bip85Index');
   DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+  DOM.bip85LoadParent = document.getElementById('bip85LoadParent');
+  DOM.bip85LoadChild = document.getElementById('bip85LoadChild');
   DOM.bip47UsePaynym = document.getElementById('bip47UsePaynym');
   DOM.bip47MyPaymentCode = document.getElementById('bip47MyPaymentCode');
   DOM.bip47MyNotificationAddress = document.getElementById(
@@ -211,6 +217,8 @@ const setupDom = () => {
   DOM.bip85MnemonicLength.oninput = calcBip85;
   DOM.bip85Bytes.oninput = calcBip85;
   DOM.bip85Index.oninput = calcBip85;
+  DOM.bip85LoadParent.addEventListener('click', bip85LoadParent);
+  DOM.bip85LoadChild.addEventListener('click', bip85LoadChild);
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -322,16 +330,6 @@ const copyEventHandler = (event) => {
 };
 
 // BIP47 functions
-const pc = () => {
-  DOM.bip47CPPaymentCode.value =
-    'PM8TJRjLzoTJ3ehbg4WaGjQ3sa2V7LqhYJqRQooTfC1fVfEpTMiqr2wDcBioUY5FdRNDqHwpFjNTMUAenu3Vi59VStPDx32VHvARmnwhLRt8SRjkXU3g';
-  calcBip47CounterParty();
-};
-const ph = () => {
-  DOM.bip39Phrase.value =
-    'scale bonus divert canal praise jewel trumpet brother patient hood artefact any';
-  mnemonicToSeedPopulate();
-};
 
 const togglePaynym = () => {
   DOM.bip47PaynymSections.forEach((element) => {
@@ -963,6 +961,47 @@ const calcBip85 = () => {
     toast('BIP85: ' + e.message);
     DOM.bip85ChildKey.value = '';
   }
+};
+
+const bip85LoadParent = (event) => {
+  event.preventDefault();
+  // check there is a parent
+  if (!bip85Lineage.length) {
+    DOM.bip85LoadParent.disabled = true;
+    toast('No Parent available');
+    return;
+  }
+  const parent = bip85Lineage.pop();
+  DOM.bip39Phrase.value = parent.phrase;
+  DOM.bip39Passphrase.value = parent.passphrase;
+  toast('Loading Parent Seed...');
+  mnemonicToSeedPopulate();
+  if (!bip85Lineage.length) {
+    DOM.bip85LoadParent.disabled = true;
+  }
+};
+
+const bip85LoadChild = (event) => {
+  event.preventDefault();
+  // Save current key as parent
+  const phrase = getPhrase();
+  const passphrase = getPassphrase();
+  if (!phrase) {
+    toast('Current Mnemonic not found');
+    return;
+  }
+  bip85Lineage.push({ phrase, passphrase });
+  // Enable load parent btn
+  if (DOM.bip85LoadParent.disabled) DOM.bip85LoadParent.disabled = false;
+  //load child
+  const rootKeyBase58 = DOM.bip32RootKey.value;
+  const master = bip85.BIP85.fromBase58(rootKeyBase58);
+  const index = parseInt(DOM.bip85Index.value);
+  const length = parseInt(DOM.bip85MnemonicLength.value);
+  const result = master.deriveBIP39(0, length, index).toMnemonic();
+  DOM.bip39Phrase.value = result;
+  toast('Loading Child Seed...');
+  mnemonicToSeedPopulate();
 };
 
 const normalizeString = (str) => str.trim().normalize('NFKD');
