@@ -968,6 +968,7 @@ const bip85LoadParent = (event) => {
   // check there is a parent
   if (!bip85Lineage.length) {
     DOM.bip85LoadParent.disabled = true;
+    DOM.bip85LoadParent.title = 'No parent key to load';
     toast('No Parent available');
     return;
   }
@@ -978,6 +979,7 @@ const bip85LoadParent = (event) => {
   mnemonicToSeedPopulate();
   if (!bip85Lineage.length) {
     DOM.bip85LoadParent.disabled = true;
+    DOM.bip85LoadParent.title = 'No parent key to load';
   }
 };
 
@@ -992,7 +994,10 @@ const bip85LoadChild = (event) => {
   }
   bip85Lineage.push({ phrase, passphrase });
   // Enable load parent btn
-  if (DOM.bip85LoadParent.disabled) DOM.bip85LoadParent.disabled = false;
+  if (DOM.bip85LoadParent.disabled) {
+    DOM.bip85LoadParent.disabled = false;
+    DOM.bip85LoadParent.title = 'Load the parent key back into the tool';
+  }
   //load child
   const rootKeyBase58 = DOM.bip32RootKey.value;
   const master = bip85.BIP85.fromBase58(rootKeyBase58);
