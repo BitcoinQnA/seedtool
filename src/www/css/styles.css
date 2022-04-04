@@ -21,6 +21,15 @@ body {
   display: flex;
   min-height: 100vh;
 }
+#homeLink {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 6;
+  fill: var(--q-orange);
+  height: 20px;
+  width: 20px;
+}
 .container {
   width: 100vw;
 }
@@ -261,7 +270,7 @@ textarea {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 100; /* Sit on top */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
