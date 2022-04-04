@@ -326,16 +326,6 @@ const copyEventHandler = (event) => {
 };
 
 // BIP47 functions
-const pc = () => {
-  DOM.bip47CPPaymentCode.value =
-    'PM8TJRjLzoTJ3ehbg4WaGjQ3sa2V7LqhYJqRQooTfC1fVfEpTMiqr2wDcBioUY5FdRNDqHwpFjNTMUAenu3Vi59VStPDx32VHvARmnwhLRt8SRjkXU3g';
-  calcBip47CounterParty();
-};
-const ph = () => {
-  DOM.bip39Phrase.value =
-    'scale bonus divert canal praise jewel trumpet brother patient hood artefact any';
-  mnemonicToSeedPopulate();
-};
 
 const togglePaynym = () => {
   DOM.bip47PaynymSections.forEach((element) => {
