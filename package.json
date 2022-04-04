@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SuperPhatArrow",
-  "license": "MIT",
+  "license": "GPLv3",
   "devDependencies": {
     "@samouraiwallet/bip47": "^0.6.1",
     "bip32": "^1.0.4",
