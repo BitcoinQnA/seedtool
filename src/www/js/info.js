@@ -190,9 +190,9 @@ window.infoHtml = {
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
         <p>
-          BIP39 defines a standard for generating a human readable 'Mnemonic Code' (also known as your 'Seed Words') from the generated raw binary. Seed words
-          are much easier for humans to manage than the long string of letters and numbers defined in BIP32. Due to the simplified nature of Mnemonics, BIP39 has
-          seen wide adoption across 99% of Bitcoin wallets. <br/><br/>Want to move your funds from one wallet to another? Just enter your seed words 
+          BIP39 defines a standard for generating a human readable 'Mnemonic Code' (also known as your 'Seed Words') from a source of entropy. Seed words
+          are much easier for humans to manage than the long string of letters and numbers defined in BIP32. Due to the simplified nature of mnemonics, BIP39 has
+          seen wide adoption across 99% of Bitcoin wallets used today. <br/><br/>Want to move your funds from one wallet to another? Just enter your seed words 
           (and passphrase if applicable) to the new wallet software. Below demonstrates the difference in readability between a root key and a BIP39 Mnemonic.   
           
           <h4>Here is an example of a BIP32 root key :-</h4> <pre>xprv9s21ZrQH143K2zHHcPMaoE4yw75u2TErFbGjLNuGfFrjnJCA9XuqXwsE8eitS3yp9XPhB3s2EdA4yWCkez2oXp249tBLBsKA7sDS9bhfMoQ</pre> 
