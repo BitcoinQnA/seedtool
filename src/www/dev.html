@@ -57,7 +57,8 @@
         </p>
         <h2>Warning</h2>
         <p>
-          <b>NEVER</b> use the online version of this tool to create or interact with seeds used to manage real bitcoin.
+          <b>NEVER</b> use the online version of this tool to create or interact with seeds used to manage real bitcoin. If the tool detects a network connection,
+          you will see a network symbol in the top corner of the screen.
           To use this tool offline, right click
           and <i>'Save Page As'</i> to save a HTML file that can be opened in any web browser on an offline device or an
           amnesic operating system like <a href="https://tails.boum.org/about/index.en.html" target="_blank"
@@ -85,8 +86,8 @@
         Seed Generation/Input
       </button>
       <div class="panel">
-        <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'entropy')">
-          More Info
+        <button class="btn" title="Click to learn more about entropy" onclick="openInfoModal(event, 'entropy')">
+          What is Entropy?
         </button>
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
@@ -115,7 +116,7 @@
         <div id="Input_Entropy" class="tabContent">
           <p class="warning">
             <strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
-            this feature is used incorrectly.Click on More Info above to learn about it.
+            this feature is used incorrectly. <br/>Click on the orange button above to learn more.
           </p>
           <label for="entropy">Enter your own entropy:</label>
           <div class="textarea-wrapper copy-wrapper private-data">
@@ -221,8 +222,8 @@
           </div>
         </div>
         <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
-        <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP39')">
-          More Info
+        <button class="btn" title="Click to learn more about BIP39" onclick="openInfoModal(event, 'BIP39')">
+          BIP39 Explained
         </button>
         <label style="float: right;" title="Hide all private information on the page"><input type="checkbox"
             id="hidePrivateData">Hide all private information</label>
@@ -294,26 +295,26 @@
         </select>
         <section id="bip32AddressSection" class="bipsContent">
           <h4>BIP32: Hierarchical Deterministic Wallets</h4>
-          <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP32')">
-            More Info
+          <button class="btn" title="Click to learn more about BIP32" onclick="openInfoModal(event, 'BIP32')">
+            BIP32 Explained
           </button><br>
         </section>
         <section id="bip44AddressSection" class="hidden bipsContent">
           <h4>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h4>
-          <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP44')">
-            More Info
+          <button class="btn" title="Click to learn more about BIP44" onclick="openInfoModal(event, 'BIP44')">
+            BIP44 Explained
           </button>
         </section>
         <section id="bip49AddressSection" class="hidden bipsContent">
           <h4>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h4>
-          <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP49')">
-            More Info
+          <button class="btn" title="Click to learn more about BIP49" onclick="openInfoModal(event, 'BIP49')">
+            BIP49 Explained
           </button>
         </section>
         <section id="bip84AddressSection" class="hidden bipsContent">
           <h4>BIP84: Derivation scheme for P2WPKH based accounts</h4>
-          <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP84')">
-            More Info
+          <button class="btn" title="Click to learn more about BIP84" onclick="openInfoModal(event, 'BIP84')">
+            BIP84 Explained
           </button>
         </section>
         <section id="bip141AddressSection" class="hidden bipsContent">
@@ -425,8 +426,8 @@
         BIP47: Reusable Payment Codes
       </button>
       <div class="panel">
-        <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP47')">
-          More Info
+        <button class="btn" title="Click to learn more about BIP47" onclick="openInfoModal(event, 'BIP47')">
+          BIP47 Explained
         </button>
         <label style="float: right;" title="Robots are fun!">
           <input type="checkbox" id="bip47UsePaynym">
@@ -516,10 +517,9 @@
       <hr>
       <button class="accordion" title="Click to expand this section">BIP85: Deterministic Entropy</button>
       <div class="panel">
-        <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP85')">More
-          Info</button>
+        <button class="btn" title="Click to learn more about BIP85" onclick="openInfoModal(event, 'BIP85')">BIP85 Explained</button>
         <p class="warning"><strong>Warning!</strong> This is an advanced feature and should only be used if you
-          understand what it does. Click on More Info above to learn about it.</p>
+          understand what it does. Click on the button above to learn more.</p>
         <container class="bip85-container">
           <div class="bip85-item">
             <label for="bip85Application">BIP85 Application</label>

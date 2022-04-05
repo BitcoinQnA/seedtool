@@ -199,6 +199,14 @@ window.infoHtml = {
           
           <h4>Here is the BIP39 Mnemonic of the same key:-</h4> <pre>pass hidden viable analyst disagree secret web cruise dumb offer dune reveal</pre><br/>   
               
+         In the fields in this section you will see your generated (either automatically or by providing your own entropy) mnemonic seed words. Note you can also type in your own, but 
+         note that typing any random words in will likely not work due to the requirement of a checksum calculation. You will also see a box to populate a BIP39
+         Passphrase. A passphrase (often called the 13th/25th word) is an additional word or phrase used to add an extra layer of security to your backup. Should your
+         seed words be compromised, an attacker would need to also compromise your passphrase to gain access to your bitcoin. <br/><br/>
+
+         Applying a passphrase to your seed words creates a completely new wallet, with its own list of unique addresses. An unlimited amount of passphrases can be applied
+         to a single set of seed words. If you use a passphrase, ensure you back it up with the same care you'd take with your mnemonic seed words. You need <b>BOTH</b> to recover your bitcoin.
+
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP39 page </a>
@@ -224,9 +232,21 @@ window.infoHtml = {
         <p>
         BIP47 defines the standard for creating a payment code which can be publicly advertised and associated with a real-life identity (or pseudonym) without 
         creating the loss of security or privacy inherent to address re-use. BIP47 does not define an address type, but does define a way for Alice to generate
-        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. <br/><br/> 
+        receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. <br/><br/>
+        
+        In this section you'll see the payment code derived from your seed words, this can be share publicly via any website or communication method. Below that are the notification address and 
+        associated public and private keys which are to be kept secret. If using the tool online you can also enable the PayNym.is connection to see a preview
+        of the avatar associated with your payment code, learn more about those <a href="https://bitcoiner.guide/paynym" target="_blank">here</a>. <br/><br/>
+        
+        Entering another payment code into the 'Counterparty Details' field will generate unique addresses to enable bitcoin send to that entity 
+        without their interaction. The tool will also generate receive addresses, should that same counterparty choose to send bitcoin to you via your public payment code.  
+        
+        
+        
+        
+         
         At the time of writing, the only wallets supporting BIP47 are Samourai and Sparrow. Although here is active development for implementations
-        into BDK and BlueWallet.  
+        into BDK and BlueWallet. <br/><br/>
 
         </p>
         <p>
@@ -260,10 +280,19 @@ window.infoHtml = {
   BIP85: /*html*/ `
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
         <p>
-         BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can derive multiple 'Child Seeds' from a single master mnemonic seed.
-         This enables a user to populate the seed words of many wallets whilst only having a physical backup of a single master mnemonic. <br/><br/> Should a child seed 
-         be lost with no offline backup, it can be regenerated in any BIP85 compatible hardware or software, so long as the user knows the master mnemonic 
-         and index number of the lost child seed.    
+         BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can deterministically derive multiple 'Child Seeds' from a single master 
+         mnemonic seed. This enables a user who might have provided their own entropy to securely generate their own master mnemonic seed (perhaps with the help
+         of this tool), to then populate an unlimited number of other wallet seeds whilst only having a physical backup of a single master mnemonic. Should any 
+         child seed be lost with no offline backup, it can be regenerated in any BIP85 compatible hardware or software (like this tool), so long as the user 
+         knows the master mnemonic and index number of the lost child seed.  <br/><br/>
+         
+         <b>Ensure you fully understand the implications before taking this approach!</b><br/><br/>
+
+         At the bottom of this section are the 'Load Parent' and 'Load Child' buttons. After selecting the desired index number for the child seed to be
+         generated, clicking on 'Load Child' will enter that mnemonic into the main box at the top of the page. This can be useful to see the generated xpubs, 
+         payment code or addresses for that child seed. To revert back to the original seed, click 'Load Parent'. Note that if a passphrase is applied to the 
+         parent seed, it will remain applied any subsequent child seeds loaded, until it is manually removed.
+
         </p>
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BIP85 page</a>
