@@ -81,6 +81,7 @@ const networks = {
  */
 const DOM = {};
 const setupDom = () => {
+  // var { bitcoin, bip32, bip39, bip47, bip85 } = window.libs;
   DOM.accordionButtons = document.querySelectorAll('.accordion');
   DOM.accordionPanels = document.querySelectorAll('.panel');
   DOM.aboutPanel = document.getElementById('aboutPanel');
@@ -184,7 +185,7 @@ const setupDom = () => {
   DOM.hidePrivateData = document.getElementById('hidePrivateData');
   DOM.onlineIcon = document.getElementById('networkIndicator');
 
-  network = bitcoin.networks.bitcoin;
+  network = libs.bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
   DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
     if (DOM.bip39ShowSplitMnemonic.checked) {
@@ -268,7 +269,7 @@ const setupDom = () => {
   // Add event listener to generate new mnemonic
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // update pointer to word list
-  wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
+  wordList = libs.bip39.wordlists[Object.keys(libs.bip39.wordlists)[0]];
   // open the about panel on load
   DOM.aboutPanel.click();
   // show user when connected to a network for security
@@ -384,8 +385,8 @@ const fetchRobotImages = async () => {
 
 const calcBip47 = () => {
   if (!getPhrase()) return;
-  const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
-  myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
+  const mySeed = libs.bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
+  myPayCode = libs.bip47.fromWalletSeed(mySeed, 0, network);
   const myNotify = myPayCode.derive(0);
   const myPrvKey = myNotify.privateKey;
   const myPubKey = myNotify.publicKey;
@@ -393,13 +394,13 @@ const calcBip47 = () => {
   DOM.bip47MyPaymentCode.value = myPayCode.toBase58();
   DOM.bip47MyNotificationAddress.value = myNotificationAddress;
   DOM.bip47MyNotificationPrvKey.value =
-    bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
+    libs.bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
   fetchRobotImages();
 };
 const isValidPaymentCode = (paymentCode) => {
   try {
-    bip47.fromBase58(paymentCode, network);
+    libs.bip47.fromBase58(paymentCode, network);
     return true;
   } catch (_error) {
     return false;
@@ -413,7 +414,7 @@ const calcBip47CounterParty = () => {
     return;
   }
   DOM.bip47CPGenSection.classList.remove('hidden');
-  bobPayCode = bip47.fromBase58(bobPcBase58, network);
+  bobPayCode = libs.bip47.fromBase58(bobPcBase58, network);
   const bobNotifyPubKey = bobPayCode.derive(0).publicKey;
   const bobNotifyAddress = bobPayCode.getNotificationAddress();
   DOM.bip47CPNotificationAddress.value = bobNotifyAddress;
@@ -507,7 +508,7 @@ const calculateBip47Addresses = () => {
         // Derive from my payment code
         pCode = myPayCode;
         key = bobPayCode.derive(0).publicKey;
-        prvKey = bitcoin.ECPair.fromPrivateKey(
+        prvKey = libs.bitcoin.ECPair.fromPrivateKey(
           pCode.derivePaymentPrivateKey(key, i)
         ).toWIF();
       }
@@ -515,20 +516,20 @@ const calculateBip47Addresses = () => {
       let address;
       switch (addressType) {
         case 'P2PKH':
-          address = bitcoin.payments.p2pkh({
+          address = libs.bitcoin.payments.p2pkh({
             pubkey: payPubKey,
             network: network,
           }).address;
           break;
         case 'P2WPKH':
-          address = bitcoin.payments.p2wpkh({
+          address = libs.bitcoin.payments.p2wpkh({
             pubkey: payPubKey,
             network: network,
           }).address;
           break;
         case 'P2WPKH/P2SH':
-          address = bitcoin.payments.p2sh({
-            redeem: bitcoin.payments.p2wpkh({
+          address = libs.bitcoin.payments.p2sh({
+            redeem: libs.bitcoin.payments.p2wpkh({
               pubkey: payPubKey,
               network: network,
             }),
@@ -555,8 +556,8 @@ const calculateBip47Addresses = () => {
 
 const getAddress = (node) => {
   if (currentBip === 'bip49') {
-    return bitcoin.payments.p2sh({
-      redeem: bitcoin.payments.p2wpkh({
+    return libs.bitcoin.payments.p2sh({
+      redeem: libs.bitcoin.payments.p2wpkh({
         pubkey: node.publicKey,
         network,
       }),
@@ -564,12 +565,13 @@ const getAddress = (node) => {
     }).address;
   }
   if (currentBip === 'bip84') {
-    return bitcoin.payments.p2wpkh({
+    return libs.bitcoin.payments.p2wpkh({
       pubkey: node.publicKey,
       network,
     }).address;
   }
-  return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address;
+  return libs.bitcoin.payments.p2pkh({ pubkey: node.publicKey, network })
+    .address;
 };
 
 /**
@@ -847,14 +849,14 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
     //   console.error('Unable to generate addresses without valid path');
     //   return;
     // }
-    // const node = bip32.fromSeed(seed);
+    // const node = libs.bip32.fromSeed(seed);
     const addressDataArray = [];
     for (let i = startIndex; i <= endIndex; i++) {
       const addressPath = path(i);
       const addressNode = node.derivePath(addressPath);
       const address = getAddress(addressNode);
       const addressPubKey = addressNode.publicKey.toString('hex');
-      const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
+      const addressPrivKey = libs.bitcoin.ECPair.fromPrivateKey(
         addressNode.privateKey
       ).toWIF();
       addressDataArray[i] = new AddressData(
@@ -902,11 +904,11 @@ const fillBip32Keys = () => {
     }
   } else {
     if (isTestnet) {
-      network = bitcoin.networks.testnet;
-      bip32RootKey.network = bitcoin.networks.testnet;
+      network = libs.bitcoin.networks.testnet;
+      bip32RootKey.network = libs.bitcoin.networks.testnet;
     } else {
-      network = bitcoin.networks.bitcoin;
-      bip32RootKey.network = bitcoin.networks.bitcoin;
+      network = libs.bitcoin.networks.bitcoin;
+      bip32RootKey.network = libs.bitcoin.networks.bitcoin;
     }
   }
   bip32ExtendedKey = bip32RootKey.derivePath(DOM.path.value);
@@ -941,7 +943,7 @@ const calcBip85 = () => {
     return;
   }
   try {
-    const master = bip85.BIP85.fromBase58(rootKeyBase58);
+    const master = libs.bip85.BIP85.fromBase58(rootKeyBase58);
     let result;
     const index = parseInt(DOM.bip85Index.value);
     if (app === 'bip39') {
@@ -1000,7 +1002,7 @@ const bip85LoadChild = (event) => {
   }
   //load child
   const rootKeyBase58 = DOM.bip32RootKey.value;
-  const master = bip85.BIP85.fromBase58(rootKeyBase58);
+  const master = libs.bip85.BIP85.fromBase58(rootKeyBase58);
   const index = parseInt(DOM.bip85Index.value);
   const length = parseInt(DOM.bip85MnemonicLength.value);
   const result = master.deriveBIP39(0, length, index).toMnemonic();
@@ -1051,7 +1053,7 @@ const findPhraseErrors = (phraseArg) => {
   }
   // Check the words are valid
   const properPhrase = wordArrayToPhrase(words);
-  const isValid = window.bip39.validateMnemonic(properPhrase);
+  const isValid = libs.bip39.validateMnemonic(properPhrase);
   if (!isValid) {
     return 'Invalid mnemonic';
   }
@@ -1223,7 +1225,7 @@ const setMnemonicFromEntropy = async () => {
   const end = hex.length - (mnemonicLength * 8) / 3;
   const hexedBin = hex.slice(0, end);
   // Convert entropy array to mnemonic
-  const phrase = window.bip39.entropyToMnemonic(hexedBin);
+  const phrase = libs.bip39.entropyToMnemonic(hexedBin);
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
   writeSplitPhrase();
@@ -1390,7 +1392,7 @@ const generateNewMnemonic = () => {
   toast('Calculating...');
   const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
   const strength = (numWords / 3) * 32;
-  const mnemonic = bip39.generateMnemonic(strength);
+  const mnemonic = libs.bip39.generateMnemonic(strength);
   DOM.bip39Phrase.value = mnemonic;
   // DOM.knownInputTextarea.value = mnemonic;
   mnemonicToSeedPopulate();
@@ -1459,7 +1461,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   const errorText = findPhraseErrors(mnemonic);
   showValidationError(errorText);
   if (!errorText) {
-    seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
+    seed = libs.bip39.mnemonicToSeedSync(mnemonic, passphrase);
     seedHex = seed.toString('hex');
   } else {
     return;
@@ -1470,7 +1472,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   }
   await calculateEntropy();
   if (seed) {
-    const node = bip32.fromSeed(seed);
+    const node = libs.bip32.fromSeed(seed);
     bip32RootKey = node;
   } else {
     bip32RootKey = null;

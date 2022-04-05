@@ -1,0 +1,25 @@
+{
+  "name": "seedtool_libs",
+  "version": "1.0.0",
+  "description": "Combined libraries for seed tool",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js -s libs -d  --exclude=./wordlists/japanese.json  --exclude=./wordlists/spanish.json  --exclude=./wordlists/italian.json  --exclude=./wordlists/french.json  --exclude=./wordlists/korean.json  --exclude=./wordlists/czech.json  --exclude=./wordlists/portuguese.json  --exclude=./wordlists/chinese_traditional.json --exclude=./wordlists/chinese_simplified.json  -o ../src/www/js/lib/libs.js"
+  },
+  "author": "SuperPhatArrow",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@samouraiwallet/bip47": "^0.6.1",
+    "bech32": "^1.1.4",
+    "bip32": "^1.0.4",
+    "bip39": "^3.0.4",
+    "bip85": "^0.0.3",
+    "bitcoinjs-lib": "^4.0.5",
+    "browserify": "^17.0.0",
+    "bs58check": "^2.1.2",
+    "create-hash": "^1.2.0",
+    "esmify": "^2.1.1",
+    "tiny-secp256k1": "^1.1.6"
+  }
+}
