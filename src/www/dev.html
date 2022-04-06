@@ -13,6 +13,10 @@
 </head>
 
 <body>
+  <div id="loadingPage" style="height: 100vh; width: 100vw; background-color: #00151a;">
+    <div class="lds-hourglass"></div>
+    <p>LOADING...</p>
+  </div>
   <a href="https://bitcoiner.guide/" id="homeLink" title="Go to bitcoiner.guide">
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
@@ -245,12 +249,38 @@
         <div>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
+          <label style="float: right;" title="Get help generating a secure passphrase"><input type="checkbox"
+              id="hidePassphraseGeneration">Get help generating a secure passphrase</label>
           <div class="copy-wrapper private-data">
             <textarea id="bip39Passphrase" class="passphrase textarea-input"
               title="Encrypt your Mnemonic with a strong passphrase. Keept it safe and private." autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
+          <div class="warning">
+            Time to crack this passphrase: <span id="bip39PassphraseCrackTime">Immediately</span>
+          </div>
         </div>
+        <section id="bip39PassGenSection" class="hidden">
+          <p>
+            This uses the <a href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases">EFF's long
+              diceware word list</a> to create a random 5 word passphrase giving you 65 bits of entropy, more than the
+            64 bits that the <a href="https://datatracker.ietf.org/doc/html/rfc8018#section-4">Password-Based
+              Cryptography
+              Specification Version 2.1</a> recommends. Five rolls of a six-sided dice generates one word.
+          </p>
+          <p>
+            Keep rolling to make more words or click the button to add a word to your passphrase.<button class="btn"
+              title="Click to add a random word to your generated passphrase" onclick="addRandomDiceWordToPassphrase()">
+              Add word </button>
+          </p>
+          <label for="bip39PassGenInput">Input Dice rolls</label>
+          <div class="copy-wrapper private-data">
+            <textarea id="bip39PassGenInput" class="textarea-input" placeholder="1543266621523456134561311"
+              title="Input the result of 25 dice rolls here to generate a good passphrase" autocomplete="off"
+              autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+          </div>
+          <hr>
+        </section>
         <div>
           <label for="bip39Seed">BIP39 Seed</label>
           <div class="copy-wrapper private-data">
@@ -640,6 +670,7 @@
   <script src="js/lib/bip39.js"></script>
   <script src="js/lib/bip47.js"></script>
   <script src="js/lib/bip85.js"></script>
+  <script src="js/lib/diceware.js"></script>
   <script src="js/info.js"></script>
   <script src="js/lib/entropy.js"></script>
   <script src="js/lib/levenshtein.js"></script>
