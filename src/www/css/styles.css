@@ -19,13 +19,16 @@
   color: var(--q-orange);
   flex-direction: column;
 }
-.lds-hourglass {
+/* .lds-hourglass, */
+.loading-bitcoin {
   display: inline-block;
   position: relative;
-  width: 80px;
-  height: 80px;
+  animation: lds-hourglass 2.5s infinite;
+  transform-origin: center;
+  width: 120px;
+  height: 120px;
 }
-.lds-hourglass:after {
+/*.lds-hourglass:after {
   content: ' ';
   display: block;
   border-radius: 50%;
@@ -36,7 +39,7 @@
   border: 32px solid var(--q-orange);
   border-color: var(--q-orange) transparent var(--q-orange) transparent;
   animation: lds-hourglass 1.2s infinite;
-}
+}*/
 @keyframes lds-hourglass {
   0% {
     transform: rotate(0);
