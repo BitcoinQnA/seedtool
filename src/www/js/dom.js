@@ -1537,15 +1537,19 @@ const diceToPassphrase = () => {
 const mnemonicToSeedPopulate = debounce(async () => {
   const mnemonic = getPhrase();
   const passphrase = getPassphrase();
-  const crackTime = zxcvbn(passphrase);
-  const crackText =
-    crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
-  if (crackText) {
-    DOM.bip39PassphraseCrackTime.innerText = crackText;
-    if (crackText !== 'centuries') {
-      DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
-    } else {
-      DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
+  if (!passphrase) {
+    DOM.bip39PassphraseCrackTime.innerText = 'No passphrase entered!';
+  } else {
+    const crackTime = zxcvbn(passphrase);
+    const crackText =
+      crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
+    if (crackText) {
+      DOM.bip39PassphraseCrackTime.innerText = 'Time to crack: ' + crackText;
+      if (crackText !== 'centuries') {
+        DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
+      } else {
+        DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
+      }
     }
   }
   let seedHex = '';
