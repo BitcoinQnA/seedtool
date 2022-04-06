@@ -146,6 +146,7 @@ textarea {
 .textarea-input {
   background-color: var(--q-light-blue);
   color: var(--q-white);
+  padding: 4px;
 }
 .accordion {
   color: var(--q-white);
@@ -368,17 +369,27 @@ footer {
   color: var(--q-orange);
   vertical-align: text-bottom;
   fill: currentColor;
+  height: 15px;
+  width: 15px;
 }
 .copy-button {
   position: absolute;
   right: 0;
   top: 0;
-  margin: 8px;
-  background: var(--q-blue);
-  box-shadow: 0 0 0 5px var(--q-blue);
+  /* margin: 3px; */
+  /* background: var(--q-blue); */
+  /* box-shadow: 0 0 0 5px var(--q-blue); */
+  /* border: 1px solid var(--q-orange); */
+  /* padding: 3px; */
+  margin-right: -18px;
+  margin-top: 2px;
 }
 .copy-wrapper {
   position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 #toast {
   visibility: hidden; /* Hidden by default. Visible on click */

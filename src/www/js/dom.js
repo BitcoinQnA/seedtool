@@ -1539,16 +1539,17 @@ const mnemonicToSeedPopulate = debounce(async () => {
   const passphrase = getPassphrase();
   if (!passphrase) {
     DOM.bip39PassphraseCrackTime.innerText = 'No passphrase entered!';
-  }
-  const crackTime = zxcvbn(passphrase);
-  const crackText =
-    crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
-  if (crackText) {
-    DOM.bip39PassphraseCrackTime.innerText = 'Time to crack: ' + crackText;
-    if (crackText !== 'centuries') {
-      DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
-    } else {
-      DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
+  } else {
+    const crackTime = zxcvbn(passphrase);
+    const crackText =
+      crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
+    if (crackText) {
+      DOM.bip39PassphraseCrackTime.innerText = 'Time to crack: ' + crackText;
+      if (crackText !== 'centuries') {
+        DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
+      } else {
+        DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
+      }
     }
   }
   let seedHex = '';
