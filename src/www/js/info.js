@@ -38,12 +38,12 @@ window.infoHtml = {
   equal to one is tails. Alice observes the 10 flips of the coin, records them and sends them to Bob: '1101000111'. This
   information has 10 binary digits which represent 10 bits of entropy of 10 random events, the 10 coin flips. The possible
   different combinations of messages that Alice could have sent Bob are 2<sup>10</sup> which is 1024 combinations
-  (2x2x2x2x2x2x2x2x2x2=1024). Alice was able to express the correct outcome with just 10 digits.
+  (2&times;2&times;2&times;2&times;2&times;2&times;2&times;2&times;2&times;2=1024). Alice was able to express the correct outcome with just 10 digits.
 </p>
 <p>
   In order to make a 12 word seed we need 128 bits of information. This is the same as flipping a coin 128 times and
   recording the results as Alice did for Bob. As before, we can deduce that there are 2<sup>128</sup> combinations. This
-  is a rather large number, about 3.4 x 10<sup>38</sup> or about 340,000,000,000,000,000,000,000,000,000,000,000,000. If
+  is a rather large number, about 3.4 &times; 10<sup>38</sup> or about 340,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000,<wbr>000. If
   we want to make a 24 word seed, that is 256 bits of entropy, 2<sup>256</sup>, or more than the number of atoms in the
   universe! If we use really good sources of entropy to generate a seed, it makes our funds secure and a person trying
   to guess your seed has more chance of selecting the same atom from all the atoms in the universe as you.
@@ -123,7 +123,7 @@ window.infoHtml = {
 </p>
 <h5>Event Count:</h5>
 <p>
-  Remember our thought experiment? That was 10 events. 10 coin flips. or for you it might be card draws, or dice rolls.
+  Remember our thought experiment? That was 10 events. 10 coin flips. Or for you it might be card draws, or dice rolls.
 </p>
 <h5>Average bits per event:</h5>
 <p>
@@ -139,7 +139,7 @@ window.infoHtml = {
 </p>
 <h5>Total Bits:</h5>
 <p>
-  Displays how many bits of entropy you have so far.
+  Displays how many bits of entropy you have so far. It is also represented over the amount of entropy you need to make the number of words you selected.
 </p>
 <h5>Filtered Entropy:</h5>
 <p>
@@ -149,15 +149,15 @@ window.infoHtml = {
 </p>
 <h5>Raw Binary:</h5>
 <p>
-  Shows your input as binary, separated every 11 bits.
+  Shows your input as binary, separated every 11 bits. 11 bits can be converted into a number between 0-2047 and this number will be one of your words. For example if one of these 11 bits is '00000000000', this is 0 and will get you the very first word on the word list. In English that is 'abandon'. If another is '11111111111' this is 2047 and that will get you the last word on the list, 'zoo'. You may notice that if you are looking for 12 words and you enter exactly 128 bits of entropy, the last group will not be 11 bits but 7. This is because we use the binary checksum to add the last 4 bits to make up the 11 bits required for the last word.
 </p>
 <h5>Binary Checksum:</h5>
 <p>
-  Displays the checksum of your Raw Binary.
+  Displays the checksum of your Raw Binary. The checksum is described in the <a src="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#generating-the-mnemonic">BIP</a> as taking the required entropy for the number of words chosen (128 bits for 12 words, 256 bits for 24 words), hash it using sha256, and the checksum is the first &#8496; bits of that checksum (where &#8496; is the number of entropy bits divided by 32, e.g. 12 words is 128 bit &divide; 32 = 4). As described above, the checksum bits are then added to the entropy bits which will give you a multiple of 11 to make the required words, e.g. 12 words, 128 bits of entropy, 4 bits of checksum, 132 bits total, 12 groups of 11 bits (12 &times; 11 = 132), 12 words. So the last word of any mnemonic phrase depends on all of the previous ones.
 </p>
 <h5>Word Indexes:</h5>
 <p>
-  These numbers represent the index of the BIP39 Mnemonic words and can be changed to different languages.
+  These numbers represent the index of the BIP39 Mnemonic words and can be changed to different languages. There are 2048 words in each language list. Each word in the list has an index which is the number of the order it is in the list, starting from zero for the first word and ending with 2047 for the last.
 </p>
 <h5>Mnemonic Length:</h5>
 <p>
@@ -170,7 +170,68 @@ window.infoHtml = {
 </p>
 <h4>What does biased entropy mean?</h4>
 <p>
-  TODO: find a way to explain this... <a href="https://github.com/iancoleman/bip39/issues/435" target="_blank">Bias in
+  Let's return to our thought experiment and imagine that Alice now needs to send Bob the result of D6 or six-sided dice roll. 6 is not a power of 2 and the nearest exponents are 2 &amp; 3. 2<sup>2</sup> = 4 but that's not enough to represent the 6 possible outcomes. Bob suggests using 2<sup>3</sup> = 8 with the following bits representing the outcomes:
+</p>
+1: 000<br />
+2: 001<br />
+3: 010<br />
+4: 011<br />
+5: 100<br />
+6: 101
+<p>
+  Alice remembers that the challenge was to send as few characters as possible and suggests an alternative:
+</p>
+1: 00<br />
+2: 01<br />
+3: 10<br />
+4: 11<br />
+5: 0<br />
+6: 1<br />
+<p>
+  After each roll of the dice, Alice can enter the result and send.
+</p>
+<p>
+  Because 6 is not a power of 2, and the theoretical maximum of entropy we can get per dice roll is LOG<sub>2</sub>(6) = 2.58, the fraction makes it tricky. You can't have 0.58 of a bit, it's either zero or one.
+</p>
+<p>
+  Bob's method provides an average entropy per roll of (3 bits x 6 outcomes) &divide; 6 outcomes = 3 bits. It's nice and neat. The trouble is that it's more than the maximum theoretically possible. When you take into consideration that Bob didn't include two of the bit combinations (110 and 111) it messes with Bob's average.
+</p>
+<p>
+  Alice's method provides an average entropy per roll of ((1 bit &times; 2 outcomes) + (2 bits &times; 4 outcomes) &divide; 6 outcomes = 2 + 8 &divide; 6 = 1.6666...
+</p>
+<p>
+  Alice's method is better for the experiment because of the challenge to send as few bits as possible but what can we learn from this about making seeds?
+</p>
+<p>
+  Well, when using entropy to make seeds we want them to be created from something that can't easily be guessed to make them as secure as we can.
+</p>
+<p>
+  &quot;This is 128 bits&quot;
+</p>
+<p>
+  These 16 ASCII characters of 8 bits and in total make 128 bits:
+</p>
+<pre>01010100 01101000 01101001 01110011 00100000 01101001 01110011 00100000 00110001 00110010 00111000 00100000 01100010 01101001 01110100 01110011 </pre>
+<p>
+  This is enough to make a 12 word seed:
+</p>
+<p>
+  &quot;rookie inhale mutual special local spoon manage frost gold upon offer tenant&quot;
+</p>
+<p>
+  Would you use this to store your money with? I hope not!!!
+</p>
+<p>
+  With the bits we use to make seeds we want to maximize the uncertainty or randomness and entropy is that measure. We don't want any bits, we want entropy, in bits.
+</p>
+<p>
+  The BIP explains that you should hash the entropy with sha256 to create the mnemonic phrase which will give you 256 bits.
+</p>
+<p>
+  The simple way to code dice rolls would be just say if I want to make 24 words I need 256 bits of entropy. We know that LOG<sub>2</sub>(6) is 2.58. so 256&divide;2.58=99.2248062 round down to 99. Great! Roll 99 (or 100) dice and enter the numbers you get (1-6) and we sha256 hash it and, boom! 256 bits of entropy. This is biased as we have seen and to maximize the entropy we use Alice's method. 256&divide;1⅔ which tells us we should really roll the dice 153 times to be unbiased. The unbiased entropy from 99 dice rolls using Alice's method gives 165 bit of entropy.
+</p>
+<p>
+  Further reading: <a href="https://github.com/iancoleman/bip39/issues/435" target="_blank">Bias in
     dice based entropy #435</a>
 </p>
   `,

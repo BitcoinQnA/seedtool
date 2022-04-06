@@ -291,7 +291,7 @@ textarea {
   border-radius: 20px;
 }
 .modal-content a {
-  color: var(--q-blue);
+  color: var(--q-light-blue);
   text-decoration: underline;
 }
 
