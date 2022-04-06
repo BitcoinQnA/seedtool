@@ -231,9 +231,9 @@
         <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
         <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP39')">
           More Info
-        </button>
-        <label style="float: right;" title="Hide all private information on the page"><input type="checkbox"
-            id="hidePrivateData">Hide all private information</label>
+        </button><br>
+        <label title="Hide all private information on the page"><input type="checkbox" id="hidePrivateData">Hide all
+          private information</label>
         <div class="warning bip39-invalid-phrase hidden">
           <label>INVALID BIP39 SEED PHRASE</label>
           <div>
@@ -250,10 +250,10 @@
           </div>
         </div>
         <div>
+          <label title="Get help generating a secure passphrase"><input type="checkbox"
+              id="hidePassphraseGeneration">Get help generating a secure passphrase</label>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
-          <label style="float: right;" title="Get help generating a secure passphrase"><input type="checkbox"
-              id="hidePassphraseGeneration">Get help generating a secure passphrase</label>
           <div class="copy-wrapper private-data">
             <textarea id="bip39Passphrase" class="passphrase textarea-input"
               title="Encrypt your Mnemonic with a strong passphrase. Keept it safe and private." autocomplete="off"
