@@ -25,6 +25,7 @@ let wordList = [];
 let myPayCode = null;
 let bobPayCode = null;
 let entropyTypeAutoDetect = true;
+let lastInnerWidth = parseInt(window.innerWidth);
 const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
@@ -282,6 +283,7 @@ const setupDom = () => {
   if (window.navigator.onLine) {
     DOM.onlineIcon.classList.remove('hidden');
   }
+  resizeObserver.observe(document.querySelector('body'));
 };
 
 // Run setupDom function when the page has loaded
@@ -300,6 +302,41 @@ const hideAllPrivateData = () => {
   }
   adjustPanelHeight();
 };
+
+// adjust textarea rows/height
+function textareaResize() {
+  document.querySelectorAll('textarea').forEach((textareaElement) => {
+    // set textarea width to 100%
+    textareaElement.style.width = '100%';
+    // measure the max width we can have
+    const maxWidth = textareaElement.clientWidth;
+    // Remove width style
+    textareaElement.style.width = '';
+    // set cols low
+    textareaElement.cols = 5;
+    while (textareaElement.clientWidth < maxWidth) {
+      // keep adding columns until we go over max width
+      textareaElement.cols++;
+    }
+    // one column less to stay under 100%
+    textareaElement.cols--;
+    // Now adjust the rows based on the number of characters in the textarea
+    const maxRows = 10;
+    const txt = textareaElement.value;
+    const cols = textareaElement.cols;
+    const arrayText = txt.split('\n');
+    let rows = arrayText.length;
+    for (i = 0; i < arrayText.length; i++)
+      rows += parseInt(arrayText[i].length / cols);
+    if (rows > maxRows) textareaElement.rows = maxRows;
+    else textareaElement.rows = rows;
+  });
+}
+
+const resizeObserver = new ResizeObserver((entries) => {
+  if (lastInnerWidth === innerWidth) return;
+  adjustPanelHeight();
+});
 
 // Add Copy Buttons
 const setupCopyButton = (element) => {
@@ -758,6 +795,7 @@ function toast(message) {
  * Whenever some CSS changes in an accordion panel, call this to fix the panel
  */
 function adjustPanelHeight() {
+  textareaResize();
   DOM.accordionPanels.forEach((panel) => {
     const isActive = panel.classList.contains('accordion-panel--active');
     if (isActive) {
@@ -1108,6 +1146,7 @@ const entropyChanged = async () => {
   } else {
     // hidePending();
   }
+  textareaResize();
 };
 
 const entropyTypeChanged = () => {
@@ -1483,6 +1522,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
     calcBip85();
     calcBip47();
   }
+  textareaResize();
 }, 1000);
 
 const resetEverything = () => {

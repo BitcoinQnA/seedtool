@@ -17,7 +17,6 @@ body {
   font-weight: normal;
   background: var(--q-blue);
   background-attachment: fixed !important;
-  background: linear-gradient(var(--q-blue), var(--q-blue));
   display: flex;
   min-height: 100vh;
 }
@@ -94,8 +93,8 @@ textarea {
 }
 .textarea-wrapper,
 .textarea-input {
-  width: 100%;
-  height: auto;
+  /* width: 100%; */
+  /* height: auto; */
 }
 .textarea-input {
   background-color: var(--q-light-blue);
@@ -205,6 +204,7 @@ textarea {
   font-family: monospace;
   border-radius: 2px;
   padding: 2px;
+  overflow-wrap: anywhere;
 }
 .bip44-text-input {
   width: 50px;
