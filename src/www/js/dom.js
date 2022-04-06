@@ -125,6 +125,14 @@ const setupDom = () => {
   );
   DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
+  DOM.bip39PassphraseCrackTime = document.getElementById(
+    'bip39PassphraseCrackTime'
+  );
+  DOM.hidePassphraseGeneration = document.getElementById(
+    'hidePassphraseGeneration'
+  );
+  DOM.bip39PassGenSection = document.getElementById('bip39PassGenSection');
+  DOM.bip39PassGenInput = document.getElementById('bip39PassGenInput');
   DOM.bip39Seed = document.getElementById('bip39Seed');
   DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
@@ -195,7 +203,16 @@ const setupDom = () => {
     }
     adjustPanelHeight();
   });
-
+  // hidePassphraseGeneration
+  // Show / hide split mnemonic cards
+  DOM.hidePassphraseGeneration.addEventListener('click', () => {
+    if (DOM.hidePassphraseGeneration.checked) {
+      DOM.bip39PassGenSection.classList.remove('hidden');
+    } else {
+      DOM.bip39PassGenSection.classList.add('hidden');
+    }
+    adjustPanelHeight();
+  });
   // listen for if entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
 
@@ -266,6 +283,7 @@ const setupDom = () => {
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
+  DOM.bip39PassGenInput.oninput = diceToPassphrase;
   // Add event listener to generate new mnemonic
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // update pointer to word list
@@ -284,6 +302,7 @@ const setupDom = () => {
     DOM.onlineIcon.classList.remove('hidden');
   }
   resizeObserver.observe(document.querySelector('body'));
+  document.getElementById('loadingPage').style.display = 'none';
 };
 
 // Run setupDom function when the page has loaded
@@ -1107,6 +1126,20 @@ const showValidationError = (errorText) => {
   adjustPanelHeight();
 };
 
+const getRandomDiceWord = () =>
+  diceware[
+    crypto
+      .getRandomValues(new Uint8Array(5))
+      .map((n) => (n % 6) + 1)
+      .join('')
+  ];
+
+const addRandomDiceWordToPassphrase = () => {
+  DOM.bip39Passphrase.value += ' ' + getRandomDiceWord();
+  DOM.bip39Passphrase.value = DOM.bip39Passphrase.value.trim();
+  mnemonicToSeedPopulate();
+};
+
 // const phraseChanged = () => {
 //   // Get the mnemonic phrase
 //   const phrase = normalizeString(DOM.bip39Phrase.value);
@@ -1485,12 +1518,36 @@ const writeSplitPhrase = async () => {
   }
 };
 
+const diceToPassphrase = () => {
+  const input = normalizeString(DOM.bip39PassGenInput.value);
+  const data = input.split('').filter((char) => !!char.match(/[1-6]/));
+  if (data.length < 5) return;
+  const words = [];
+  while (data.length > 4) {
+    words.push(diceware[data.slice(0, 5).join('')]);
+    data.splice(0, 5);
+  }
+  if (!words.length) return;
+  DOM.bip39Passphrase.value = words.join(' ');
+  mnemonicToSeedPopulate();
+};
 /**
  * Called when mnemonic is updated
  */
 const mnemonicToSeedPopulate = debounce(async () => {
   const mnemonic = getPhrase();
   const passphrase = getPassphrase();
+  const crackTime = zxcvbn(passphrase);
+  const crackText =
+    crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
+  if (crackText) {
+    DOM.bip39PassphraseCrackTime.innerText = crackText;
+    if (crackText !== 'centuries') {
+      DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
+    } else {
+      DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
+    }
+  }
   let seedHex = '';
   resetEverything();
   seed = null;
