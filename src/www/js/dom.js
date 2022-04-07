@@ -26,6 +26,8 @@ let myPayCode = null;
 let bobPayCode = null;
 let entropyTypeAutoDetect = true;
 let lastInnerWidth = parseInt(window.innerWidth);
+let libTimeout = null;
+let libTimeoutCount = 0;
 const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
@@ -80,8 +82,46 @@ const networks = {
 /**
  * Setup the DOM for interaction
  */
+// Store elements in DOM object to reference everywhere
 const DOM = {};
 const setupDom = () => {
+  // run a quick check that the browser is modern enough to handle this
+  if (thisBrowserIsShit()) {
+    alert(
+      'Your browser is outdated and is unable to run this tool. Please update it or use a modern browser instead.'
+    );
+    return;
+  }
+  // Test to see if all the libraries are ready
+  if (
+    !window.bip32 ||
+    !window.bip39 ||
+    !window.bip47 ||
+    !window.bip85 ||
+    !window.bitcoin ||
+    !window.diceware ||
+    !window.Entropy ||
+    !window.Levenshtein ||
+    !window.zxcvbn
+  ) {
+    // check we are not in a loop
+    if (libTimeoutCount > 30) {
+      // 9 seconds: something must be wrong
+      alert('Something has gone wrong. please try to reload the page');
+      return;
+    }
+    // Log this
+    console.log(`Waiting for libs... delay number: ${libTimeoutCount}`);
+    // try again in a bit
+    libTimeoutCount++;
+    libTimeout = setTimeout(setupDom, 300);
+    return;
+  } else {
+    // clear timeout and counter
+    libTimeoutCount = 0;
+    libTimeout = null;
+  }
+  // store html elements
   DOM.accordionButtons = document.querySelectorAll('.accordion');
   DOM.accordionPanels = document.querySelectorAll('.panel');
   DOM.aboutPanel = document.getElementById('aboutPanel');
@@ -95,7 +135,6 @@ const setupDom = () => {
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
   DOM.bip32RootFingerprint = document.getElementById('bip32RootFingerprint');
-  // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
   DOM.entropyInput = document.getElementById('entropy');
@@ -193,23 +232,30 @@ const setupDom = () => {
   DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
   DOM.hidePrivateData = document.getElementById('hidePrivateData');
   DOM.onlineIcon = document.getElementById('networkIndicator');
-
+  DOM.infoModal = document.getElementById('infoModal');
+  DOM.infoModalText = document.getElementById('infoModalText');
+  // set network now
   network = bitcoin.networks.bitcoin;
+  // CHECKBOXES
   // Show / hide split mnemonic cards
   DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
-  bip39ShowSplitMnemonic();
-  // hidePassphraseGeneration
+  // Show / hide Passphrase Generation
   DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  // hide private data
+  DOM.hidePrivateData.oninput = hideAllPrivateData;
+  // call these now in case checkbox is not in expected state
+  // e.g. user navigates back to site from another page
+  bip39ShowSplitMnemonic();
   hidePassphraseGeneration();
-  // listen for if entropy method changes
+  hideAllPrivateData();
+  // listen for entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
-
   // listen for address generate button clicks
   DOM.addressGenerateButton.onclick = generateAddresses;
   DOM.path.oninput = generateAddresses;
-
   // listen for change in derivedPathSelect
   DOM.derivedPathSelect.oninput = derivedPathSelectChanged;
+  // call now to select defaults
   derivedPathSelectChanged();
   // listen for bip47 changes
   DOM.bip47UsePaynym.oninput = togglePaynym;
@@ -235,9 +281,6 @@ const setupDom = () => {
       adjustPanelHeight();
     });
   });
-  // hide private data
-  DOM.hidePrivateData.oninput = hideAllPrivateData;
-  hideAllPrivateData();
   // Copy button
   DOM.copyWrapper.forEach(setupCopyButton);
   // FOOTER: calculate copyright year
@@ -256,16 +299,12 @@ const setupDom = () => {
   document.getElementById('defaultOpenTab').click();
   // Setup one click copy
   document.querySelectorAll('.one-click-copy').forEach((textElement) => {
-    textElement.addEventListener('click', copyEventHandler);
+    textElement.onclick = copyEventHandler;
   });
   // add listener for bip44 path inputs
   DOM.pathCoin.oninput = changePath;
   DOM.pathAccount.oninput = changePath;
   DOM.pathChange.oninput = changePath;
-  // Add event listener for displaying/hiding entropy details
-  // DOM.entropyDisplay.addEventListener('click', () => {
-  //   displayEntropy(DOM.entropyDisplay.checked);
-  // });
   // add event listener for entropy
   DOM.entropyInput.oninput = entropyChanged;
   DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
@@ -277,40 +316,66 @@ const setupDom = () => {
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // update pointer to word list
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
-  // open the about panel on load
-  DOM.aboutPanel.click();
   // show user when connected to a network for security
-  window.addEventListener('offline', (event) => {
+  window.addEventListener('offline', () => {
     DOM.onlineIcon.classList.add('hidden');
   });
-  window.addEventListener('online', (event) => {
+  window.addEventListener('online', () => {
     DOM.onlineIcon.classList.remove('hidden');
   });
   // set it now
   if (window.navigator.onLine) {
     DOM.onlineIcon.classList.remove('hidden');
+  } else {
+    DOM.onlineIcon.classList.add('hidden');
   }
+  // Watch for changes in the window size to change textarea boxes
   resizeObserver.observe(document.querySelector('body'));
+  // open the about panel on load
+  DOM.aboutPanel.click();
+  // Remove loading screen
   document.getElementById('loadingPage').style.display = 'none';
 };
 
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
 
-// Hide all private data
+/**
+ * Test for the features we use
+ * return true if not available
+ * @returns {boolean}
+ */
+const thisBrowserIsShit = () => {
+  let isShit = false;
+  if (
+    // check crypto
+    !window.crypto ||
+    !window.crypto.getRandomValues ||
+    !window.crypto.subtle ||
+    // check copy to clipboard
+    !navigator.clipboard ||
+    // template check
+    !('content' in document.createElement('template')) ||
+    // TextEncoder
+    !TextEncoder ||
+    // check String.prototype.normalize
+    !String.prototype.normalize
+  )
+    isShit = true;
+
+  // return result
+  return isShit;
+};
+
+// Show/Hide all private data
 const hideAllPrivateData = () => {
-  if (DOM.hidePrivateData.checked) {
-    document.querySelectorAll('.private-data').forEach((el) => {
-      el.style.display = 'none';
-    });
-  } else {
-    document.querySelectorAll('.private-data').forEach((el) => {
-      el.style.display = '';
-    });
-  }
+  document.querySelectorAll('.private-data').forEach((el) => {
+    el.style.display = DOM.hidePrivateData.checked ? 'none' : '';
+  });
   adjustPanelHeight();
 };
 
+// Show/Hide passphrase generation section
 const hidePassphraseGeneration = () => {
   if (DOM.hidePassphraseGeneration.checked) {
     DOM.bip39PassGenSection.classList.remove('hidden');
@@ -320,6 +385,7 @@ const hidePassphraseGeneration = () => {
   adjustPanelHeight();
 };
 
+// Show/Hide split mnemonic cards section
 const bip39ShowSplitMnemonic = () => {
   if (DOM.bip39ShowSplitMnemonic.checked) {
     DOM.bip39SplitMnemonicSection.classList.remove('hidden');
@@ -352,21 +418,19 @@ function textareaResize() {
     const cols = textareaElement.cols;
     const arrayText = txt.split('\n');
     let rows = arrayText.length;
-    for (i = 0; i < arrayText.length; i++)
-      rows += parseInt(arrayText[i].length / cols);
-    if (rows > maxRows) textareaElement.rows = maxRows;
-    else textareaElement.rows = rows;
+    arrayText.forEach((line) => (rows += parseInt(line.length / cols)));
+    textareaElement.rows = rows > maxRows ? maxRows : rows;
   });
 }
 
-const resizeObserver = new ResizeObserver((entries) => {
+// Make adjustments to the layout if the window size changes
+const resizeObserver = new ResizeObserver(() => {
   if (lastInnerWidth === innerWidth) return;
   adjustPanelHeight();
 });
 
 // Add Copy Buttons
 const setupCopyButton = (element) => {
-  if (!('content' in document.createElement('template'))) return;
   const template = document.getElementById('copyButtonTemplate');
   const clone = template.content.firstElementChild.cloneNode(true);
 
@@ -384,16 +448,16 @@ const setupCopyButton = (element) => {
   element.appendChild(clone);
 };
 
-//
+// for one click copy
 const copyEventHandler = (event) => {
   event.preventDefault();
   const textElement = event.currentTarget;
-  const text = textElement.innerText || textElement.value;
+  const text = textElement.value || textElement.innerText;
   copyTextToClipboard(text);
 };
 
 // BIP47 functions
-
+// Show/Hide paynym sections
 const togglePaynym = () => {
   DOM.bip47PaynymSections.forEach((element) => {
     if (DOM.bip47UsePaynym.checked) {
@@ -405,6 +469,7 @@ const togglePaynym = () => {
   fetchRobotImages();
 };
 
+// Use paynym.is robohash api to get a robot image
 const fetchRobotImages = async () => {
   const url = 'https://paynym.is/preview/';
   const myPayCode = normalizeString(DOM.bip47MyPaymentCode.value);
@@ -440,13 +505,22 @@ const fetchRobotImages = async () => {
       });
     }
   } catch (error) {
-    console.error(error); // TODO remove this for prod
+    console.error(error); // TODO remove this for prod?
+    // remove robot images if they exist and add text explaining why
+    DOM.bip47PaynymSections.forEach((element) => {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+      element.innerText = 'Unable to display a Robot, you may be offline.';
+    });
   }
   adjustPanelHeight();
 };
 
+// Calculate and populate User's bip47 fields
 const calcBip47 = () => {
-  if (!getPhrase()) return;
+  // make sure we have a valid seed and mnemonic
+  if (!getPhrase() || !bip32RootKey) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
   myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
   const myNotify = myPayCode.derive(0);
@@ -460,6 +534,12 @@ const calcBip47 = () => {
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
   fetchRobotImages();
 };
+
+/**
+ * Test if a payment code is valid
+ * @param {string} paymentCode Base58 encoded string of the payment code
+ * @returns {boolean}
+ */
 const isValidPaymentCode = (paymentCode) => {
   try {
     bip47.fromBase58(paymentCode, network);
@@ -468,7 +548,9 @@ const isValidPaymentCode = (paymentCode) => {
     return false;
   }
 };
+// Calculate and populate counter-party's bip47 fields
 const calcBip47CounterParty = () => {
+  // Test it is valid
   const bobPcBase58 = normalizeString(DOM.bip47CPPaymentCode.value);
   if (!isValidPaymentCode(bobPcBase58)) {
     DOM.bip47CPGenSection.classList.add('hidden');
@@ -486,6 +568,7 @@ const calcBip47CounterParty = () => {
   fetchRobotImages();
 };
 
+// Remove data from bip47 section
 const clearBip47Addresses = () => {
   DOM.bip47CsvDownloadLink.classList.add('hidden');
   while (DOM.bip47AddressListContainer.firstChild) {
@@ -539,6 +622,7 @@ const injectBip47Addresses = (addressDataArray) => {
   )}`;
 };
 
+// generates an array of addresses and passes them on to be displayed
 const calculateBip47Addresses = () => {
   clearBip47Addresses();
   DOM.bip47AddressSection.classList.add('hidden');
@@ -616,6 +700,7 @@ const calculateBip47Addresses = () => {
   }
 };
 
+// returns addresses for a given node depending on currentBip
 const getAddress = (node) => {
   if (currentBip === 'bip49') {
     return bitcoin.payments.p2sh({
@@ -642,10 +727,10 @@ const getAddress = (node) => {
  * @param {boolean} immediate Override timeout and call now
  * @returns {function}
  */
-// Returns a function, that, as long as it continues to be invoked, will not
-// be triggered. The function will be called after it stops being called for
-// N milliseconds. If `immediate` is passed, trigger the function on the
-// leading edge, instead of the trailing.
+// Returns a function, that, as long as it continues to be invoked,
+// will not be triggered. The function will be called after it
+// stops being called for N milliseconds. If `immediate` is passed,
+// trigger the function on the leading edge, instead of the trailing.
 function debounce(func, wait, immediate) {
   let timeout;
   return function () {
@@ -713,8 +798,7 @@ const derivedPathSelectChanged = () => {
 /**
  * QnA Explains dialog / Modal
  */
-DOM.infoModal = document.getElementById('infoModal');
-DOM.infoModalText = document.getElementById('infoModalText');
+
 /**
  * Hide the modal and clear it's text
  */
@@ -741,51 +825,19 @@ window.onclick = function (event) {
   }
 };
 /**
- * If navigator.clipboard is not available, here is fallback
- * @param {string} text text to copy
- */
-function fallbackCopyTextToClipboard(text) {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-
-  // Avoid scrolling to bottom
-  textArea.style.top = '0';
-  textArea.style.left = '0';
-  textArea.style.position = 'fixed';
-
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
-  try {
-    const successful = document.execCommand('copy');
-    let msg = successful ? 'successful' : 'unsuccessful';
-    toast('Copied to clipboard');
-  } catch (err) {
-    console.error('Fallback: Oops, unable to copy', err);
-    toast('ERROR: Unable to copy to clipboard');
-  }
-
-  document.body.removeChild(textArea);
-}
-/**
  * Copy text to clipboard
  * @param {string} text text to copy
  */
 function copyTextToClipboard(text) {
-  if (!navigator.clipboard) {
-    fallbackCopyTextToClipboard(text);
-  } else {
-    navigator.clipboard.writeText(text).then(
-      function () {
-        toast('Copied to clipboard');
-      },
-      function (err) {
-        console.error('Async: Could not copy text: ', err);
-        toast('ERROR: Unable to copy to clipboard');
-      }
-    );
-  }
+  navigator.clipboard.writeText(text).then(
+    function () {
+      toast('Copied to clipboard');
+    },
+    function (err) {
+      console.error('Async: Could not copy text: ', err);
+      toast('ERROR: Unable to copy to clipboard');
+    }
+  );
 }
 /**
  * Displays a pop-up message like a notification
@@ -801,37 +853,18 @@ function toast(message) {
     background.classList.remove('show-toast');
   }, 3000);
 }
-/**
- * Display / Hide Entropy details
- * @param {boolean} checked Is the checkbox checked
- */
-// function displayEntropy(checked) {
-//   DOM.entropyDetailsContainer = document.getElementById(
-//     'entropyDetailsContainer'
-//   );
-//   if (checked) {
-//     // show details
-//     DOM.entropyDetailsContainer.style.display = 'flex';
-//   } else {
-//     DOM.entropyDetailsContainer.style.display = 'none';
-//   }
-//   adjustPanelHeight();
-// }
-/**
- * Whenever some CSS changes in an accordion panel, call this to fix the panel
- */
+
+// resizes layout of panels in accordion and textarea boxes
 function adjustPanelHeight() {
   textareaResize();
   DOM.accordionPanels.forEach((panel) => {
-    const isActive = panel.classList.contains('accordion-panel--active');
-    if (isActive) {
-      panel.style.maxHeight = panel.scrollHeight + 'px';
-    } else {
-      panel.style.maxHeight = null;
-    }
+    panel.style.maxHeight = panel.classList.contains('accordion-panel--active')
+      ? panel.scrollHeight + 'px'
+      : null;
   });
 }
 
+// event handler for when the path is changed
 const changePath = () => {
   const purpose = DOM.pathPurpose.value;
   const coin = DOM.pathCoin.value;
@@ -899,6 +932,7 @@ const injectAddresses = (addressDataArray) => {
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
+// get derived addresses and pass them off to be inserted in DOM
 const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   clearAddresses();
   if (!bip32RootKey) {
@@ -907,11 +941,6 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   try {
     const node = bip32RootKey;
     const path = (i) => `${DOM.path.value}/${i}`;
-    // if (!path()) {
-    //   console.error('Unable to generate addresses without valid path');
-    //   return;
-    // }
-    // const node = bip32.fromSeed(seed);
     const addressDataArray = [];
     for (let i = startIndex; i <= endIndex; i++) {
       const addressPath = path(i);
@@ -934,6 +963,7 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   }
 };
 
+// Handler for when derived addresses need doing
 const generateAddresses = (event) => {
   event.preventDefault();
   const btn = event.target;
@@ -946,6 +976,7 @@ const generateAddresses = (event) => {
   fillBip32Keys();
 };
 
+// Remove displayed derived addresses
 const clearAddresses = () => {
   DOM.csvDownloadLink.classList.add('hidden');
   while (DOM.addressListContainer.firstChild) {
@@ -954,6 +985,7 @@ const clearAddresses = () => {
   adjustPanelHeight();
 };
 
+// Populate extended keys for currentBip
 const fillBip32Keys = () => {
   if (!bip32RootKey) return;
   if (currentBip === 'bip49' || currentBip === 'bip84') {
@@ -981,6 +1013,7 @@ const fillBip32Keys = () => {
   }
 };
 
+// When currentBip isn't 32, display bip32 keys
 const displayAccountKeys = () => {
   const purpose = DOM.pathPurpose.value;
   const coin = DOM.pathCoin.value;
@@ -991,6 +1024,7 @@ const displayAccountKeys = () => {
   DOM.pathAccountXpub.value = accountExtendedKey.neutered().toBase58();
 };
 
+// Calculate and populate the BIP85 section
 const calcBip85 = () => {
   const app = DOM.bip85Application.value;
   DOM.bip85MnemonicLength.parentElement.classList.add('hidden');
@@ -1027,6 +1061,7 @@ const calcBip85 = () => {
   }
 };
 
+// Return to the parent of the current seed, if one exists
 const bip85LoadParent = (event) => {
   event.preventDefault();
   // check there is a parent
@@ -1047,6 +1082,7 @@ const bip85LoadParent = (event) => {
   }
 };
 
+// Load the bip85 child seed into the tool and save the parent
 const bip85LoadChild = (event) => {
   event.preventDefault();
   // Save current key as parent
@@ -1073,17 +1109,26 @@ const bip85LoadChild = (event) => {
   mnemonicToSeedPopulate();
 };
 
+// remove white space from ends and normalize per spec
 const normalizeString = (str) => str.trim().normalize('NFKD');
 
+// helper function to get the mnemonic
 const getPhrase = () => normalizeString(DOM.bip39Phrase.value);
 
+// helper function to get the passphrase
 const getPassphrase = () => normalizeString(DOM.bip39Passphrase.value);
 
+// helper function to get the user input entropy
 const getEntropy = () => normalizeString(DOM.entropyInput.value);
 
+/**
+ * Helper function to try to find the nearest word to one given
+ * @param {string} word word from wordList - may be misspelt
+ * @returns {string} nearest word it could find in the wordList
+ */
 const findNearestWord = (word) => {
   let minDistance = 99;
-  let closestWord = wordList[0];
+  let closestWord = L[0];
   for (let i = 0; i < wordList.length; i++) {
     const comparedTo = wordList[i];
     if (comparedTo.indexOf(word) === 0) {
@@ -1098,6 +1143,11 @@ const findNearestWord = (word) => {
   return closestWord;
 };
 
+/**
+ * Test mnemonic phrase for errors
+ * @param {string} phraseArg The mnemonic phrase
+ * @returns {string} Any errors with the phrase
+ */
 const findPhraseErrors = (phraseArg) => {
   const phrase = normalizeString(phraseArg);
   const words = phraseToWordArray(phrase);
@@ -1122,6 +1172,10 @@ const findPhraseErrors = (phraseArg) => {
   return '';
 };
 
+/**
+ * Display a warning with mnemonic phrase errors
+ * @param {string} errorText Text describing the error
+ */
 const showValidationError = (errorText) => {
   if (errorText) {
     DOM.bip39InvalidMessage.innerText = errorText + '. ';
@@ -1133,6 +1187,10 @@ const showValidationError = (errorText) => {
   adjustPanelHeight();
 };
 
+/**
+ * Get a random word from the diceware list
+ * @returns {string} a random word from the diceware list
+ */
 const getRandomDiceWord = () =>
   diceware[
     crypto
@@ -1147,24 +1205,7 @@ const addRandomDiceWordToPassphrase = () => {
   mnemonicToSeedPopulate();
 };
 
-// const phraseChanged = () => {
-//   // Get the mnemonic phrase
-//   const phrase = normalizeString(DOM.bip39Phrase.value);
-//   const errorText = findPhraseErrors(phrase);
-//   showValidationError(errorText);
-//   if (errorText) {
-//     return;
-//   }
-//   // Calculate and display
-//   var passphrase = DOM.bip39Passphrase.value;
-//   // calcBip32RootKeyFromSeed(phrase, passphrase);
-//   // calcForDerivationPath();
-//   // calcBip85();
-//   // Show the word indexes
-//   showWordIndexes();
-//   writeSplitPhrase(phrase);
-// };
-
+// Event handler on entropy input
 const entropyChanged = async () => {
   // debounce?
   if (getEntropy().length === 0) {
@@ -1189,11 +1230,13 @@ const entropyChanged = async () => {
   textareaResize();
 };
 
+// If user chooses own entropy type
 const entropyTypeChanged = () => {
   entropyTypeAutoDetect = false;
   entropyChanged();
 };
 
+// Calculate and display entropy
 const calculateEntropy = async () => {
   const input = getEntropy();
   let entropy = null;
@@ -1248,6 +1291,12 @@ const calculateEntropy = async () => {
   writeSplitPhrase();
 };
 
+/**
+ * Asynchronous helper to hash a string
+ * @param {string} text string to hash
+ * @param {string=} algo which hashing algorithm to use
+ * @returns {Promise} hexadecimal string of hash
+ */
 const hash = async (text, algo = 'SHA-256') => {
   const msgUint8 = new TextEncoder().encode(text);
   const hashBuffer = await crypto.subtle.digest(algo, msgUint8);
@@ -1256,6 +1305,7 @@ const hash = async (text, algo = 'SHA-256') => {
   return hex;
 };
 
+// Calculate and populate fields from user entropy
 const setMnemonicFromEntropy = async () => {
   clearEntropyFeedback();
   // Get entropy value
@@ -1317,6 +1367,7 @@ const setMnemonicFromEntropy = async () => {
   calcBip47();
 };
 
+// get a string of what kind of entropy is detected for displaying
 const getEntropyTypeStr = (entropy) => {
   let typeStr = entropy.base.str || 'Unknown';
   // Add some detail if these are cards
@@ -1428,6 +1479,7 @@ const wordArrayToPhrase = (words) => {
   return phrase;
 };
 
+// Display the indexes of the mnemonic phrase
 const showWordIndexes = () => {
   const words = phraseToWordArray();
   const wordIndexes = [];
@@ -1438,6 +1490,7 @@ const showWordIndexes = () => {
   DOM.entropyWordIndexes.innerText = wordIndexesStr;
 };
 
+// display the checksum of the used entropy
 const showChecksum = () => {
   const words = phraseToWordArray();
   const checksumBitlength = words.length / 3;
@@ -1465,6 +1518,7 @@ const showChecksum = () => {
   DOM.entropyBinaryChecksum.innerText = checksum;
 };
 
+// Generate a random mnemonic when button is clicked
 const generateNewMnemonic = () => {
   toast('Calculating...');
   const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
@@ -1475,6 +1529,7 @@ const generateNewMnemonic = () => {
   mnemonicToSeedPopulate();
 };
 
+// Split the mnemonic phrase over 3 cards
 const writeSplitPhrase = async () => {
   const phrase = DOM.bip39Phrase.value;
   const wordCount = phrase.split(/\s/g).length;
@@ -1525,6 +1580,8 @@ const writeSplitPhrase = async () => {
   }
 };
 
+// Get the word associated with the dice the user rolled
+// 5 rolls gets one word
 const diceToPassphrase = () => {
   const input = normalizeString(DOM.bip39PassGenInput.value);
   const data = input.split('').filter((char) => !!char.match(/[1-6]/));
@@ -1595,6 +1652,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   adjustPanelHeight();
 }, 1000);
 
+// Empty all fields
 const resetEverything = () => {
   seed = null;
   bip32RootKey = null;
@@ -1624,16 +1682,16 @@ const resetEverything = () => {
   DOM.bip47CPNotificationPubKey.value = '';
 };
 
+// Empty entropy fields
 const clearEntropyFeedback = () => {
-  DOM.entropyTimeToCrack.innerText = '...';
-  DOM.entropyEventCount.innerText = '...';
-  DOM.entropyEntropyType.innerText = '...';
-  DOM.entropyBitsPerEvent.innerText = '...';
-  DOM.entropyRawWords.innerText = '...';
-  DOM.entropyTotalBits.innerText = '...';
-  DOM.entropyFiltered.innerText = '...';
-  DOM.entropyRawBinary.innerText = '...';
-  DOM.entropyBinaryChecksum.innerText = '...';
-  DOM.entropyWordIndexes.innerText = '...';
-  // DOM.entropyMethod.value = 'hex';
+  DOM.entropyTimeToCrack.innerText = '';
+  DOM.entropyEventCount.innerText = '';
+  DOM.entropyEntropyType.innerText = '';
+  DOM.entropyBitsPerEvent.innerText = '';
+  DOM.entropyRawWords.innerText = '';
+  DOM.entropyTotalBits.innerText = '';
+  DOM.entropyFiltered.innerText = '';
+  DOM.entropyRawBinary.innerText = '';
+  DOM.entropyBinaryChecksum.innerText = '';
+  DOM.entropyWordIndexes.innerText = '';
 };
