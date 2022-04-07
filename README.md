@@ -50,8 +50,3 @@ MSG="Added this awesome new feature" npm run git
 ```
 Will run the build script and push your changes to git
 
-### Test
-```
-npm test
-```
-Should run tests when written (TODO)

@@ -5,9 +5,26 @@
   <meta charset="utf-8" />
   <title>Seed Tool</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <meta content="Mnemonic seed generation for all your bitcoin needs" name="description" />
+  <meta property="og:title" content="Bitcoiner.guide Seed Tool">
+  <meta property="og:type" content="website" />
+  <meta property="og:image"
+    content="https://raw.githubusercontent.com/BitcoinQnA/bitcoiner.guide/master/assets/images/BDG1.png">
+  <meta property="og:url" content="https://bitcoiner.guide/seed">
+  <meta name="twitter:title" content="Bitcoiner.guide Seed Tool">
+  <meta name="twitter:description"
+    content=" Generate Bitcoin seeds, Mnemonics, Payment Codes, Addresses and more! BIP32 BIP39 BIP44 BIP47 BIP49 BIP84 BIP85">
+  <meta name="twitter:image"
+    content="https://raw.githubusercontent.com/BitcoinQnA/bitcoiner.guide/master/assets/images/BDG1.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:description"
+    content="Generate Bitcoin seeds, Mnemonics, Payment Codes, Addresses and more! BIP32 BIP39 BIP44 BIP47 BIP49 BIP84 BIP85">
+  <meta property="og:site_name" content="Bitcoiner.guide">
+  <meta name="twitter:image:alt" content="Bitcoiner.guide">
+  <meta name="twitter:site" content="@BitcoinQ_A">
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta content="Bitcoin Entropy + Seed Tool" name="description" />
+  <meta
+    content="Generate Bitcoin seeds, Mnemonics, Payment Codes, Addresses and more! BIP32 BIP39 BIP44 BIP47 BIP49 BIP84 BIP85"
+    name="description" />
   <link rel="shortcut icon"
     href="data:image/vnd.microsoft.icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAOtAAADrQAAAAAAAAAAAAAAAAAAAAAAABqT9wAak/cBGpP3JhqT93kak/e9GpP33BqT990ak/fAGpP3fhqT9yoak/cBGpP3AAAAAAAAAAAAAAAAABqT9wAak/cIGpP3ZhqT99gak/f9GpP3/xqT9/8ak/f/GpP3/xqT9/0ak/fbGpP3bhqT9woak/cAAAAAABqT9wAak/cHGpP3hBqT9/cak/f/GJL3/xmS9/8dlPf/GpP3/xqT9/8ak/f/GpP3/xqT9/kak/eOGpP3ChqT9wAak/cAGpP3ZBqT9/cak/f/GZP3/0Wn+P9Mqvn/h8b7/yeZ9/8Wkff/F5L3/xqT9/8ak/f/GpP3+hqT928ak/cAGpP3IxqT99Mak/f/GpP3/xWR9/+Aw/v/pNT8/8fl/f+e0fz/isj7/0+s+f8ak/f/GpP3/xqT9/8ak/fbGpP3LBqT93Iak/f8GpP3/yCW9/95wPr/zuj9//H4///M5/3/weL9/+73/v/g8P7/PaT4/xiS9/8ak/f/GpP3/hqT94Aak/e0GpP3/xqT9/8elff/crz6/8zn/f/p9f7/QaX4/xqT9/+c0Pz//f7//16z+f8Wkff/GpP3/xqT9/8ak/fCGpP30xqT9/8ak/f/GpP3/xSQ9/9suvr/9vv//3/D+/+Bw/v/5PL+/9Pq/f80n/j/GJL3/xqT9/8ak/f/GpP33xqT99Iak/f/GpP3/xqT9/8Xkvf/Qqb4/+32/v/a7v7/m9D8/8Pj/f/r9v7/WrH5/xeS9/8ak/f/GpP3/xqT998ak/eyGpP3/xqT9/8ak/f/GZP3/yWY9//O6P3/v+H9/x6V9/9vu/r//f7//4DD+/8Wkff/GpP3/xqT9/8ak/fBGpP3cBqT9/sak/f/GpP3/xqT9/8mmff/t938//D4/v+13Pz/4PD+/7Xc/P84ofj/GJL3/xqT9/8ak/f9GpP3fhqT9yEak/fRGpP3/xqT9/8Ykvf/b7v6/8nm/f/g8P7/ut/9/8Xj/f8yn/j/GJL3/xqT9/8ak/f/GpP32RqT9yoak/cAGpP3YRqT9/Yak/f/GZP3/yqa+P8pmvj/e8H6/3zB+v91vvr/LJz4/xmS9/8ak/f/GpP3+RqT92wak/cAGpP3ABqT9wcak/eAGpP39hqT9/8Zk/f/GJL3/yWY9/8nmff/GZP3/xqT9/8ak/f/GpP3+BqT94oak/cJGpP3AAAAAAAak/cAGpP3BxqT92Eak/fUGpP3/BqT9/8Zk/f/GZP3/xqT9/8ak/f9GpP32BqT92kak/cJGpP3AAAAAAAAAAAAAAAAABqT9wAak/cAGpP3IhqT93Mak/e3GpP31xqT99cak/e6GpP3eBqT9yYak/cBGpP3AAAAAAAAAAAA4AcAAMADAACAAQAAgAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAEAAIABAADAAwAA4AcAAA==" />
 </head>
@@ -22,6 +39,14 @@
           d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z" />
       </g>
     </svg>
+    <noscript>
+      <h1>JavaScript is Required</h1>
+      <p>
+        This entire page requires JavaScript which appears to be disabled in your browser. Please enable JavaScript
+        and reload the page to get it to work.
+      </p>
+      <hr>
+    </noscript>
     <h2>LOADING</h2>
   </div>
   <a href="https://bitcoiner.guide/" id="homeLink" title="Go to bitcoiner.guide">
@@ -44,14 +69,6 @@
     <div class="content">
       <h1>Seed Tool</h1>
       <hr>
-      <noscript>
-        <h1>JavaScript is Required</h1>
-        <p>
-          This entire page requires JavaScript which appears to be disabled in your browser. Please enable JavaScript
-          and reload the page to get it to work.
-        </p>
-        <hr>
-      </noscript>
       <button class="accordion" title="Click to expand this section" id="aboutPanel">
         About
       </button>
@@ -528,7 +545,7 @@
                 rows="2"></textarea></div>
           </div>
           <section class="bip47PaynymSection hidden" id="bip47CPRobotSection"></section>
-          <section id="bip47AddressSection" class="">
+          <section id="bip47AddressSection">
             <p>
               Note these addresses are derived from your private key and the public key of your counterparty.
             </p>
