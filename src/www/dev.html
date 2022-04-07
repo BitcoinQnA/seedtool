@@ -81,15 +81,16 @@
           understanding of how entropy, seed generation,
           passphrases, xpubs and payment codes are all interlinked. Just like the tools and libraries used in its
           creation, this tool is completely
-          free and open <a href="https://github.com/BitcoinQnA/seedtool" target="_blank" rel="noopener noreferrer">
+          free and <a href="https://github.com/BitcoinQnA/seedtool" target="_blank" rel="noopener noreferrer"> open
             source.</a>
         </p>
         <h2>Warning</h2>
         <p>
           <b>NEVER</b> use the online version of this tool to create or interact with seeds used to manage real bitcoin.
-          If the tool detects a network connection,
-          you will see a network symbol in the top corner of the screen.
-          To use this tool offline, right click
+          While there is nothing in this tool that
+          collects private information or sends it anywhere, there may be other software on your device that does. If
+          the tool detects a network connection,
+          you will see a network symbol in the top corner of the screen. To use this tool offline, right click
           and <i>'Save Page As'</i> to save a HTML file that can be opened in any web browser on an offline device or an
           amnesic operating system like <a href="https://tails.boum.org/about/index.en.html" target="_blank"
             rel="noopener noreferrer">Tails.</a>
@@ -261,8 +262,8 @@
           </div>
         </div>
         <h4>BIP39: Mnemonic code for generating deterministic keys</h4>
-        <button class="btn" title="Click to learn more about this section" onclick="openInfoModal(event, 'BIP39')">
-          More Info
+        <button class="btn" title="Click to learn more about BIP39" onclick="openInfoModal(event, 'BIP39')">
+          BIP39 Explained
         </button><br>
         <label title="Hide all private information on the page"><input type="checkbox" id="hidePrivateData">Hide all
           private information</label>
@@ -288,7 +289,7 @@
             (recommended)</label>
           <div class="copy-wrapper private-data">
             <textarea id="bip39Passphrase" class="passphrase textarea-input"
-              title="Encrypt your Mnemonic with a strong passphrase. Keept it safe and private." autocomplete="off"
+              title="Encrypt your Mnemonic with a strong passphrase. Keep it safe and private." autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
           <div class="warning">
@@ -297,15 +298,21 @@
         </div>
         <section id="bip39PassGenSection" class="hidden">
           <p>
-            This uses the <a href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases">EFF's long
-              diceware word list</a> to create a random 5 word passphrase giving you 65 bits of entropy, more than the
-            64 bits that the <a href="https://datatracker.ietf.org/doc/html/rfc8018#section-4">Password-Based
-              Cryptography
-              Specification Version 2.1</a> recommends. Five rolls of a six-sided dice generates one word.
+
+            This section uses the EFF's long diceware word <a
+              href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases"> list</a> to create
+            a random passphrase. To generate a secure passphrase, 5 words is <a
+              href="https://coldbit.com/can-bip-39-passphrase-be-cracked/"> recommended</a>.
+            You can also use dice rolls to generate a random passphrase, five rolls of a six-sided dice generates one
+            word. Keep rolling to make more words or
+            click the button below to add words at random to your passphrase. <br /><br />
+
+            <b>NOTE</b>- Bitcoin wallet passphrase fields are case sensitive and also include blank spaces. Take extreme
+            care when creating and backing them up.
           </p>
           <p>
-            Keep rolling to make more words or click the button to add a word to your passphrase.<button class="btn"
-              title="Click to add a random word to your generated passphrase" onclick="addRandomDiceWordToPassphrase()">
+            <button class="btn" title="Click to add a random word to your generated passphrase"
+              onclick="addRandomDiceWordToPassphrase()">
               Add word </button>
           </p>
           <label for="bip39PassGenInput">Input Dice rolls</label>
@@ -621,8 +628,6 @@
       <hr>
       <button class="accordion" title="Click to expand this section">Credits and licenses</button>
       <div class="panel">
-        <button class="btn" title="Click to learn more about this section"
-          onclick="openInfoModal(event, 'CREDITS')">More Info</button>
         <h3>Libraries & Tools</h3>
         <ul>
           <li><a href="https://github.com/iancoleman/bip39" target="_blank" rel="noopener noreferrer">BIP39 Seed Tool by
