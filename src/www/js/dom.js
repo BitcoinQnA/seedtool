@@ -94,6 +94,7 @@ const setupDom = () => {
   DOM.copyWrapper = document.querySelectorAll('.copy-wrapper');
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
+  DOM.bip32RootFingerprint = document.getElementById('bip32RootFingerprint');
   // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
@@ -298,14 +299,12 @@ window.addEventListener('DOMContentLoaded', setupDom);
 
 // Hide all private data
 const hideAllPrivateData = () => {
-  console.log('ping');
   if (DOM.hidePrivateData.checked) {
     document.querySelectorAll('.private-data').forEach((el) => {
       el.style.display = 'none';
     });
   } else {
     document.querySelectorAll('.private-data').forEach((el) => {
-      console.log(el);
       el.style.display = '';
     });
   }
@@ -1584,6 +1583,9 @@ const mnemonicToSeedPopulate = debounce(async () => {
     bip32RootKey = null;
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
+  DOM.bip32RootFingerprint.value = bip32RootKey
+    ? bip32RootKey.fingerprint.toString('hex')
+    : 'unknown';
   if (bip32RootKey) {
     calculateAddresses();
     fillBip32Keys();
@@ -1599,6 +1601,7 @@ const resetEverything = () => {
   myPayCode = null;
   bobPayCode = null;
   DOM.bip32RootKey.value = '';
+  DOM.bip32RootFingerprint.value = '';
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = '';
   }
