@@ -1584,14 +1584,13 @@ const mnemonicToSeedPopulate = debounce(async () => {
     bip32RootKey = null;
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
-  adjustPanelHeight();
   if (bip32RootKey) {
     calculateAddresses();
     fillBip32Keys();
     calcBip85();
     calcBip47();
   }
-  textareaResize();
+  adjustPanelHeight();
 }, 1000);
 
 const resetEverything = () => {
