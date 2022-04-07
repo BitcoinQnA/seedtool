@@ -1299,11 +1299,8 @@ const setMnemonicFromEntropy = async () => {
   while (hex.length % 64 !== 0) {
     hex = `0${hex}`;
   }
-  console.log('hex :>> ', hex);
   const end = (mnemonicLength * 8) / 3;
-  console.log('end :>> ', end);
   const hexedBin = hex.slice(0, end);
-  console.log('hexedBin :>> ', hexedBin);
   // Convert entropy array to mnemonic
   const phrase = window.bip39.entropyToMnemonic(hexedBin);
   // Set the mnemonic in the UI
