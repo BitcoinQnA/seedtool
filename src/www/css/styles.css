@@ -227,6 +227,13 @@ textarea {
   border: 1px solid var(--q-white);
   border-top: none;
 }
+#pathInputsFlex {
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+  flex-flow: wrap;
+  text-align: center;
+}
 /* .entropy-details--flex-container {
   display: none;
 } */
@@ -283,12 +290,18 @@ textarea {
 }
 #bip141ScriptSemantics,
 #derivedPathSelect,
+#pathCoin,
+#pathChange,
 #bip85Application,
 #bip85MnemonicLength {
   width: 100%;
   background-color: var(--q-light-blue);
   color: var(--q-orange);
   padding: 8px;
+}
+.path-text-input {
+  width: 100%;
+  color: var(--q-orange);
 }
 .info-button {
   background-color: var(--q-blue);
@@ -374,15 +387,16 @@ footer {
 }
 .copy-button {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 3px;
+  top: 3px;
   /* margin: 3px; */
-  /* background: var(--q-blue); */
-  /* box-shadow: 0 0 0 5px var(--q-blue); */
+  background: var(--q-blue);
+  box-shadow: 0 0 0 5px var(--q-blue);
   /* border: 1px solid var(--q-orange); */
   /* padding: 3px; */
-  margin-right: -18px;
-  margin-top: 2px;
+  /* margin-right: 18px; */
+  /* margin-top: 2px; */
+  cursor: copy;
 }
 .copy-wrapper {
   position: relative;

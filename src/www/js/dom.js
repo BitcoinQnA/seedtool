@@ -94,6 +94,7 @@ const setupDom = () => {
   DOM.copyWrapper = document.querySelectorAll('.copy-wrapper');
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
+  DOM.bip32RootFingerprint = document.getElementById('bip32RootFingerprint');
   // DOM.knownInputTextarea = document.getElementById('knownInputTextarea');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
@@ -195,24 +196,11 @@ const setupDom = () => {
 
   network = bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
-  DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
-    if (DOM.bip39ShowSplitMnemonic.checked) {
-      DOM.bip39SplitMnemonicSection.classList.remove('hidden');
-    } else {
-      DOM.bip39SplitMnemonicSection.classList.add('hidden');
-    }
-    adjustPanelHeight();
-  });
+  DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
+  bip39ShowSplitMnemonic();
   // hidePassphraseGeneration
-  // Show / hide split mnemonic cards
-  DOM.hidePassphraseGeneration.addEventListener('click', () => {
-    if (DOM.hidePassphraseGeneration.checked) {
-      DOM.bip39PassGenSection.classList.remove('hidden');
-    } else {
-      DOM.bip39PassGenSection.classList.add('hidden');
-    }
-    adjustPanelHeight();
-  });
+  DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  hidePassphraseGeneration();
   // listen for if entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
 
@@ -235,8 +223,8 @@ const setupDom = () => {
   DOM.bip85MnemonicLength.oninput = calcBip85;
   DOM.bip85Bytes.oninput = calcBip85;
   DOM.bip85Index.oninput = calcBip85;
-  DOM.bip85LoadParent.addEventListener('click', bip85LoadParent);
-  DOM.bip85LoadChild.addEventListener('click', bip85LoadChild);
+  DOM.bip85LoadParent.onclick = bip85LoadParent;
+  DOM.bip85LoadChild.onclick = bip85LoadChild;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -249,6 +237,7 @@ const setupDom = () => {
   });
   // hide private data
   DOM.hidePrivateData.oninput = hideAllPrivateData;
+  hideAllPrivateData();
   // Copy button
   DOM.copyWrapper.forEach(setupCopyButton);
   // FOOTER: calculate copyright year
@@ -312,12 +301,30 @@ window.addEventListener('DOMContentLoaded', setupDom);
 const hideAllPrivateData = () => {
   if (DOM.hidePrivateData.checked) {
     document.querySelectorAll('.private-data').forEach((el) => {
-      el.classList.add('private-data--hidden');
+      el.style.display = 'none';
     });
   } else {
     document.querySelectorAll('.private-data').forEach((el) => {
-      el.classList.remove('private-data--hidden');
+      el.style.display = '';
     });
+  }
+  adjustPanelHeight();
+};
+
+const hidePassphraseGeneration = () => {
+  if (DOM.hidePassphraseGeneration.checked) {
+    DOM.bip39PassGenSection.classList.remove('hidden');
+  } else {
+    DOM.bip39PassGenSection.classList.add('hidden');
+  }
+  adjustPanelHeight();
+};
+
+const bip39ShowSplitMnemonic = () => {
+  if (DOM.bip39ShowSplitMnemonic.checked) {
+    DOM.bip39SplitMnemonicSection.classList.remove('hidden');
+  } else {
+    DOM.bip39SplitMnemonicSection.classList.add('hidden');
   }
   adjustPanelHeight();
 };
@@ -1576,14 +1583,16 @@ const mnemonicToSeedPopulate = debounce(async () => {
     bip32RootKey = null;
   }
   DOM.bip32RootKey.value = bip32RootKey ? bip32RootKey.toBase58() : 'unknown';
-  adjustPanelHeight();
+  DOM.bip32RootFingerprint.value = bip32RootKey
+    ? bip32RootKey.fingerprint.toString('hex')
+    : 'unknown';
   if (bip32RootKey) {
     calculateAddresses();
     fillBip32Keys();
     calcBip85();
     calcBip47();
   }
-  textareaResize();
+  adjustPanelHeight();
 }, 1000);
 
 const resetEverything = () => {
@@ -1592,6 +1601,7 @@ const resetEverything = () => {
   myPayCode = null;
   bobPayCode = null;
   DOM.bip32RootKey.value = '';
+  DOM.bip32RootFingerprint.value = '';
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = '';
   }
