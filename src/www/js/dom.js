@@ -195,24 +195,11 @@ const setupDom = () => {
 
   network = bitcoin.networks.bitcoin;
   // Show / hide split mnemonic cards
-  DOM.bip39ShowSplitMnemonic.addEventListener('click', () => {
-    if (DOM.bip39ShowSplitMnemonic.checked) {
-      DOM.bip39SplitMnemonicSection.classList.remove('hidden');
-    } else {
-      DOM.bip39SplitMnemonicSection.classList.add('hidden');
-    }
-    adjustPanelHeight();
-  });
+  DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
+  bip39ShowSplitMnemonic();
   // hidePassphraseGeneration
-  // Show / hide split mnemonic cards
-  DOM.hidePassphraseGeneration.addEventListener('click', () => {
-    if (DOM.hidePassphraseGeneration.checked) {
-      DOM.bip39PassGenSection.classList.remove('hidden');
-    } else {
-      DOM.bip39PassGenSection.classList.add('hidden');
-    }
-    adjustPanelHeight();
-  });
+  DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  hidePassphraseGeneration();
   // listen for if entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
 
@@ -235,8 +222,8 @@ const setupDom = () => {
   DOM.bip85MnemonicLength.oninput = calcBip85;
   DOM.bip85Bytes.oninput = calcBip85;
   DOM.bip85Index.oninput = calcBip85;
-  DOM.bip85LoadParent.addEventListener('click', bip85LoadParent);
-  DOM.bip85LoadChild.addEventListener('click', bip85LoadChild);
+  DOM.bip85LoadParent.onclick = bip85LoadParent;
+  DOM.bip85LoadChild.onclick = bip85LoadChild;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -249,6 +236,7 @@ const setupDom = () => {
   });
   // hide private data
   DOM.hidePrivateData.oninput = hideAllPrivateData;
+  hideAllPrivateData();
   // Copy button
   DOM.copyWrapper.forEach(setupCopyButton);
   // FOOTER: calculate copyright year
@@ -310,14 +298,34 @@ window.addEventListener('DOMContentLoaded', setupDom);
 
 // Hide all private data
 const hideAllPrivateData = () => {
+  console.log('ping');
   if (DOM.hidePrivateData.checked) {
     document.querySelectorAll('.private-data').forEach((el) => {
-      el.classList.add('private-data--hidden');
+      el.style.display = 'none';
     });
   } else {
     document.querySelectorAll('.private-data').forEach((el) => {
-      el.classList.remove('private-data--hidden');
+      console.log(el);
+      el.style.display = '';
     });
+  }
+  adjustPanelHeight();
+};
+
+const hidePassphraseGeneration = () => {
+  if (DOM.hidePassphraseGeneration.checked) {
+    DOM.bip39PassGenSection.classList.remove('hidden');
+  } else {
+    DOM.bip39PassGenSection.classList.add('hidden');
+  }
+  adjustPanelHeight();
+};
+
+const bip39ShowSplitMnemonic = () => {
+  if (DOM.bip39ShowSplitMnemonic.checked) {
+    DOM.bip39SplitMnemonicSection.classList.remove('hidden');
+  } else {
+    DOM.bip39SplitMnemonicSection.classList.add('hidden');
   }
   adjustPanelHeight();
 };
