@@ -1,0 +1,14 @@
+{
+  "name": "lib-bitcoinjs-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r bitcoinjs-lib -s bitcoin > bitcoin.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "bitcoinjs-lib": "^4.0.5"
+  }
+}

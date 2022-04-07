@@ -1,0 +1,14 @@
+{
+  "name": "lib-bip85",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r bip85 -s bip85 > bip85.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "bip85": "^0.0.3"
+  }
+}
