@@ -267,14 +267,13 @@
         </div>
         <section id="bip39PassGenSection" class="hidden">
           <p>
-            This uses the <a href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases">EFF's long
-              diceware word list</a> to create a random 5 word passphrase giving you 65 bits of entropy, more than the
-            64 bits that the <a href="https://datatracker.ietf.org/doc/html/rfc8018#section-4">Password-Based
-              Cryptography
-              Specification Version 2.1</a> recommends. Five rolls of a six-sided dice generates one word.
+            This section uses the EFF's long diceware word <a href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases"> list</a> to create 
+            a random passphrase. To generate a secure passphrase, 5 words is <a href="https://coldbit.com/can-bip-39-passphrase-be-cracked/"> recommended</a>.
+            You can also use dice rolls to generate a random passphrase, five rolls of a six-sided dice generates one word. Keep rolling to make more words or 
+            click the button below to add words at random to your passphrase.
           </p>
           <p>
-            Keep rolling to make more words or click the button to add a word to your passphrase.<button class="btn"
+            <button class="btn"
               title="Click to add a random word to your generated passphrase" onclick="addRandomDiceWordToPassphrase()">
               Add word </button>
           </p>
