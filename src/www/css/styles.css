@@ -19,7 +19,6 @@
   color: var(--q-orange);
   flex-direction: column;
 }
-/* .lds-hourglass, */
 .loading-bitcoin {
   display: inline-block;
   position: relative;
@@ -28,18 +27,6 @@
   width: 120px;
   height: 120px;
 }
-/*.lds-hourglass:after {
-  content: ' ';
-  display: block;
-  border-radius: 50%;
-  width: 0;
-  height: 0;
-  margin: 8px;
-  box-sizing: border-box;
-  border: 32px solid var(--q-orange);
-  border-color: var(--q-orange) transparent var(--q-orange) transparent;
-  animation: lds-hourglass 1.2s infinite;
-}*/
 @keyframes lds-hourglass {
   0% {
     transform: rotate(0);
@@ -54,11 +41,11 @@
   }
 }
 body {
-  /* padding: 0px 0px 20px 0px; */
   margin: 0px;
-  /* margin-bottom: 51px; */
-  font: 14px/1.5 'OpenSansRegular', 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
+  font: 14px/1.5 'OpenSansRegular', Helvetica, Inter, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
   color: var(--q-white);
   font-weight: normal;
   background: var(--q-blue);
@@ -134,15 +121,6 @@ p {
 textarea {
   resize: none;
 }
-.form-group {
-  border: 1px solid var(--q-white);
-  border-radius: 3px;
-}
-/*.textarea-wrapper,
-.textarea-input {
-  width: 100%;
-  height: auto;
-}*/
 .textarea-input {
   background-color: var(--q-light-blue);
   color: var(--q-white);
@@ -184,8 +162,7 @@ textarea {
 .tiny {
   font-size: xx-small;
 }
-.tab,
-.tabBips {
+.tab {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
@@ -194,7 +171,6 @@ textarea {
   height: 50px;
 }
 .tab button,
-.tabBips button,
 .tab-addresses button {
   background-color: inherit;
   color: var(--q-white);
@@ -205,15 +181,10 @@ textarea {
   padding: 14px 16px;
   transition: 0.3s;
 }
-.tabBips button {
-  width: 20%;
-}
 .tab-addresses button,
 .tab button {
   width: 50%;
 }
-.tabBips button:hover,
-.tabBips button.tab--active,
 .tab button:hover,
 .tab button.tab--active,
 .tab-addresses button:hover,
@@ -227,16 +198,6 @@ textarea {
   border: 1px solid var(--q-white);
   border-top: none;
 }
-#pathInputsFlex {
-  display: flex;
-  gap: 10px;
-  flex-direction: row;
-  flex-flow: wrap;
-  text-align: center;
-}
-/* .entropy-details--flex-container {
-  display: none;
-} */
 .entropy-details--flex-container {
   display: flex;
   flex-flow: row wrap;
@@ -260,9 +221,6 @@ textarea {
   border-radius: 2px;
   padding: 2px;
   overflow-wrap: anywhere;
-}
-.bip44-text-input {
-  width: 50px;
 }
 .address-block {
   border: 1px solid var(--q-white);
@@ -312,7 +270,7 @@ textarea {
   padding: 6px;
 }
 .info-button:hover {
-  background-color: #002933;
+  background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
 .one-click-copy,
@@ -327,36 +285,34 @@ textarea {
   z-index: 5;
   width: 25px;
 }
-/* The Modal (background) */
 .modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 100; /* Sit on top */
+  display: none;
+  position: fixed;
+  z-index: 100;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
-/* Modal Content/Box */
 .modal-content {
   background-color: var(--q-white);
   color: var(--q-blue);
-  margin: 15% auto; /* 15% from the top and centered */
+  margin: 15% auto;
   padding: 20px;
   border: 1px solid var(--q-orange);
-  width: 80%; /* Could be more or less, depending on screen size */
+  width: 80%;
   border-radius: 20px;
 }
-.modal-content a {
+.modal-content a,
+.modal-content a:any-link {
   color: var(--q-light-blue);
   text-decoration: underline;
 }
 
-/* The Close Button */
 #modalClose {
   color: var(--q-blue);
   float: right;
@@ -389,13 +345,8 @@ footer {
   position: absolute;
   right: 3px;
   top: 3px;
-  /* margin: 3px; */
   background: var(--q-blue);
   box-shadow: 0 0 0 5px var(--q-blue);
-  /* border: 1px solid var(--q-orange); */
-  /* padding: 3px; */
-  /* margin-right: 18px; */
-  /* margin-top: 2px; */
   cursor: copy;
 }
 .copy-wrapper {
@@ -406,44 +357,39 @@ footer {
   margin-bottom: 3px;
 }
 #toast {
-  visibility: hidden; /* Hidden by default. Visible on click */
-  min-width: 250px; /* Set a default minimum width */
-  margin-left: -125px; /* Divide value of min-width by 2 */
-  background-color: var(--q-orange); /* Black background color */
-  color: var(--q-blue); /* White text color */
-  text-align: center; /* Centered text */
-  border-radius: 20px; /* Rounded borders */
-  padding: 16px; /* Padding */
-  position: fixed; /* Sit on top of the screen */
-  z-index: 2; /* Add a z-index if needed */
-  left: 50%; /* Center the toast */
-  bottom: 30px; /* 30px from the bottom */
-  box-shadow: 0 0 4px 2px var(--q-white); /* glow */
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: var(--q-orange);
+  color: var(--q-blue);
+  text-align: center;
+  border-radius: 20px;
+  padding: 16px;
+  position: fixed;
+  z-index: 2;
+  left: 50%;
+  bottom: 30px;
+  box-shadow: 0 0 4px 2px var(--q-white);
 }
 #toast-background {
-  visibility: hidden; /* Hidden by default. Visible on click */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  visibility: hidden;
+  position: fixed;
+  z-index: 1;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.8);
   cursor: not-allowed;
 }
-/* Show the toast when clicking on a button (class added with JavaScript) */
 #toast.show-toast,
 #toast-background.show-toast {
-  visibility: visible; /* Show the toast */
-  /* Add animation: Take 0.5 seconds to fade in and out the toast.
-  However, delay the fade out process for 2.5 seconds */
+  visibility: visible;
   -webkit-animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
   animation: toastFadeIn 0.5s, toastFadeOut 0.5s 2.5s;
 }
-
-/* Animations to fade the toast in and out */
 @-webkit-keyframes toastFadeIn {
   from {
     bottom: 0;
@@ -515,9 +461,9 @@ footer {
 }
 
 pre {
-  white-space: pre-wrap; /* css-3 */
-  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-  white-space: -pre-wrap; /* Opera 4-6 */
-  white-space: -o-pre-wrap; /* Opera 7 */
-  word-wrap: break-word; /* Internet Explorer 5.5+ */
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
 }

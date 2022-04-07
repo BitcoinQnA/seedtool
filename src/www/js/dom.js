@@ -1286,9 +1286,9 @@ const calculateEntropy = async () => {
   } else {
     DOM.entropyFilterWarning.classList.add('hidden');
   }
+  await writeSplitPhrase();
   showWordIndexes();
   showChecksum();
-  writeSplitPhrase();
 };
 
 /**
@@ -1355,7 +1355,7 @@ const setMnemonicFromEntropy = async () => {
   const phrase = window.bip39.entropyToMnemonic(hexedBin);
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
-  writeSplitPhrase();
+  await writeSplitPhrase();
   // Show the word indexes
   showWordIndexes();
   // Show the checksum
@@ -1563,15 +1563,15 @@ const writeSplitPhrase = async () => {
     hackTime = '<1 second';
     displayRedText = true;
   } else if (hackTime < 86400) {
-    hackTime = Math.floor(hackTime) + ' seconds';
+    hackTime = Math.floor(hackTime).toLocaleString() + ' seconds';
     displayRedText = true;
   } else if (hackTime < 31557600) {
     hackTime = Math.floor(hackTime / 86400) + ' days';
     displayRedText = true;
   } else {
-    hackTime = Math.floor(hackTime / 31557600) + ' years';
+    hackTime = Math.floor(hackTime / 31557600).toLocaleString() + ' years';
   }
-  DOM.bip39PhraseSplitWarn.innerText =
+  DOM.bip39PhraseSplitWarn.innerHTML =
     'Time to hack with only one card: ' + hackTime;
   if (displayRedText) {
     DOM.bip39PhraseSplitWarn.classList.add('warning');
