@@ -1,0 +1,14 @@
+{
+  "name": "lib-bip32",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r bip32 -s bip32 > bip32.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "bip32": "^1.0.4"
+  }
+}

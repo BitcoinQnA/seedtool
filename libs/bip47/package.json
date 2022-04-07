@@ -1,0 +1,14 @@
+{
+  "name": "lib-bip47",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r @samouraiwallet/bip47 -s bip47 > bip47.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@samouraiwallet/bip47": "^0.6.1"
+  }
+}
