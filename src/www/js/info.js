@@ -299,7 +299,7 @@ window.infoHtml = {
         associated public and private keys which are to be kept secret. If using the tool online you can also enable the PayNym.is connection to see a preview
         of the avatar associated with your payment code, learn more about those <a href="https://bitcoiner.guide/paynym" target="_blank">here</a>. <br/><br/>
         
-        Entering another payment code into the 'Counterparty Details' field will generate unique addresses to enable bitcoin send to that entity 
+        Entering another payment code into the 'Counterparty Details' field will generate unique addresses to enable bitcoin sends to that entity 
         without their interaction. The tool will also generate receive addresses, should that same counterparty choose to send bitcoin to you via your public payment code.  
         
         
