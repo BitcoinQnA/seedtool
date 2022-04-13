@@ -375,6 +375,7 @@ window.infoHtml = {
         <h3>Changelog</h3>
         <ul>
           <li>V1.0.0 - Initial release</li>
+          <li>V1.0.1 - Fix social preview information</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
