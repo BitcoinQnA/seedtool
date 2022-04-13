@@ -161,9 +161,6 @@ textarea {
 .accordion.accordion--active:after {
   content: '\2796';
 }
-.tiny {
-  font-size: xx-small;
-}
 .tab {
   overflow: hidden;
   border: 1px solid var(--q-white);
@@ -327,14 +324,6 @@ textarea {
   color: var(--q-blue);
   text-decoration: none;
   cursor: pointer;
-}
-footer {
-  text-align: center;
-  position: sticky;
-  top: calc(100vh - 50px);
-  height: 50px;
-  border-top: 1px solid var(--q-orange);
-  background-color: var(--q-blue);
 }
 .copy-icon {
   color: var(--q-orange);

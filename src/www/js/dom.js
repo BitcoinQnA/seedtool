@@ -283,18 +283,6 @@ const setupDom = () => {
   });
   // Copy button
   DOM.copyWrapper.forEach(setupCopyButton);
-  // FOOTER: calculate copyright year
-  document.querySelectorAll('.cYear').forEach((yearSpan) => {
-    let output = '';
-    const currentYear = new Date().getFullYear();
-    const originYear = parseInt(yearSpan.innerHTML);
-    if (currentYear - originYear > 10) {
-      output = '&nbsp;-&nbsp;' + originYear + 10;
-    } else if (currentYear !== originYear) {
-      output = '&nbsp;-&nbsp;' + currentYear;
-    }
-    yearSpan.innerHTML += output;
-  });
   // Make sure that the generate seed tab is open
   document.getElementById('defaultOpenTab').click();
   // Setup one click copy
