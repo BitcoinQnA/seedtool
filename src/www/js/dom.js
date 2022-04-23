@@ -28,6 +28,7 @@ let entropyTypeAutoDetect = true;
 let lastInnerWidth = parseInt(window.innerWidth);
 let libTimeout = null;
 let libTimeoutCount = 0;
+let hidePrivateData = false;
 const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
@@ -176,6 +177,8 @@ const setupDom = () => {
   DOM.bip39Seed = document.getElementById('bip39Seed');
   DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
+  DOM.hidePassphraseTest = document.getElementById('hidePassphraseTest');
+  DOM.bip39PassTestSection = document.getElementById('bip39PassTestSection');
   DOM.pathCoin = document.getElementById('pathCoin');
   DOM.pathAccount = document.getElementById('pathAccount');
   DOM.pathChange = document.getElementById('pathChange');
@@ -230,7 +233,7 @@ const setupDom = () => {
   DOM.bip141ScriptSelect = document.getElementById('bip141ScriptSemantics');
   DOM.bip32AccountXprv = document.getElementById('bip32AccountXprv');
   DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
-  DOM.hidePrivateData = document.getElementById('hidePrivateData');
+  DOM.showHide = document.getElementById('showHide');
   DOM.onlineIcon = document.getElementById('networkIndicator');
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
@@ -241,13 +244,15 @@ const setupDom = () => {
   DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
   // Show / hide Passphrase Generation
   DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  // Show / hide Passphrase Tester
+  DOM.hidePassphraseTest.oninput = hidePassphraseTest;
   // hide private data
-  DOM.hidePrivateData.oninput = hideAllPrivateData;
+  DOM.showHide.onclick = toggleHideAllPrivateData;
   // call these now in case checkbox is not in expected state
   // e.g. user navigates back to site from another page
   bip39ShowSplitMnemonic();
   hidePassphraseGeneration();
-  hideAllPrivateData();
+  hidePassphraseTest();
   // listen for entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
   // listen for address generate button clicks
@@ -356,9 +361,12 @@ const thisBrowserIsShit = () => {
 };
 
 // Show/Hide all private data
-const hideAllPrivateData = () => {
+const toggleHideAllPrivateData = () => {
+  hidePrivateData = !hidePrivateData;
+  document.getElementById('hideIcon').classList.toggle('hidden');
+  document.getElementById('showIcon').classList.toggle('hidden');
   document.querySelectorAll('.private-data').forEach((el) => {
-    el.style.display = DOM.hidePrivateData.checked ? 'none' : '';
+    el.style.display = hidePrivateData ? 'none' : '';
   });
   adjustPanelHeight();
 };
@@ -369,6 +377,16 @@ const hidePassphraseGeneration = () => {
     DOM.bip39PassGenSection.classList.remove('hidden');
   } else {
     DOM.bip39PassGenSection.classList.add('hidden');
+  }
+  adjustPanelHeight();
+};
+
+// Show/Hide passphrase tester section
+const hidePassphraseTest = () => {
+  if (DOM.hidePassphraseTest.checked) {
+    DOM.bip39PassTestSection.classList.remove('hidden');
+  } else {
+    DOM.bip39PassTestSection.classList.add('hidden');
   }
   adjustPanelHeight();
 };
@@ -557,7 +575,7 @@ const clearBip47Addresses = () => {
 const injectBip47Addresses = (addressDataArray) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
-`;
+  `;
   // declare DOM elements
   DOM.bip47CsvDownloadLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
@@ -572,7 +590,7 @@ const injectBip47Addresses = (addressDataArray) => {
     csv += `${addressData.path},${addressData.address},${addressData.pubKey},${
       addressData.prvKey || 'N/A'
     },
-`;
+  `;
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
@@ -585,7 +603,10 @@ const injectBip47Addresses = (addressDataArray) => {
     // Add the clone to the DOM
     DOM.bip47AddressListContainer.appendChild(clone);
   });
-  hideAllPrivateData();
+  if (hidePrivateData) {
+    hidePrivateData = false;
+    toggleHideAllPrivateData();
+  }
   DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
     csv
   )}`;
@@ -871,7 +892,7 @@ class AddressData {
 const injectAddresses = (addressDataArray) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
-`;
+  `;
   // declare DOM elements
   DOM.csvDownloadLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
@@ -884,7 +905,7 @@ const injectAddresses = (addressDataArray) => {
   addressDataArray.forEach((addressData) => {
     // Append this address to csv
     csv += `${addressData.path},${addressData.address},${addressData.pubKey},${addressData.prvKey},
-`;
+  `;
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
@@ -897,7 +918,10 @@ const injectAddresses = (addressDataArray) => {
     // Add the clone to the DOM
     DOM.addressListContainer.appendChild(clone);
   });
-  hideAllPrivateData();
+  if (hidePrivateData) {
+    hidePrivateData = false;
+    toggleHideAllPrivateData();
+  }
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
 };
 
