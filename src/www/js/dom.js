@@ -386,28 +386,9 @@ const bip39ShowSplitMnemonic = () => {
 // adjust textarea rows/height
 function textareaResize() {
   document.querySelectorAll('textarea').forEach((textareaElement) => {
-    // set textarea width to 100%
     textareaElement.style.width = '100%';
-    // measure the max width we can have
-    const maxWidth = textareaElement.clientWidth;
-    // Remove width style
-    textareaElement.style.width = '';
-    // set cols low
-    textareaElement.cols = 5;
-    while (textareaElement.clientWidth < maxWidth) {
-      // keep adding columns until we go over max width
-      textareaElement.cols++;
-    }
-    // one column less to stay under 100%
-    textareaElement.cols--;
-    // Now adjust the rows based on the number of characters in the textarea
-    const maxRows = 10;
-    const txt = textareaElement.value;
-    const cols = textareaElement.cols;
-    const arrayText = txt.split('\n');
-    let rows = arrayText.length;
-    arrayText.forEach((line) => (rows += parseInt(line.length / cols)));
-    textareaElement.rows = rows > maxRows ? maxRows : rows;
+    textareaElement.style.height = 'auto';
+    textareaElement.style.height = textareaElement.scrollHeight + 5 + 'px';
   });
 }
 
