@@ -161,14 +161,12 @@ const setupDom = () => {
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
   DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
-  DOM.bip39ShowSplitMnemonic = document.getElementById(
-    'bip39ShowSplitMnemonic'
-  );
   DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
   DOM.bip39PassphraseCrackTime = document.getElementById(
     'bip39PassphraseCrackTime'
   );
+  DOM.bip39ToolSelect = document.getElementById('bip39ToolSelect');
   DOM.hidePassphraseGeneration = document.getElementById(
     'hidePassphraseGeneration'
   );
@@ -179,6 +177,7 @@ const setupDom = () => {
   DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
   DOM.hidePassphraseTest = document.getElementById('hidePassphraseTest');
   DOM.bip39PassTestSection = document.getElementById('bip39PassTestSection');
+  DOM.bip39PassTestBtn = document.getElementById('bip39PassTestBtn');
   DOM.pathCoin = document.getElementById('pathCoin');
   DOM.pathAccount = document.getElementById('pathAccount');
   DOM.pathChange = document.getElementById('pathChange');
@@ -239,20 +238,23 @@ const setupDom = () => {
   DOM.infoModalText = document.getElementById('infoModalText');
   // set network now
   network = bitcoin.networks.bitcoin;
+  // BIP39 Tool select
+  DOM.bip39ToolSelect.oninput = selectBip39Tool;
+  DOM.bip39PassTestBtn.onclick = bip39PassphraseTest;
   // CHECKBOXES
-  // Show / hide split mnemonic cards
-  DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
-  // Show / hide Passphrase Generation
-  DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
-  // Show / hide Passphrase Tester
-  DOM.hidePassphraseTest.oninput = hidePassphraseTest;
+  // // Show / hide split mnemonic cards
+  // DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
+  // // Show / hide Passphrase Generation
+  // DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  // // Show / hide Passphrase Tester
+  // DOM.hidePassphraseTest.oninput = hidePassphraseTest;
   // hide private data
   DOM.showHide.onclick = toggleHideAllPrivateData;
   // call these now in case checkbox is not in expected state
   // e.g. user navigates back to site from another page
-  bip39ShowSplitMnemonic();
-  hidePassphraseGeneration();
-  hidePassphraseTest();
+  // bip39ShowSplitMnemonic();
+  // hidePassphraseGeneration();
+  // hidePassphraseTest();
   // listen for entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
   // listen for address generate button clicks
@@ -371,35 +373,47 @@ const toggleHideAllPrivateData = () => {
   adjustPanelHeight();
 };
 
-// Show/Hide passphrase generation section
-const hidePassphraseGeneration = () => {
-  if (DOM.hidePassphraseGeneration.checked) {
-    DOM.bip39PassGenSection.classList.remove('hidden');
-  } else {
-    DOM.bip39PassGenSection.classList.add('hidden');
+// Select a BIP39 Tool
+const selectBip39Tool = () => {
+  document.querySelectorAll('.bip39ToolSection').forEach(s => s.classList.add('hidden'));
+  const section = document.getElementById(DOM.bip39ToolSelect.value);
+  if (section) {
+    section.classList.remove('hidden');
   }
   adjustPanelHeight();
-};
+}
 
-// Show/Hide passphrase tester section
-const hidePassphraseTest = () => {
-  if (DOM.hidePassphraseTest.checked) {
-    DOM.bip39PassTestSection.classList.remove('hidden');
-  } else {
-    DOM.bip39PassTestSection.classList.add('hidden');
+// bip39 Passphrase Test
+const bip39PassphraseTest = () => {
+  const knownAddress = normalizeString(document.getElementById('bip39KnownAddress').value);
+  const userPath = document.getElementById('bip39CustomPath').value;
+  if (!bip32RootKey || !knownAddress || !userPath) {
+    toast('Some info missing')  
+    return;
   }
-  adjustPanelHeight();
-};
-
-// Show/Hide split mnemonic cards section
-const bip39ShowSplitMnemonic = () => {
-  if (DOM.bip39ShowSplitMnemonic.checked) {
-    DOM.bip39SplitMnemonicSection.classList.remove('hidden');
-  } else {
-    DOM.bip39SplitMnemonicSection.classList.add('hidden');
+  DOM.bip39PassTestBtn.innerText = 'TESTING...';
+  DOM.bip39PassTestBtn.disabled = true;
+  try {
+    const node = bip32RootKey;
+    const path = (i) => `${userPath}/${i}`;
+    for (let i = 0; i < 1000; i++) {
+      const addressPath = path(i);
+      const addressNode = node.derivePath(addressPath);
+      const address = getAddress(addressNode);
+      if (address === knownAddress) {
+        toast('MATCH FOUND!!!');
+        DOM.bip39PassTestBtn.innerText = 'Search';
+        DOM.bip39PassTestBtn.disabled = false;
+        return;
+      }
+    }
+  } catch (error) {
+    console.error(error?.message || error);
   }
-  adjustPanelHeight();
-};
+  toast('No Match Found');
+  DOM.bip39PassTestBtn.innerText = 'Search';
+  DOM.bip39PassTestBtn.disabled = false;
+}
 
 // adjust textarea rows/height
 function textareaResize() {

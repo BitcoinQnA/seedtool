@@ -284,8 +284,6 @@
           </div>
         </div>
         <div>
-          <label title="Get help generating a secure passphrase"><input type="checkbox"
-              id="hidePassphraseGeneration">Get help generating a secure passphrase</label>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
           <div class="copy-wrapper private-data">
@@ -297,7 +295,26 @@
             <span id="bip39PassphraseCrackTime">No passphrase entered!</span>
           </div>
         </div>
-        <section id="bip39PassGenSection" class="hidden">
+        <div>
+          <label for="bip39Seed">BIP39 Seed</label>
+          <div class="copy-wrapper private-data">
+            <textarea id="bip39Seed" class="seed textarea-input"
+              title="Your wallet seed entropy in Hexadecimal format. PRIVATE!" autocomplete="off" autocorrect="off"
+              autocapitalize="off" spellcheck="false" readonly></textarea>
+          </div>
+        </div>
+        <div>
+          <label for="bip39ToolSelect">Select a BIP39 Tool</label>
+          <select id="bip39ToolSelect" title="Select a BIP39 tool if needed">
+            <option value="hidden">None</option>
+            <option value="bip39PassGenSection">Passphrase Generator</option>
+            <option value="bip39PassTestSection">Passphrase Tester</option>
+            <option value="splitMnemonic">Split Mnemonic</option>
+            <option value="xor" disabled>Seed XOR (soon)</option>
+            <option value="otp" disabled>One Time Pad (soon)</option>
+          </select>
+        </div>
+        <section id="bip39PassGenSection" class="bip39ToolSection hidden">
           <p>
 
             This section uses the EFF's long diceware word <a
@@ -322,46 +339,25 @@
               title="Input the result of 25 dice rolls here to generate a good passphrase" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
-          <hr>
         </section>
-        <div>
-          <label title="Test a forgotten passphrase against a known address"><input type="checkbox"
-              id="hidePassphraseTest">Show the forgotten passphrase tester</label>
-        </div>
-        <section id="bip39PassTestSection" class="hidden">
+        <section id="bip39PassTestSection" class="bip39ToolSection hidden">
+          <p>Please be patient, each search can take up to 20 seconds!</p>
           <label>Known Address: <textarea id="bip39KnownAddress" class="textarea-input"></textarea></label>
-          <label><input type="checkbox" id="bip39PassTestCustom">Use custom path</label>
-          <label>Enter your own path: <textarea id="bip39CustomPath" placeholder="Do NOT include the index" class="textarea-input"></textarea></label>
-          <button class="btn" title="Search for your address using the seed from the mnemonic and passphrase above">Search</button>
-          <hr>
+          <label class="hidden"><input type="checkbox" id="bip39PassTestCustom">Use custom path</label>
+          <label>Derivation path: <textarea id="bip39CustomPath" placeholder="Do NOT include the index" class="textarea-input">m/84'/0'/0'/0</textarea></label>
+          <button id="bip39PassTestBtn" class="btn" title="Search for your address using the seed from the mnemonic and passphrase above">Search</button>
         </section>
-        <div>
-          <label for="bip39Seed">BIP39 Seed</label>
+        <section id="splitMnemonic" class="bip39ToolSection hidden">
+          <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
           <div class="copy-wrapper private-data">
-            <textarea id="bip39Seed" class="seed textarea-input"
-              title="Your wallet seed entropy in Hexadecimal format. PRIVATE!" autocomplete="off" autocorrect="off"
+            <textarea id="bip39PhraseSplit" class="phraseSplit textarea-input"
+              title="Only 2 of 3 cards needed to recover." rows="3" autocomplete="off" autocorrect="off"
               autocapitalize="off" spellcheck="false" readonly></textarea>
           </div>
-        </div>
-        <div>
-          <div>
-            <label title="Show split Mnemonic Cards">
-              <input type="checkbox" id="bip39ShowSplitMnemonic">
-              Show split mnemonic cards
-            </label>
-          </div>
-          <div id="splitMnemonic" class="hidden">
-            <label for="bip39PhraseSplit">BIP39 Split Mnemonic</label>
-            <div class="copy-wrapper private-data">
-              <textarea id="bip39PhraseSplit" class="phraseSplit textarea-input"
-                title="Only 2 of 3 cards needed to recover." rows="3" autocomplete="off" autocorrect="off"
-                autocapitalize="off" spellcheck="false" readonly></textarea>
-            </div>
-            <p>
-              <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
-            </p>
-          </div>
-        </div>
+          <p>
+            <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
+          </p>
+        </section>
       </div>
       <hr>
       <button class="accordion" title="Click to expand this section">
