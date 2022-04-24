@@ -335,6 +335,9 @@ const setupDom = () => {
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
 
+// Helper function to reorder the event stack
+const sleep = (time = 0) => new Promise((r) => setTimeout(r, time));
+
 /**
  * Test for the features we use
  * return true if not available
@@ -363,57 +366,83 @@ const thisBrowserIsShit = () => {
 };
 
 // Show/Hide all private data
-const toggleHideAllPrivateData = () => {
+const toggleHideAllPrivateData = (panelHeightAdjustNotRequired) => {
   hidePrivateData = !hidePrivateData;
   document.getElementById('hideIcon').classList.toggle('hidden');
   document.getElementById('showIcon').classList.toggle('hidden');
   document.querySelectorAll('.private-data').forEach((el) => {
     el.style.display = hidePrivateData ? 'none' : '';
   });
-  adjustPanelHeight();
+  if (!panelHeightAdjustNotRequired) adjustPanelHeight();
 };
 
 // Select a BIP39 Tool
 const selectBip39Tool = () => {
-  document.querySelectorAll('.bip39ToolSection').forEach(s => s.classList.add('hidden'));
+  document
+    .querySelectorAll('.bip39ToolSection')
+    .forEach((s) => s.classList.add('hidden'));
   const section = document.getElementById(DOM.bip39ToolSelect.value);
   if (section) {
     section.classList.remove('hidden');
   }
   adjustPanelHeight();
-}
+};
 
 // bip39 Passphrase Test
-const bip39PassphraseTest = () => {
-  const knownAddress = normalizeString(document.getElementById('bip39KnownAddress').value);
-  const userPath = document.getElementById('bip39CustomPath').value;
+const bip39PassphraseTest = async () => {
+  let msg = '';
+  const knownAddress = normalizeString(
+    document.getElementById('bip39KnownAddr').value
+  );
+  const userPath = document.getElementById('bip39CustomPath').value.trim();
   if (!bip32RootKey || !knownAddress || !userPath) {
-    toast('Some info missing')  
+    bip39PassphraseMessage(
+      'You will need a valid seed, known address and path'
+    );
+    toast('Some info missing');
     return;
   }
-  DOM.bip39PassTestBtn.innerText = 'TESTING...';
-  DOM.bip39PassTestBtn.disabled = true;
+  const pathBip = 'bip' + parseInt(userPath.split('/')[1]);
+  document.querySelector('#loadingPage>h2').innerText = 'searching...';
+  document.getElementById('loadingPage').style.display = '';
+  await sleep(50);
   try {
     const node = bip32RootKey;
     const path = (i) => `${userPath}/${i}`;
     for (let i = 0; i < 1000; i++) {
       const addressPath = path(i);
       const addressNode = node.derivePath(addressPath);
-      const address = getAddress(addressNode);
+      const address = getAddress(addressNode, pathBip);
       if (address === knownAddress) {
+        msg = /*html*/ `<strong>SUCCESS: </strong>Address at index ${i} matches your address!`;
+        bip39PassphraseMessage(msg);
         toast('MATCH FOUND!!!');
-        DOM.bip39PassTestBtn.innerText = 'Search';
-        DOM.bip39PassTestBtn.disabled = false;
         return;
+      }
+      if (address[0] !== knownAddress[0]) {
+        throw new Error(
+          `INCORRECT PATH: Generated Address ${address} is of a different type to user address ${knownAddress}`
+        );
       }
     }
   } catch (error) {
+    msg = error?.message || error;
+    bip39PassphraseMessage(msg);
     console.error(error?.message || error);
+    toast('Error!');
+    return;
   }
+  msg = /*html*/ `Your address did not match after searching 1000 addresses derived from this path and seed.`;
+  bip39PassphraseMessage(msg);
   toast('No Match Found');
-  DOM.bip39PassTestBtn.innerText = 'Search';
-  DOM.bip39PassTestBtn.disabled = false;
-}
+};
+
+const bip39PassphraseMessage = (msg) => {
+  const msgEl = document.getElementById('bip39PassTestInfo');
+  msgEl.innerHTML = msg;
+  document.getElementById('loadingPage').style.display = 'none';
+  adjustPanelHeight();
+};
 
 // adjust textarea rows/height
 function textareaResize() {
@@ -619,11 +648,12 @@ const injectBip47Addresses = (addressDataArray) => {
   });
   if (hidePrivateData) {
     hidePrivateData = false;
-    toggleHideAllPrivateData();
+    toggleHideAllPrivateData(true);
   }
   DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
     csv
   )}`;
+  adjustPanelHeight();
 };
 
 // generates an array of addresses and passes them on to be displayed
@@ -705,8 +735,8 @@ const calculateBip47Addresses = () => {
 };
 
 // returns addresses for a given node depending on currentBip
-const getAddress = (node) => {
-  if (currentBip === 'bip49') {
+const getAddress = (node, bipToUse = currentBip) => {
+  if (bipToUse === 'bip49') {
     return bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: node.publicKey,
@@ -715,7 +745,7 @@ const getAddress = (node) => {
       network,
     }).address;
   }
-  if (currentBip === 'bip84') {
+  if (bipToUse === 'bip84') {
     return bitcoin.payments.p2wpkh({
       pubkey: node.publicKey,
       network,
@@ -934,9 +964,10 @@ const injectAddresses = (addressDataArray) => {
   });
   if (hidePrivateData) {
     hidePrivateData = false;
-    toggleHideAllPrivateData();
+    toggleHideAllPrivateData(true);
   }
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
+  adjustPanelHeight();
 };
 
 // get derived addresses and pass them off to be inserted in DOM
@@ -1135,7 +1166,7 @@ const getEntropy = () => normalizeString(DOM.entropyInput.value);
  */
 const findNearestWord = (word) => {
   let minDistance = 99;
-  let closestWord = L[0];
+  let closestWord = wordList[0];
   for (let i = 0; i < wordList.length; i++) {
     const comparedTo = wordList[i];
     if (comparedTo.indexOf(word) === 0) {
