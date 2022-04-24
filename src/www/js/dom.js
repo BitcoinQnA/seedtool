@@ -28,6 +28,7 @@ let entropyTypeAutoDetect = true;
 let lastInnerWidth = parseInt(window.innerWidth);
 let libTimeout = null;
 let libTimeoutCount = 0;
+let hidePrivateData = false;
 const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
@@ -160,14 +161,12 @@ const setupDom = () => {
   DOM.bip39Phrase = document.getElementById('bip39Phrase');
   DOM.bip39PhraseSplit = document.getElementById('bip39PhraseSplit');
   DOM.bip39PhraseSplitWarn = document.getElementById('bip39PhraseSplitWarn');
-  DOM.bip39ShowSplitMnemonic = document.getElementById(
-    'bip39ShowSplitMnemonic'
-  );
   DOM.bip39SplitMnemonicSection = document.getElementById('splitMnemonic');
   DOM.bip39Passphrase = document.getElementById('bip39Passphrase');
   DOM.bip39PassphraseCrackTime = document.getElementById(
     'bip39PassphraseCrackTime'
   );
+  DOM.bip39ToolSelect = document.getElementById('bip39ToolSelect');
   DOM.hidePassphraseGeneration = document.getElementById(
     'hidePassphraseGeneration'
   );
@@ -176,6 +175,9 @@ const setupDom = () => {
   DOM.bip39Seed = document.getElementById('bip39Seed');
   DOM.bip39Invalid = document.querySelector('.bip39-invalid-phrase');
   DOM.bip39InvalidMessage = document.getElementById('bip39ValidationError');
+  DOM.hidePassphraseTest = document.getElementById('hidePassphraseTest');
+  DOM.bip39PassTestSection = document.getElementById('bip39PassTestSection');
+  DOM.bip39PassTestBtn = document.getElementById('bip39PassTestBtn');
   DOM.pathCoin = document.getElementById('pathCoin');
   DOM.pathAccount = document.getElementById('pathAccount');
   DOM.pathChange = document.getElementById('pathChange');
@@ -230,24 +232,29 @@ const setupDom = () => {
   DOM.bip141ScriptSelect = document.getElementById('bip141ScriptSemantics');
   DOM.bip32AccountXprv = document.getElementById('bip32AccountXprv');
   DOM.bip32AccountXpub = document.getElementById('bip32AccountXpub');
-  DOM.hidePrivateData = document.getElementById('hidePrivateData');
+  DOM.showHide = document.getElementById('showHide');
   DOM.onlineIcon = document.getElementById('networkIndicator');
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
   // set network now
   network = bitcoin.networks.bitcoin;
+  // BIP39 Tool select
+  DOM.bip39ToolSelect.oninput = selectBip39Tool;
+  DOM.bip39PassTestBtn.onclick = bip39PassphraseTest;
   // CHECKBOXES
-  // Show / hide split mnemonic cards
-  DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
-  // Show / hide Passphrase Generation
-  DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  // // Show / hide split mnemonic cards
+  // DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
+  // // Show / hide Passphrase Generation
+  // DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
+  // // Show / hide Passphrase Tester
+  // DOM.hidePassphraseTest.oninput = hidePassphraseTest;
   // hide private data
-  DOM.hidePrivateData.oninput = hideAllPrivateData;
+  DOM.showHide.onclick = toggleHideAllPrivateData;
   // call these now in case checkbox is not in expected state
   // e.g. user navigates back to site from another page
-  bip39ShowSplitMnemonic();
-  hidePassphraseGeneration();
-  hideAllPrivateData();
+  // bip39ShowSplitMnemonic();
+  // hidePassphraseGeneration();
+  // hidePassphraseTest();
   // listen for entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
   // listen for address generate button clicks
@@ -328,6 +335,9 @@ const setupDom = () => {
 // Run setupDom function when the page has loaded
 window.addEventListener('DOMContentLoaded', setupDom);
 
+// Helper function to reorder the event stack
+const sleep = (time = 0) => new Promise((r) => setTimeout(r, time));
+
 /**
  * Test for the features we use
  * return true if not available
@@ -356,30 +366,81 @@ const thisBrowserIsShit = () => {
 };
 
 // Show/Hide all private data
-const hideAllPrivateData = () => {
+const toggleHideAllPrivateData = (panelHeightAdjustNotRequired) => {
+  hidePrivateData = !hidePrivateData;
+  document.getElementById('hideIcon').classList.toggle('hidden');
+  document.getElementById('showIcon').classList.toggle('hidden');
   document.querySelectorAll('.private-data').forEach((el) => {
-    el.style.display = DOM.hidePrivateData.checked ? 'none' : '';
+    el.style.display = hidePrivateData ? 'none' : '';
   });
-  adjustPanelHeight();
+  if (!panelHeightAdjustNotRequired) adjustPanelHeight();
 };
 
-// Show/Hide passphrase generation section
-const hidePassphraseGeneration = () => {
-  if (DOM.hidePassphraseGeneration.checked) {
-    DOM.bip39PassGenSection.classList.remove('hidden');
-  } else {
-    DOM.bip39PassGenSection.classList.add('hidden');
+// Select a BIP39 Tool
+const selectBip39Tool = () => {
+  document
+    .querySelectorAll('.bip39ToolSection')
+    .forEach((s) => s.classList.add('hidden'));
+  const section = document.getElementById(DOM.bip39ToolSelect.value);
+  if (section) {
+    section.classList.remove('hidden');
   }
   adjustPanelHeight();
 };
 
-// Show/Hide split mnemonic cards section
-const bip39ShowSplitMnemonic = () => {
-  if (DOM.bip39ShowSplitMnemonic.checked) {
-    DOM.bip39SplitMnemonicSection.classList.remove('hidden');
-  } else {
-    DOM.bip39SplitMnemonicSection.classList.add('hidden');
+// bip39 Passphrase Test
+const bip39PassphraseTest = async () => {
+  let msg = '';
+  const knownAddress = normalizeString(
+    document.getElementById('bip39KnownAddr').value
+  );
+  const userPath = document.getElementById('bip39CustomPath').value.trim();
+  if (!bip32RootKey || !knownAddress || !userPath) {
+    bip39PassphraseMessage(
+      'You will need a valid seed, known address and path'
+    );
+    toast('Some info missing');
+    return;
   }
+  const pathBip = 'bip' + parseInt(userPath.split('/')[1]);
+  document.querySelector('#loadingPage>h2').innerText = 'searching...';
+  document.getElementById('loadingPage').style.display = '';
+  await sleep(50);
+  try {
+    const node = bip32RootKey;
+    const path = (i) => `${userPath}/${i}`;
+    for (let i = 0; i < 1000; i++) {
+      const addressPath = path(i);
+      const addressNode = node.derivePath(addressPath);
+      const address = getAddress(addressNode, pathBip);
+      if (address === knownAddress) {
+        msg = /*html*/ `<strong>SUCCESS: </strong>Address at index ${i} matches your address!`;
+        bip39PassphraseMessage(msg);
+        toast('MATCH FOUND!!!');
+        return;
+      }
+      if (address[0] !== knownAddress[0]) {
+        throw new Error(
+          `INCORRECT PATH: Generated Address ${address} is of a different type to user address ${knownAddress}`
+        );
+      }
+    }
+  } catch (error) {
+    msg = error?.message || error;
+    bip39PassphraseMessage(msg);
+    console.error(error?.message || error);
+    toast('Error!');
+    return;
+  }
+  msg = /*html*/ `Your address did not match after searching 1000 addresses derived from this path and seed.`;
+  bip39PassphraseMessage(msg);
+  toast('No Match Found');
+};
+
+const bip39PassphraseMessage = (msg) => {
+  const msgEl = document.getElementById('bip39PassTestInfo');
+  msgEl.innerHTML = msg;
+  document.getElementById('loadingPage').style.display = 'none';
   adjustPanelHeight();
 };
 
@@ -557,7 +618,7 @@ const clearBip47Addresses = () => {
 const injectBip47Addresses = (addressDataArray) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
-`;
+  `;
   // declare DOM elements
   DOM.bip47CsvDownloadLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
@@ -572,7 +633,7 @@ const injectBip47Addresses = (addressDataArray) => {
     csv += `${addressData.path},${addressData.address},${addressData.pubKey},${
       addressData.prvKey || 'N/A'
     },
-`;
+  `;
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
@@ -585,10 +646,14 @@ const injectBip47Addresses = (addressDataArray) => {
     // Add the clone to the DOM
     DOM.bip47AddressListContainer.appendChild(clone);
   });
-  hideAllPrivateData();
+  if (hidePrivateData) {
+    hidePrivateData = false;
+    toggleHideAllPrivateData(true);
+  }
   DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
     csv
   )}`;
+  adjustPanelHeight();
 };
 
 // generates an array of addresses and passes them on to be displayed
@@ -670,8 +735,8 @@ const calculateBip47Addresses = () => {
 };
 
 // returns addresses for a given node depending on currentBip
-const getAddress = (node) => {
-  if (currentBip === 'bip49') {
+const getAddress = (node, bipToUse = currentBip) => {
+  if (bipToUse === 'bip49') {
     return bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
         pubkey: node.publicKey,
@@ -680,7 +745,7 @@ const getAddress = (node) => {
       network,
     }).address;
   }
-  if (currentBip === 'bip84') {
+  if (bipToUse === 'bip84') {
     return bitcoin.payments.p2wpkh({
       pubkey: node.publicKey,
       network,
@@ -871,7 +936,7 @@ class AddressData {
 const injectAddresses = (addressDataArray) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
-`;
+  `;
   // declare DOM elements
   DOM.csvDownloadLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
@@ -884,7 +949,7 @@ const injectAddresses = (addressDataArray) => {
   addressDataArray.forEach((addressData) => {
     // Append this address to csv
     csv += `${addressData.path},${addressData.address},${addressData.pubKey},${addressData.prvKey},
-`;
+  `;
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
@@ -897,8 +962,12 @@ const injectAddresses = (addressDataArray) => {
     // Add the clone to the DOM
     DOM.addressListContainer.appendChild(clone);
   });
-  hideAllPrivateData();
+  if (hidePrivateData) {
+    hidePrivateData = false;
+    toggleHideAllPrivateData(true);
+  }
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
+  adjustPanelHeight();
 };
 
 // get derived addresses and pass them off to be inserted in DOM
@@ -1097,7 +1166,7 @@ const getEntropy = () => normalizeString(DOM.entropyInput.value);
  */
 const findNearestWord = (word) => {
   let minDistance = 99;
-  let closestWord = L[0];
+  let closestWord = wordList[0];
   for (let i = 0; i < wordList.length; i++) {
     const comparedTo = wordList[i];
     if (comparedTo.indexOf(word) === 0) {

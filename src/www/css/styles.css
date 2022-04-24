@@ -11,7 +11,7 @@
   height: 100vh;
   width: 100vw;
   background-color: #00151a;
-  position: absolute;
+  position: fixed;
   z-index: 100;
   display: flex;
   justify-content: center;
@@ -55,9 +55,18 @@ body {
 }
 #homeLink {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 15px;
+  left: 15px;
   z-index: 6;
+  fill: var(--q-orange);
+  height: 20px;
+  width: 20px;
+}
+#showHide {
+  z-index: 6;
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
   fill: var(--q-orange);
   height: 20px;
   width: 20px;
@@ -247,6 +256,7 @@ textarea {
 }
 #bip141ScriptSemantics,
 #derivedPathSelect,
+#bip39ToolSelect,
 #pathCoin,
 #pathChange,
 #bip85Application,
@@ -278,11 +288,11 @@ textarea {
 }
 #networkIndicator {
   position: fixed;
-  top: 25px;
-  right: 25px;
+  top: 15px;
+  right: 15px;
   fill: var(--q-orange);
   z-index: 5;
-  width: 25px;
+  width: 20px;
 }
 .modal {
   display: none;
@@ -458,7 +468,7 @@ pre {
   white-space: -o-pre-wrap;
   word-wrap: break-word;
 }
-label{
+label {
   display: block; /* add this */
   padding-top: 5px;
 }
