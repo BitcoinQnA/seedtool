@@ -81,8 +81,8 @@ window.infoHtml = {
   generate button will not work. In that case you might choose to use your own source of entropy.
 </p>
 <p>
-  <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank">You are not a good
-    source of entropy.</a>
+   You are <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank"> not</a> a good
+   source of entropy, see this in practice <a href="https://roadtolarissa.com/oracle/" target="_blank">here.</a>
 </p>
 <p>
   Card entropy has been implemented assuming cards are replaced, not drawn one after another. This means a full deck of
