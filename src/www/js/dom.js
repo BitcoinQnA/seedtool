@@ -442,23 +442,6 @@ const bip39PassphraseTest = async () => {
     default:
       break;
   }
-  if (knownAddress.startsWith('bc1q') && knownAddress.length !== 42) {
-    msg = 'ERROR: Native Segwit addresses should be 42 characters long';
-    bip39PassphraseMessage(msg);
-    toast('Incorrect Address');
-    return;
-  }
-
-  if (
-    (knownAddress.startsWith('1') || knownAddress.startsWith('3')) &&
-    knownAddress.length !== 34
-  ) {
-    msg =
-      'ERROR: Both Wrapped Segwit & Legacy addresses should be 34 characters long';
-    bip39PassphraseMessage(msg);
-    toast('Incorrect Address');
-    return;
-  }
   document.querySelector('#loadingPage>h2').innerText = 'searching...';
   document.getElementById('loadingPage').style.display = '';
   await sleep(50);
