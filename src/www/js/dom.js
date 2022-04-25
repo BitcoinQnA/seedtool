@@ -395,14 +395,70 @@ const bip39PassphraseTest = async () => {
     document.getElementById('bip39KnownAddr').value
   );
   const userPath = document.getElementById('bip39CustomPath').value.trim();
+  if (userPath.match(/^(m\/)?(\d+'?\/)*\d+'?$/) === null) {
+    bip39PassphraseMessage(
+      'ERROR: This path is invalid, please check it and try again'
+    );
+    toast('Invalid Path');
+    return;
+  }
   if (!bip32RootKey || !knownAddress || !userPath) {
     bip39PassphraseMessage(
-      'You will need a valid seed, known address and path'
+      'ERROR: You will need a valid seed, known address and path'
     );
     toast('Some info missing');
     return;
   }
   const pathBip = 'bip' + parseInt(userPath.split('/')[1]);
+  switch (pathBip) {
+    case 'bip0':
+    case 'bip44':
+      if (!knownAddress.startsWith('1')) {
+        msg =
+          'ERROR: Your path indicates a legacy address, but your address doesn\'t start with "1"';
+        bip39PassphraseMessage(msg);
+        toast('Incorrect path');
+        return;
+      }
+      break;
+    case 'bip49':
+      if (!knownAddress.startsWith('3')) {
+        msg =
+          'ERROR: Your path indicates a wrapped segwit address, but your address doesn\'t start with "1"';
+        bip39PassphraseMessage(msg);
+        toast('Incorrect path');
+        return;
+      }
+      break;
+    case 'bip84':
+      if (!knownAddress.startsWith('bc1q')) {
+        msg =
+          'ERROR: Your path indicates a native segwit address, but your address doesn\'t start with "bc1q"';
+        bip39PassphraseMessage(msg);
+        toast('Incorrect path');
+        return;
+      }
+      break;
+    default:
+      break;
+  }
+  if (knownAddress.startsWith('bc1q') && knownAddress.length !== 42) {
+    msg = 'ERROR: Native Segwit addresses should be 42 characters long';
+    bip39PassphraseMessage(msg);
+    toast('Incorrect Address');
+    return;
+  }
+
+  if (
+    (knownAddress.startsWith('1') || knownAddress.startsWith('3')) &&
+    knownAddress.length !== 34
+  ) {
+    msg =
+      'ERROR: Both Wrapped Segwit & Legacy addresses should be 34 characters long';
+    bip39PassphraseMessage(msg);
+    toast('Incorrect Address');
+    return;
+  }
   document.querySelector('#loadingPage>h2').innerText = 'searching...';
   document.getElementById('loadingPage').style.display = '';
   await sleep(50);
@@ -426,7 +482,7 @@ const bip39PassphraseTest = async () => {
       }
     }
   } catch (error) {
-    msg = error?.message || error;
+    msg = 'ERROR: ' + error?.message || error;
     bip39PassphraseMessage(msg);
     console.error(error?.message || error);
     toast('Error!');
