@@ -424,7 +424,7 @@ const bip39PassphraseTest = async () => {
     case 'bip49':
       if (!knownAddress.startsWith('3')) {
         msg =
-          'ERROR: Your path indicates a wrapped segwit address, but your address doesn\'t start with "1"';
+          'ERROR: Your path indicates a wrapped segwit address, but your address doesn\'t start with "3"';
         bip39PassphraseMessage(msg);
         toast('Incorrect path');
         return;
