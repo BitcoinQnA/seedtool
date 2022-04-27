@@ -377,6 +377,7 @@ window.infoHtml = {
           <li>V1.0.0 - Initial release</li>
           <li>V1.0.1 - Fix social preview information</li>
           <li>V1.0.2 - Fix loading issue on iOS devices</li>
+          <li>V1.0.3 - Add passphrase tester tool</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
