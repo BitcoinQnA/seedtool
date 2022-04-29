@@ -392,7 +392,98 @@
           </p>
         </section>
         <section id="xor" class="bip39ToolSection hidden">
-          <p>SeedXOR section</p>
+          <p>
+            <strong>TLDR: </strong> Using the <span class="xor-number-seeds">2</span> BIP39 phrases below, you
+            can recreate your orginal one above.
+          </p>
+          <p>
+            Seed XOR generates an extra random seed and then uses the binary operator "Exclusive Or" on each bit
+            of entropy from the two seeds to generate a new seed. We can keep making random seeds and it still
+            works. Here we allow up to 8 seeds.
+          </p>
+          <p>
+            XOR is a simple operation to perform and can
+            be done with a pen and paper. The nice thing about this is that all seeds are
+            valid (so you can store dummy funds on them), you can perform the same function on the random seed
+            and the result seed and you will almost get back to your original seed. That "almost" is important.
+          </p>
+          <p>
+            <strong>
+              It is important that you save your original final word if you will calculate back to your original
+              seed by hand as you won't be able to calculate the checksum easily.
+            </strong>
+            Hashing with SHA by hand is really hard to do.
+          </p>
+          <p>
+            For more information, see <a target="_blank" rel="noopener noreferrer"
+              href="https://seedxor.com">seedxor.com</a>
+          </p>
+          <button class="btn" id="xorAddSeed" onclick="addXorSeed(event)">+</button><button disabled class="btn"
+            id="xorRemoveSeed" onclick="removeXorSeed(event)">-</button>
+          <div class="xor-seed">
+            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed2" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed3" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed4" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed5" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed6" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed7" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed8" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+          <div>
+            <label for="xorResult">XOR Result</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorResult" class="xor-result textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
         </section>
         <section id="otp" class="bip39ToolSection hidden">
           <p>One time pad section</p>

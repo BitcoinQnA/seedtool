@@ -303,6 +303,11 @@ const setupDom = () => {
   // add event listener for entropy
   DOM.entropyInput.oninput = entropyChanged;
   DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
+  // link length selectors together
+  DOM.generateRandomStrengthSelect.oninput = () => {
+    DOM.entropyMnemonicLengthSelect.value =
+      DOM.generateRandomStrengthSelect.value;
+  };
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
@@ -481,6 +486,127 @@ const bip39PassphraseMessage = (msg) => {
   msgEl.innerHTML = msg;
   document.getElementById('loadingPage').style.display = 'none';
   adjustPanelHeight();
+};
+
+// Remove XOR seed
+const removeXorSeed = async (event) => {
+  event.preventDefault();
+  document.getElementById('xorAddSeed').disabled = false;
+  const seeds = [...document.querySelectorAll('.xor-seed')];
+  let visibleSeeds = 0;
+  for (let i = seeds.length - 1; i > 0; i--) {
+    visibleSeeds = i;
+    const seed = seeds[i];
+    if (!seed.classList.contains('hidden')) {
+      seed.classList.add('hidden');
+      break;
+    }
+  }
+  visibleSeeds++;
+  document
+    .querySelectorAll('.xor-number-seeds')
+    .forEach((span) => (span.innerText = visibleSeeds));
+  document.getElementById('xorRemoveSeed').disabled =
+    visibleSeeds === 2 ? true : false;
+  await calculateXor();
+  adjustPanelHeight();
+};
+
+// Add an xor seed
+const addXorSeed = async (event) => {
+  event.preventDefault();
+  document.getElementById('xorRemoveSeed').disabled = false;
+  const seeds = [...document.querySelectorAll('.xor-seed')];
+  let visibleSeeds = 0;
+  for (let i = 0; i < seeds.length; i++) {
+    visibleSeeds = i;
+    const seed = seeds[i];
+    if (seed.classList.contains('hidden')) {
+      seed.classList.remove('hidden');
+      break;
+    }
+  }
+  visibleSeeds += 2;
+  document
+    .querySelectorAll('.xor-number-seeds')
+    .forEach((span) => (span.innerText = visibleSeeds));
+  document.getElementById('xorAddSeed').disabled =
+    visibleSeeds === 8 ? true : false;
+  await calculateXor();
+  adjustPanelHeight();
+};
+
+/**
+ * Converts an array of bytes to a binary string
+ * @param {number[]} byteArray
+ * @returns {string}
+ */
+const bytesToBinary = (byteArray) =>
+  byteArray.map((x) => x.toString(2).padStart(8, '0')).join('');
+
+const deriveChecksumBits = async (entropyBuffer) => {
+  const ENT = entropyBuffer.length * 8;
+  const CS = ENT / 32;
+  const hash = await crypto.subtle.digest('SHA-256', entropyBuffer);
+  return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
+};
+
+// Calculate XOR
+const calculateXor = async () => {
+  let result = getWordIndexes(phraseToWordArray());
+  const seeds = [...document.querySelectorAll('.xor-seed')]
+    .filter((div) => !div.classList.contains('hidden'))
+    .map((div) =>
+      getWordIndexes(phraseToWordArray(div.querySelector('textarea').value))
+    );
+  if (seeds.length < 1) {
+    console.error('Not enough seeds to do XOR');
+    return;
+  }
+  for (let i = 0; i < seeds.length; i++) {
+    if (seeds[i].length === 0) {
+      console.error("Can't do XOR on empty seed");
+      return;
+    }
+  }
+  seeds.forEach((seedToXor) => {
+    result = result.map((wordInd, i) => {
+      return wordInd ^ seedToXor[i];
+    });
+  });
+  const bits = result.map((x) => x.toString(2).padStart(11, '0')).join('');
+  const dividerIndex = Math.floor(bits.length / 33) * 32;
+  const entropyBits = bits.slice(0, dividerIndex);
+  const entropyBytes = entropyBits
+    .match(/(.{1,8})/g)
+    .map((bin) => parseInt(bin, 2));
+  if (
+    entropyBytes.length < 16 ||
+    entropyBytes.length > 32 ||
+    entropyBytes.length % 4 !== 0
+  ) {
+    console.error('Invalid entropy');
+    return;
+  }
+  const entropy = Uint8Array.from(entropyBytes);
+  const newChecksum = await deriveChecksumBits(entropy);
+  let newLastWordIndex = parseInt(
+    result
+      .pop()
+      .toString(2)
+      .padStart(11, '0')
+      .slice(0, 11 - newChecksum.length) + newChecksum,
+    2
+  );
+  result.push(newLastWordIndex);
+  result = result.map((n) => wordList[n]);
+  document.getElementById('xorResult').value = result.join(' ');
+};
+
+const fillRandomXorSeeds = () => {
+  document.querySelectorAll('.xor-seed').forEach((div) => {
+    div.querySelector('textarea').value = createMnemonic();
+  });
 };
 
 // adjust textarea rows/height
@@ -1284,6 +1410,8 @@ const addRandomDiceWordToPassphrase = () => {
 
 // Event handler on entropy input
 const entropyChanged = async () => {
+  DOM.generateRandomStrengthSelect.value =
+    DOM.entropyMnemonicLengthSelect.value;
   // debounce?
   if (getEntropy().length === 0) {
     resetEverything();
@@ -1529,8 +1657,7 @@ const getEntropyTypeStr = (entropy) => {
 const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
 
-const phraseToWordArray = () => {
-  const phrase = normalizeString(DOM.bip39Phrase.value);
+const phraseToWordArray = (phrase = getPhrase()) => {
   const words = phrase.split(/\s/g);
   const noBlanks = [];
   for (let i = 0; i < words.length; i++) {
@@ -1556,14 +1683,19 @@ const wordArrayToPhrase = (words) => {
   return phrase;
 };
 
-// Display the indexes of the mnemonic phrase
-const showWordIndexes = () => {
-  const words = phraseToWordArray();
+// Get an array of indexes from and array of words
+const getWordIndexes = (words) => {
   const wordIndexes = [];
   words.forEach((word) => {
     wordIndexes.push(wordList.indexOf(word));
   });
-  const wordIndexesStr = wordIndexes.join(', ');
+  return wordIndexes;
+};
+
+// Display the indexes of the mnemonic phrase
+const showWordIndexes = () => {
+  const words = phraseToWordArray();
+  const wordIndexesStr = getWordIndexes(words).join(', ');
   DOM.entropyWordIndexes.innerText = wordIndexesStr;
 };
 
@@ -1595,13 +1727,18 @@ const showChecksum = () => {
   DOM.entropyBinaryChecksum.innerText = checksum;
 };
 
-// Generate a random mnemonic when button is clicked
-const generateNewMnemonic = () => {
-  toast('Calculating...');
+// Get Mnemonic sentence
+const createMnemonic = () => {
   const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
   const strength = (numWords / 3) * 32;
   const mnemonic = bip39.generateMnemonic(strength);
-  DOM.bip39Phrase.value = mnemonic;
+  return mnemonic;
+};
+
+// Generate a random mnemonic when button is clicked
+const generateNewMnemonic = () => {
+  toast('Calculating...');
+  DOM.bip39Phrase.value = createMnemonic();
   // DOM.knownInputTextarea.value = mnemonic;
   mnemonicToSeedPopulate();
 };
@@ -1726,6 +1863,8 @@ const mnemonicToSeedPopulate = debounce(async () => {
     calcBip85();
     calcBip47();
   }
+  fillRandomXorSeeds();
+  calculateXor();
   adjustPanelHeight();
 }, 1000);
 
