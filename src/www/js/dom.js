@@ -1911,3 +1911,126 @@ const clearEntropyFeedback = () => {
   DOM.entropyBinaryChecksum.innerText = '';
   DOM.entropyWordIndexes.innerText = '';
 };
+
+/**
+ * Seed One Time Pad
+ * SuperPhatArrow
+ *
+ * Ported from the python cli tool
+ * seed-otp (Unlicense)
+ * https://github.com/brndnmtthws/seed-otp
+ *
+ * Useage:
+ * await otp.generate(12)
+ *  -> returns a key for a 12 word mnemonic
+ * await otp.encrypt('AAwCnwGIAe0EWABWAI4AkAMjAFQBLgZjB1T1PJtz','abandon ability able about above absent absorb abstract absurd abuse access accident')
+ *  -> returns a scrambled mnemonic
+ * await otp.decrypt('AAwCnwGIAe0EWABWAI4AkAMjAFQBLgZjB1T1PJtz','fault couple digital merge area bar barrel grab argue cheap soap typical')
+ *  -> returns original mnemonic
+ *
+ */
+
+window.otp = {
+  async generate(numberOfWords) {
+    if (numberOfWords % 3 !== 0 || numberOfWords < 12 || numberOfWords > 24)
+      throw new Error('Incorrect number of words');
+    const keyArray = crypto.getRandomValues(new Uint8Array(2 + numberOfWords));
+    // First 2 bytes are the number of words
+    keyArray[0] = 0;
+    keyArray[1] = numberOfWords;
+    // Get the checksum
+    const hash = await crypto.subtle.digest('SHA-256', keyArray);
+    const checksum = new Uint8Array(hash.slice(0, 4));
+    const full = new Uint8Array(keyArray.length + checksum.length);
+    full.set(keyArray, 0);
+    full.set(checksum, keyArray.length);
+    const base64url = await new Promise((r) => {
+      const reader = new FileReader();
+      reader.onload = () => r(reader.result);
+      reader.readAsDataURL(new Blob([full]));
+    });
+    return base64url.split(',', 2)[1].replaceAll('=', '');
+  },
+  async encrypt(key, mnemonic) {
+    // Convert mnemonic to array
+    const words = normalizeString(mnemonic).split(' ');
+    // Add padding to Base64
+    while (key.length % 4 !== 0) {
+      key += '=';
+    }
+    // base64 to array of numbers
+    let keyArray = this._getKeyArrayFromBase64(key);
+    // Test key was made for this mnemonic length
+    if (keyArray[1] !== words.length) {
+      throw new Error('Mnemonic length does not match key');
+    }
+    // test checksum matches
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return;
+    // make 16 bit array from the key
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    // Get the encrypted words
+    const encrypted = words.map((word, i) => {
+      const wordIndex = wordList.findIndex((w) => w === word);
+      const encWord = wordList[(wordIndex + dataView[i]) % 2048];
+      return encWord;
+    });
+    return encrypted.join(' ');
+  },
+  async decrypt(key, cipherMnemonic) {
+    // Convert mnemonic to array
+    const words = normalizeString(cipherMnemonic).split(' ');
+    // Add padding to Base64
+    while (key.length % 4 !== 0) {
+      key += '=';
+    }
+    // base64 to array of numbers
+    let keyArray = this._getKeyArrayFromBase64(key);
+    // Test key was made for this mnemonic length
+    if (keyArray[1] !== words.length) {
+      throw new Error('Mnemonic length does not match key');
+    }
+    // test checksum matches
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return;
+    // make 16 bit array from the key
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    // Get the encrypted words
+    // Get the encrypted words
+    const decrypted = words.map((word, i) => {
+      const wordIndex = wordList.findIndex((w) => w === word);
+      const encWord = wordList[(wordIndex - dataView[i]) % 2048];
+      return encWord;
+    });
+    return decrypted.join(' ');
+  },
+  async _testChecksum(keyArray) {
+    // test checksum matches
+    const divider = keyArray.length - 4;
+    const keyChecksum = keyArray.slice(divider);
+    const keyPayload = new Uint8Array(keyArray.slice(0, divider));
+    const hash = await crypto.subtle.digest('SHA-256', keyPayload);
+    const checksum = new Uint8Array(hash.slice(0, 4));
+    if (keyChecksum.toString() !== checksum.toString()) {
+      throw new Error('Checksum does not match');
+    }
+    return true;
+  },
+  _getKeyArrayFromBase64(keyBase64) {
+    return window
+      .atob(keyBase64)
+      .split('')
+      .map((c) => c.charCodeAt(0));
+  },
+  _getUint16(keyPayload) {
+    const buffer = new ArrayBuffer(keyPayload.length - 2);
+    const dataView = new Uint16Array(buffer);
+    let count = 2;
+    for (let i = 0; i < dataView.length; i++) {
+      dataView[i] = (keyPayload[count++] << 8) + keyPayload[count++];
+    }
+    return dataView;
+  },
+};
