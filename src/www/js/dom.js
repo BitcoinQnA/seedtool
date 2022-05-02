@@ -329,6 +329,9 @@ const setupDom = () => {
   } else {
     DOM.onlineIcon.classList.add('hidden');
   }
+  // Listen for OTP button clicks
+  document.getElementById('otpGenerate').onclick = generateOneTimePad;
+  document.getElementById('otpDecrypt').onclick = decryptOneTimePad;
   // Watch for changes in the window size to change textarea boxes
   resizeObserver.observe(document.querySelector('body'));
   // open the about panel on load
@@ -607,6 +610,36 @@ const fillRandomXorSeeds = () => {
   document.querySelectorAll('.xor-seed').forEach((div) => {
     div.querySelector('textarea').value = createMnemonic();
   });
+};
+
+// Generate OTP
+const generateOneTimePad = async () => {
+  const mnemonic = getPhrase();
+  if (!bip39.validateMnemonic(mnemonic)) return;
+  const strength = parseInt(DOM.generateRandomStrengthSelect.value);
+  let key = document.getElementById('otpKey').value;
+  if (!key) {
+    key = await otp.generate(strength);
+    document.getElementById('otpKey').value = key;
+  }
+  const cipherKey = await otp.encrypt(key, mnemonic);
+  document.getElementById('otpCipherText').value = cipherKey;
+};
+
+// Decrypt OTP
+const decryptOneTimePad = async () => {
+  const cipherMnemonic = normalizeString(
+    document.getElementById('otpCipherText').value
+  );
+  const key = normalizeString(document.getElementById('otpKey').value);
+  if (!cipherMnemonic || !key) return;
+  const mnemonic = await otp.decrypt(key, cipherMnemonic);
+  document.getElementById('otpDecrypted').value = mnemonic;
+  document.getElementById('otpMatched').innerHTML =
+    mnemonic === getPhrase()
+      ? 'Match'
+      : '<span class="warning">ERROR: Not Matched!</span>';
+  adjustPanelHeight();
 };
 
 // adjust textarea rows/height
@@ -1865,6 +1898,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   }
   fillRandomXorSeeds();
   calculateXor();
+  await generateOneTimePad();
   adjustPanelHeight();
 }, 1000);
 
@@ -1896,6 +1930,10 @@ const resetEverything = () => {
   DOM.bip47CPPaymentCode.value = '';
   DOM.bip47CPNotificationAddress.value = '';
   DOM.bip47CPNotificationPubKey.value = '';
+  document.getElementById('otpDecrypted').value = '';
+  document.getElementById('otpMatched').innerHTML = '';
+  document.getElementById('otpKey').value = '';
+  document.getElementById('otpCipherText').value = '';
 };
 
 // Empty entropy fields
@@ -1912,7 +1950,7 @@ const clearEntropyFeedback = () => {
   DOM.entropyWordIndexes.innerText = '';
 };
 
-/**
+/*
  * Seed One Time Pad
  * SuperPhatArrow
  *
@@ -1930,15 +1968,28 @@ const clearEntropyFeedback = () => {
  *
  */
 
-window.otp = {
+const otp = {
+  /**
+   * otp.generate
+   * @param {number} numberOfWords Mnemonic length
+   * @returns {string} One Time Pad Key
+   */
   async generate(numberOfWords) {
     if (numberOfWords % 3 !== 0 || numberOfWords < 12 || numberOfWords > 24)
       throw new Error('Incorrect number of words');
-    const keyArray = crypto.getRandomValues(new Uint8Array(2 + numberOfWords));
-    // First 2 bytes are the number of words
-    keyArray[0] = 0;
-    keyArray[1] = numberOfWords;
-    // Get the checksum
+    const keyList = new Uint16Array(numberOfWords);
+    for (let i = 0; i < numberOfWords; i++) {
+      let randomNumber = 2048;
+      do {
+        randomNumber = crypto.getRandomValues(new Uint16Array(1))[0];
+      } while (randomNumber >= 2048);
+      keyList[i] = randomNumber;
+    }
+    const keyList8 = new Uint8Array(keyList.buffer);
+    if (!isBigEndian()) {
+      endianness(keyList8, 2);
+    }
+    const keyArray = new Uint8Array([0, numberOfWords, ...keyList8]);
     const hash = await crypto.subtle.digest('SHA-256', keyArray);
     const checksum = new Uint8Array(hash.slice(0, 4));
     const full = new Uint8Array(keyArray.length + checksum.length);
@@ -1951,26 +2002,25 @@ window.otp = {
     });
     return base64url.split(',', 2)[1].replaceAll('=', '');
   },
+  /**
+   * otp.encrypt
+   * @param {string} key One Time Pad Key
+   * @param {string} mnemonic The Mnemonic to encrypt
+   * @returns {string} Encrypted Mnemonic
+   */
   async encrypt(key, mnemonic) {
-    // Convert mnemonic to array
     const words = normalizeString(mnemonic).split(' ');
-    // Add padding to Base64
     while (key.length % 4 !== 0) {
       key += '=';
     }
-    // base64 to array of numbers
     let keyArray = this._getKeyArrayFromBase64(key);
-    // Test key was made for this mnemonic length
     if (keyArray[1] !== words.length) {
       throw new Error('Mnemonic length does not match key');
     }
-    // test checksum matches
     const checksumOk = await this._testChecksum(keyArray);
     if (!checksumOk) return;
-    // make 16 bit array from the key
     const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
     const dataView = this._getUint16(keyPayload);
-    // Get the encrypted words
     const encrypted = words.map((word, i) => {
       const wordIndex = wordList.findIndex((w) => w === word);
       const encWord = wordList[(wordIndex + dataView[i]) % 2048];
@@ -1978,36 +2028,36 @@ window.otp = {
     });
     return encrypted.join(' ');
   },
+  /**
+   * otp.decrypt
+   * @param {string} key One Time Pad Key
+   * @param {string} cipherMnemonic Encripted Mnemonic
+   * @returns {string} Decrypted Mnemonic
+   */
   async decrypt(key, cipherMnemonic) {
-    // Convert mnemonic to array
     const words = normalizeString(cipherMnemonic).split(' ');
-    // Add padding to Base64
     while (key.length % 4 !== 0) {
       key += '=';
     }
-    // base64 to array of numbers
     let keyArray = this._getKeyArrayFromBase64(key);
-    // Test key was made for this mnemonic length
     if (keyArray[1] !== words.length) {
       throw new Error('Mnemonic length does not match key');
     }
-    // test checksum matches
     const checksumOk = await this._testChecksum(keyArray);
     if (!checksumOk) return;
-    // make 16 bit array from the key
     const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
     const dataView = this._getUint16(keyPayload);
-    // Get the encrypted words
-    // Get the encrypted words
-    const decrypted = words.map((word, i) => {
-      const wordIndex = wordList.findIndex((w) => w === word);
-      const encWord = wordList[(wordIndex - dataView[i]) % 2048];
-      return encWord;
-    });
+    const decrypted = [];
+    for (let i = 0; i < words.length; i++) {
+      const cipherWord = words[i];
+      const cipherIndex = wordList.findIndex((w) => w === cipherWord);
+      const index = (cipherIndex - dataView[i] + 2048) % 2048;
+      const word = wordList[index];
+      decrypted.push(word);
+    }
     return decrypted.join(' ');
   },
   async _testChecksum(keyArray) {
-    // test checksum matches
     const divider = keyArray.length - 4;
     const keyChecksum = keyArray.slice(divider);
     const keyPayload = new Uint8Array(keyArray.slice(0, divider));
@@ -2027,10 +2077,82 @@ window.otp = {
   _getUint16(keyPayload) {
     const buffer = new ArrayBuffer(keyPayload.length - 2);
     const dataView = new Uint16Array(buffer);
-    let count = 2;
-    for (let i = 0; i < dataView.length; i++) {
-      dataView[i] = (keyPayload[count++] << 8) + keyPayload[count++];
+    if (!isBigEndian()) {
+      let count = 2;
+      for (let i = 0; i < dataView.length; i++) {
+        dataView[i] = (keyPayload[count++] << 8) + keyPayload[count++];
+      }
     }
     return dataView;
   },
 };
+
+const isBigEndian = () => {
+  const uInt32 = new Uint32Array([0x11223344]);
+  const uInt8 = new Uint8Array(uInt32.buffer);
+  return uInt8[0] === 0x11;
+};
+
+/*
+ * Endianness
+ * Copyright (c) 2017-2018 Rafael da Silva Rocha.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
+/**
+ * @see https://github.com/rochars/endianness
+ */
+
+/**
+ * Swap the byte ordering in a buffer. The buffer is modified in place.
+ * @param {!Array|!Uint8Array} bytes The bytes.
+ * @param {number} offset The byte offset.
+ * @param {number=} start The start index. Assumes 0.
+ * @param {number=} end The end index. Assumes the buffer length.
+ * @throws {Error} If the buffer length is not valid.
+ */
+function endianness(bytes, offset, start = 0, end = bytes.length) {
+  if (end % offset) {
+    throw new Error('Bad buffer length.');
+  }
+  for (let index = start; index < end; index += offset) {
+    swap(bytes, offset, index);
+  }
+}
+
+/**
+ * Swap the byte order of a value in a buffer. The buffer is modified in place.
+ * @param {!Array|!Uint8Array} bytes The bytes.
+ * @param {number} offset The byte offset.
+ * @param {number} index The start index.
+ * @private
+ */
+function swap(bytes, offset, index) {
+  offset--;
+  for (let x = 0; x < offset; x++) {
+    /** @type {*} */
+    let theByte = bytes[index + x];
+    bytes[index + x] = bytes[index + offset];
+    bytes[index + offset] = theByte;
+    offset--;
+  }
+}

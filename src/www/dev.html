@@ -340,6 +340,7 @@
             <option value="bip39PassTestSection">Passphrase Tester</option>
             <option value="splitMnemonic">Split Mnemonic</option>
             <option value="xor">Seed XOR</option>
+            <option value="hamming" disabled>Hamming Backup (soon)</option>
             <option value="otp">One Time Pad</option>
           </select>
         </div>
@@ -485,8 +486,37 @@
             </div>
           </div>
         </section>
+        <section id="hamming" class="bip39ToolSection hidden">
+          <p>Hamming Backups Explained</p>
+        </section>
         <section id="otp" class="bip39ToolSection hidden">
-          <p>One time pad section</p>
+          <p>One time pad explained</p>
+          <button id="otpGenerate" class="btn">ENCRYPT</button>
+          <div>
+            <label for="otpKey">One time pad key</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpKey" class="textarea-input" title="These words should be kept safe, secure and private."
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div>
+            <label for="otpCipherText">One time pad encrypted seed</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpCipherText" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <button id="otpDecrypt" class="btn">DECRYPT</button>
+          <div>
+            <span id="otpMatched" style="float: right;"></span>
+            <label for="otpDecrypted">One time pad decrypted seed</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpDecrypted" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
         </section>
         <br>
       </div>
@@ -772,21 +802,25 @@
         <h3 id="libraries">Libraries & Tools</h3>
         <ul>
           <li><a href="https://github.com/iancoleman/bip39" target="_blank" rel="noopener noreferrer">BIP39 Seed Tool by
-              Ian Coleman - MIT License</a></li>
+              Ian Coleman - MIT</a></li>
           <li><a href="https://github.com/dropbox/zxcvbn" target="_blank" rel="noopener noreferrer">zxcvbn by Dropbox -
-              MIT License</a></li>
+              MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip32" target="_blank" rel="noopener noreferrer">BitcoinJS-lib by
-              BitcoinJS Contributors - MIT License</a></li>
+              BitcoinJS Contributors - MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip32" target="_blank" rel="noopener noreferrer">BIP32 by BitcoinJS
-              Contributors - MIT License</a></li>
+              Contributors - MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip39" target="_blank" rel="noopener noreferrer">BIP39 by BitcoinJS
-              Contributors - MIT License</a></li>
+              Contributors - MIT</a></li>
           <li><a href="https://code.samourai.io/dojo/bip47-js" target="_blank" rel="noopener noreferrer">BIP47-js by
-              Samourai - GNU GPL v3 License</a></li>
+              Samourai - GNU GPL v3</a></li>
           <li><a href="https://github.com/AndreasGassmann/bip85" target="_blank" rel="noopener noreferrer">BIP85 by
               Andreas Gassmann - MIT</a></li>
           <li><a href="http://www.onlinewebfonts.com" target="_blank" rel="noopener noreferrer">Icon Fonts - CC BY
               3.0</a></li>
+          <li><a href="https://github.com/gf3/Levenshtein" target="_blank" rel="noopener noreferrer">Levenshtein by gf3
+              - Unlicense</a></li>
+          <li><a href="https://github.com/rochars/endianness" target="_blank" rel="noopener noreferrer">Endianness by
+              Rafael da Silva Rocha - MIT</a></li>
         </ul>
       </div>
     </div>
