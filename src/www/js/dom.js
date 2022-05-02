@@ -1420,7 +1420,7 @@ const setMnemonicFromEntropy = async () => {
     DOM.entropyWeakEntropyWarning.classList.add('hidden');
   }
   // Get bits by hashing entropy with SHA256
-  let hex = await hash(entropyStr);
+  let hex = await hash(entropy.cleanStr);
   // make sure the hash is at least 64 chars long
   // It should be but just in case
   while (hex.length % 64 !== 0) {
