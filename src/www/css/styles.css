@@ -217,7 +217,7 @@ hr {
   background-color: var(--q-blue);
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.2s ease-in-out;
+  transition: max-height 0.3s ease-in-out;
 }
 .accordion:after {
   content: '\02795';
@@ -376,6 +376,7 @@ hr {
   border-radius: 5px;
   max-height: 80%;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 .modal-content a,
 .modal-content a:any-link {

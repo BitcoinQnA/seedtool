@@ -85,7 +85,7 @@ const networks = {
  */
 // Store elements in DOM object to reference everywhere
 const DOM = {};
-const setupDom = () => {
+const setupDom = async () => {
   // run a quick check that the browser is modern enough to handle this
   if (thisBrowserIsShit()) {
     alert(
@@ -326,10 +326,12 @@ const setupDom = () => {
   }
   // Watch for changes in the window size to change textarea boxes
   resizeObserver.observe(document.querySelector('body'));
-  // open the about panel on load
-  DOM.aboutPanel.click();
   // Remove loading screen
   document.getElementById('loadingPage').style.display = 'none';
+  // Pause for dramatic effect
+  await sleep(200);
+  // open the about panel on load
+  DOM.aboutPanel.click();
 };
 
 // Run setupDom function when the page has loaded
