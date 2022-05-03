@@ -404,6 +404,10 @@ hr {
   cursor: pointer;
   background-color: var(--q-blue);
 }
+#infoModalText {
+  max-width: 60em;
+  margin: auto;
+}
 .copy-icon {
   color: var(--q-orange);
   vertical-align: text-bottom;
@@ -514,11 +518,8 @@ hr {
   color: var(--q-orange);
   box-shadow: 0 0 4px 2px var(--q-orange);
   margin: 4px;
-  cursor: pointer;
-}
-
-.chip:hover {
-  background-color: var(--q-light-blue);
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .chip-img {
