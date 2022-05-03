@@ -233,6 +233,7 @@ hr {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
+  border-radius: 5px;
 }
 .tab-addresses {
   height: 50px;
@@ -264,6 +265,7 @@ hr {
   padding: 6px 12px;
   border: 1px solid var(--q-white);
   border-top: none;
+  border-radius: 5px;
 }
 .entropy-details--flex-container {
   display: flex;
