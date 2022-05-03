@@ -331,6 +331,7 @@ const setupDom = () => {
   }
   // Listen for OTP button clicks
   document.getElementById('otpGenerate').onclick = generateOneTimePad;
+  document.getElementById('otpEncrypt').onclick = encryptOneTimePad;
   document.getElementById('otpDecrypt').onclick = decryptOneTimePad;
   // Watch for changes in the window size to change textarea boxes
   resizeObserver.observe(document.querySelector('body'));
@@ -614,16 +615,28 @@ const fillRandomXorSeeds = () => {
 
 // Generate OTP
 const generateOneTimePad = async () => {
+  const strength = parseInt(DOM.generateRandomStrengthSelect.value);
+  key = await otp.generate(strength);
+  document.getElementById('otpKey').value = key;
+  return key;
+};
+
+// Encrypt OTP
+const encryptOneTimePad = async () => {
   const mnemonic = getPhrase();
   if (!bip39.validateMnemonic(mnemonic)) return;
   const strength = parseInt(DOM.generateRandomStrengthSelect.value);
   let key = document.getElementById('otpKey').value;
-  if (!key) {
-    key = await otp.generate(strength);
-    document.getElementById('otpKey').value = key;
+  const keyValid = await otp.validateKey(key, strength);
+  if (!keyValid) {
+    toast('Invalid OTP Key');
+    return;
   }
-  const cipherKey = await otp.encrypt(key, mnemonic);
-  document.getElementById('otpCipherText').value = cipherKey;
+  if (!key) {
+    key = await generateOneTimePad();
+  }
+  const cipherMnemonic = await otp.encrypt(key, mnemonic);
+  document.getElementById('otpCipherText').value = cipherMnemonic;
 };
 
 // Decrypt OTP
@@ -2057,6 +2070,16 @@ const otp = {
     }
     return decrypted.join(' ');
   },
+  async validateKey(key, numberOfWords) {
+    let keyArray = this._getKeyArrayFromBase64(key);
+    if (keyArray[1] !== numberOfWords) return false;
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return false;
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    if (dataView.length !== numberOfWords) return false;
+    return true;
+  },
   async _testChecksum(keyArray) {
     const divider = keyArray.length - 4;
     const keyChecksum = keyArray.slice(divider);
@@ -2064,7 +2087,8 @@ const otp = {
     const hash = await crypto.subtle.digest('SHA-256', keyPayload);
     const checksum = new Uint8Array(hash.slice(0, 4));
     if (keyChecksum.toString() !== checksum.toString()) {
-      throw new Error('Checksum does not match');
+      console.error('Checksum does not match');
+      return false;
     }
     return true;
   },
@@ -2097,24 +2121,7 @@ const isBigEndian = () => {
  * Endianness
  * Copyright (c) 2017-2018 Rafael da Silva Rocha.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * MIT License
  *
  */
 
