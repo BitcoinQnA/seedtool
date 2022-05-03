@@ -18,7 +18,7 @@ window.infoHtml = {
 <h4>What is Entropy?</h4>
 <p>
   Entropy in cryptography is <a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)"
-    target="_blank">Shannon Entropy</a> from Information Theory, not to be confused with entropy in Physics. In
+     target="_blank" rel="noopener noreferrer">Shannon Entropy</a> from Information Theory, not to be confused with entropy in Physics. In
   information theory, the entropy of a random variable is the average level of "information", "surprise", or
   "uncertainty" inherent to the variable's possible outcomes. It is measured in bits, which can be either a zero or a
   one.
@@ -53,7 +53,7 @@ window.infoHtml = {
 </p>
 <p>
   Entropy values must be sourced from a <a href="https://en.wikipedia.org/wiki/Random_number_generation"
-    target="_blank">strong source of randomness</a>. This means flipping a fair coin, rolling a fair dice, noise
+     target="_blank" rel="noopener noreferrer">strong source of randomness</a>. This means flipping a fair coin, rolling a fair dice, noise
   measurements etc. Do
   <strong>NOT</strong> use phrases from books, lyrics from songs, your birthday or street address, keyboard mashing, or
   anything you <i>think</i> is random, because chances are overwhelming it isn't random enough for the needs of this
@@ -69,20 +69,20 @@ window.infoHtml = {
   Storing entropy (such as keeping a deck of cards in a specific shuffled order) is unreliable compared to
   storing a mnemonic.
   Instead of storing entropy, store the mnemonic generated from the entropy.
-  <a href="https://en.wikipedia.org/wiki/Steganography#Physical" target="_blank">Steganography</a> may be
+  <a href="https://en.wikipedia.org/wiki/Steganography#Physical"  target="_blank" rel="noopener noreferrer">Steganography</a> may be
   beneficial when storing the mnemonic.
 </p>
 <p>
   The random mnemonic generator on this page uses a <a
-    href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues" target="_blank">
+    href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues"  target="_blank" rel="noopener noreferrer">
     cryptographically secure random number generator</a>. The built in random generator can generally be trusted more
   than your own intuition about
   randomness. If cryptographic randomness isn't available in your browser, this page will show a warning and the
   generate button will not work. In that case you might choose to use your own source of entropy.
 </p>
 <p>
-   You are <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309" target="_blank"> not</a> a good
-   source of entropy, see this in practice <a href="https://roadtolarissa.com/oracle/" target="_blank">here.</a>
+   You are <a href="https://bitcointalk.org/index.php?topic=311000.msg3345309#msg3345309"  target="_blank" rel="noopener noreferrer"> not</a> a good
+   source of entropy, see this in practice <a href="https://roadtolarissa.com/oracle/"  target="_blank" rel="noopener noreferrer">here.</a>
 </p>
 <p>
   Card entropy has been implemented assuming cards are replaced, not drawn one after another. This means a full deck of
@@ -118,7 +118,7 @@ window.infoHtml = {
 </ul>
 <h5>Time to crack:</h5>
 <p>
-  This uses <a href="https://github.com/dropbox/zxcvbn" target="_blank">zxcvbn</a> which is a password strength
+  This uses <a href="https://github.com/dropbox/zxcvbn"  target="_blank" rel="noopener noreferrer">zxcvbn</a> which is a password strength
   estimator inspired by password crackers. It is provided to give you an indication of the strength of your entropy.
 </p>
 <h5>Event Count:</h5>
@@ -153,7 +153,7 @@ window.infoHtml = {
 </p>
 <h5>Binary Checksum:</h5>
 <p>
-  Displays the checksum of your Raw Binary. The checksum is described in the <a src="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#generating-the-mnemonic">BIP</a> as taking the required entropy for the number of words chosen (128 bits for 12 words, 256 bits for 24 words), hash it using sha256, and the checksum is the first &#8496; bits of that checksum (where &#8496; is the number of entropy bits divided by 32, e.g. 12 words is 128 bit &divide; 32 = 4). As described above, the checksum bits are then added to the entropy bits which will give you a multiple of 11 to make the required words, e.g. 12 words, 128 bits of entropy, 4 bits of checksum, 132 bits total, 12 groups of 11 bits (12 &times; 11 = 132), 12 words. So the last word of any mnemonic phrase depends on all of the previous ones.
+  Displays the checksum of your Raw Binary. The checksum is described in the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#generating-the-mnemonic"  target="_blank" rel="noopener noreferrer">BIP</a> as taking the required entropy for the number of words chosen (128 bits for 12 words, 256 bits for 24 words), hash it using sha256, and the checksum is the first &#8496; bits of that checksum (where &#8496; is the number of entropy bits divided by 32, e.g. 12 words is 128 bit &divide; 32 = 4). As described above, the checksum bits are then added to the entropy bits which will give you a multiple of 11 to make the required words, e.g. 12 words, 128 bits of entropy, 4 bits of checksum, 132 bits total, 12 groups of 11 bits (12 &times; 11 = 132), 12 words. So the last word of any mnemonic phrase depends on all of the previous ones.
 </p>
 <h5>Word Indexes:</h5>
 <p>
@@ -231,7 +231,7 @@ window.infoHtml = {
   The simple way to code dice rolls would be just say if I want to make 24 words I need 256 bits of entropy. We know that LOG<sub>2</sub>(6) is 2.58. so 256&divide;2.58=99.2248062 round down to 99. Great! Roll 99 (or 100) dice and enter the numbers you get (1-6) and we sha256 hash it and, boom! 256 bits of entropy. This is biased as we have seen and to maximize the entropy we use Alice's method. 256&divide;1⅔ which tells us we should really roll the dice 153 times to be unbiased. The unbiased entropy from 99 dice rolls using Alice's method gives 165 bit of entropy.
 </p>
 <p>
-  Further reading: <a href="https://github.com/iancoleman/bip39/issues/435" target="_blank">Bias in
+  Further reading: <a href="https://github.com/iancoleman/bip39/issues/435" target="_blank" rel="noopener noreferrer">Bias in
     dice based entropy #435</a>
 </p>
   `,
@@ -246,7 +246,7 @@ window.infoHtml = {
         
   </p>
   <p>
-    Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank">BIP32 page </a>
+    Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki" target="_blank" rel="noopener noreferrer">BIP32 page </a>
   </p>`,
   BIP39: /*html*/ `
         <h3>BIP39: Mnemonic code for generating deterministic keys</h3>
@@ -270,7 +270,7 @@ window.infoHtml = {
 
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP39 page </a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank" rel="noopener noreferrer">BIP39 page </a>
         </p>`,
   BIP44: /*html*/ `
         <h3>BIP44: Multi-Account Hierarchy for Deterministic Wallets</h3>
@@ -286,7 +286,7 @@ window.infoHtml = {
         their larger transaction size resulting in larger fees.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank">BIP44 page</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki" target="_blank" rel="noopener noreferrer">BIP44 page</a>
         </p>`,
   BIP47: /*html*/ `
         <h3>BIP47: Reusable Payment Codes for Hierarchical Deterministic Wallets</h3>
@@ -297,7 +297,7 @@ window.infoHtml = {
         
         In this section you'll see the payment code derived from your seed words, this can be share publicly via any website or communication method. Below that are the notification address and 
         associated public and private keys which are to be kept secret. If using the tool online you can also enable the PayNym.is connection to see a preview
-        of the avatar associated with your payment code, learn more about those <a href="https://bitcoiner.guide/paynym" target="_blank">here</a>. <br/><br/>
+        of the avatar associated with your payment code, learn more about those <a href="https://bitcoiner.guide/paynym" target="_blank" rel="noopener noreferrer">here</a>. <br/><br/>
         
         Entering another payment code into the 'Counterparty Details' field will generate unique addresses to enable bitcoin sends to that entity 
         without their interaction. The tool will also generate receive addresses, should that same counterparty choose to send bitcoin to you via your public payment code.  
@@ -311,7 +311,7 @@ window.infoHtml = {
 
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank">BIP47 page</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki" target="_blank" rel="noopener noreferrer">BIP47 page</a>
         </p>`,
   BIP49: /*html*/ `
         <h3>BIP49: Derivation scheme for P2WPKH-nested-in-P2SH based accounts</h3>
@@ -324,7 +324,7 @@ window.infoHtml = {
         Wrapped Segwit addresses defined in this BIP are quickly being replaced in wallet software by those confirming to the BIP84 standard.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank">BIP49 page</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki" target="_blank" rel="noopener noreferrer">BIP49 page</a>
         </p>`,
   BIP84: /*html*/ `
         <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
@@ -336,7 +336,7 @@ window.infoHtml = {
           BIP84 also defines that wallets adopting the standard should adopt the <b>'zpub'</b> or <b>'zprv'</b> prefixes when displaying extended public/private keys.
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank">BIP84 page</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki" target="_blank" rel="noopener noreferrer">BIP84 page</a>
         </p>`,
   BIP85: /*html*/ `
         <h3>BIP85: Deterministic Entropy From BIP32 Keychains</h3>
@@ -356,7 +356,7 @@ window.infoHtml = {
 
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank">BIP85 page</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank" rel="noopener noreferrer">BIP85 page</a>
         </p>`,
   BIP141: /*html*/ `
         <h3>BIP141: Segregated Witness (Consensus layer)</h3>
@@ -364,8 +364,68 @@ window.infoHtml = {
           About BIP
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki" target="_blank">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki" target="_blank" rel="noopener noreferrer">BITCOIN IMPROVEMENT PROPOSAL</a>
         </p>`,
+  PASSGEN: /*html*/ `
+        <p>
+          This section uses the EFF's long diceware word <a
+            href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases" target="_blank" rel="noopener noreferrer">list</a> to create
+          a random passphrase. To generate a secure passphrase, 5 words is <a
+            href="https://coldbit.com/can-bip-39-passphrase-be-cracked/" target="_blank" rel="noopener noreferrer">recommended</a>.
+          You can also use dice rolls to generate a random passphrase, five rolls of a six-sided dice generates one
+          word. Keep rolling to make more words or
+          click the button to add words at random to your passphrase.
+        </p>
+        <p>
+          <b>NOTE:</b> Bitcoin wallet passphrase fields are case sensitive and also include blank spaces. Take extreme
+          care when creating and backing them up.
+        </p>`,
+  PASSTEST: /*html*/ `
+        <p>
+          <a
+            href="https://twitter.com/BitcoinQ_A/status/1519268818564038657" target="_blank" rel="noopener noreferrer">See the video!</a>
+        </p>`,
+  SEEDXOR: /*html*/ `
+        <p>
+          <strong>TLDR: </strong> Using the <span class="xor-number-seeds">2</span> BIP39 phrases below, you
+          can recreate your orginal one above.
+        </p>
+        <p>
+          Seed XOR generates an extra random seed and then uses the binary operator "Exclusive Or" on each bit
+          of entropy from the two seeds to generate a new seed. We can keep making random seeds and it still
+          works. Here we allow up to 8 seeds.
+        </p>
+        <p>
+          XOR is a simple operation to perform and can
+          be done with a pen and paper. The nice thing about this is that all seeds are
+          valid (so you can store dummy funds on them), you can perform the same function on the random seed
+          and the result seed and you will almost get back to your original seed. That "almost" is important.
+        </p>
+        <p>
+          <strong>
+            It is important that you save your original final word if you will calculate back to your original
+            seed by hand as you won't be able to calculate the checksum easily.
+          </strong>
+          Hashing with SHA by hand is really hard to do.
+        </p>
+        <p>
+          For more information, see <a target="_blank" rel="noopener noreferrer"
+            href="https://seedxor.com">seedxor.com</a>
+        </p>`,
+  HAMMING: /*html*/ `Oh Boy!`,
+  OTP: /*html*/ `
+        <p>
+          This is a port from the <a target="_blank" rel="noopener noreferrer"
+            href="https://github.com/brndnmtthws/seed-otp">python command line tool seed-otp by Brenden Matthews</a>.
+        </p>
+        <p>
+          Brenden gives a really good explanation of how it works, when it would be useful and all the tradeoffs to consider in the README which you should definitely read, for more information.
+        </p>
+        <p>Two very important things to note:</p>
+        <ol>
+          <li>If you lose your One Time Pad Key, you will not be able to decrypt your encrypted mnemonic.</li>
+          <li>Your encrypted mnemonic is not a valid BIP39 seed phrase so you will not be able to use it to store funds.</li>
+        </ol>`,
   ADDRESSES: /*html*/ `
         <h3>Derived Addresses</h3>
         <p>
@@ -375,9 +435,10 @@ window.infoHtml = {
         <h3>Changelog</h3>
         <ul>
           <li>V1.0.0 - Initial release</li>
-          <li>V1.0.1 - Fix social preview information</li>
-          <li>V1.0.2 - Fix loading issue on iOS devices</li>
-          <li>V1.0.3 - Add passphrase tester tool</li>
+          <li>V1.0.1 - FIX: social preview information</li>
+          <li>V1.0.2 - FIX: loading issue on iOS devices</li>
+          <li>V1.0.3 - ADD: passphrase tester tool</li>
+          <li>V1.0.4 - ADD: SeedXOR & One Time Pads</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
