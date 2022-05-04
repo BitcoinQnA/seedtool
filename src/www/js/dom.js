@@ -650,10 +650,12 @@ const decryptOneTimePad = async () => {
   if (!cipherMnemonic || !key) return;
   const mnemonic = await otp.decrypt(key, cipherMnemonic);
   document.getElementById('otpDecrypted').value = mnemonic;
-  document.getElementById('otpMatched').innerHTML =
-    mnemonic === getPhrase()
-      ? 'Match'
-      : '<span class="warning">ERROR: Not Matched!</span>';
+  const loadedMnemonic = getPhrase();
+  if (loadedMnemonic)
+    document.getElementById('otpMatched').innerHTML =
+      mnemonic === loadedMnemonic
+        ? 'Matches the loaded seed'
+        : '<span class="warning">ERROR: Does not match the loaded seed</span>';
   adjustPanelHeight();
 };
 
