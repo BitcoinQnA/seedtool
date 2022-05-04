@@ -386,27 +386,26 @@ window.infoHtml = {
             href="https://twitter.com/BitcoinQ_A/status/1519268818564038657" target="_blank" rel="noopener noreferrer">See the video!</a>
         </p>`,
   SEEDXOR: /*html*/ `
-        <p>
-          <strong>TLDR: </strong> Using the <span class="xor-number-seeds">2</span> BIP39 phrases below, you
-          can recreate your orginal one above.
+          <h3>Seed XOR</h3>
+          Seed XOR is designed to remove your physical seed backup from being a single point of failure in your Bitcoin security setup. It uses a method of 
+          splitting an existing mnemonic seed into multiple additional BIP39 compatible seeds. These subsequent
+          mnemonics can be loaded with sats to act as a decoy from your main stash which is 'hidden' behind the combination of those subsequent seeds.
+          Each seed should be backed up in the same way you would any traditional seed. Recovering the main 'hidden' seed requires the combination 
+          of <strong>ALL</strong> parts. 
         </p>
         <p>
-          Seed XOR generates an extra random seed and then uses the binary operator "Exclusive Or" on each bit
-          of entropy from the two seeds to generate a new seed. We can keep making random seeds and it still
-          works. Here we allow up to 8 seeds.
+          Seed XOR generates an extra, random seed and then uses the binary operator "Exclusive Or" on each bit
+          of entropy from the two seeds to generate a new seed. This can be done multiple times depending on how
+          many seeds you want to split your main seed across. Here we allow up to 8 seeds.
         </p>
         <p>
-          XOR is a simple operation to perform and can
-          be done with a pen and paper. The nice thing about this is that all seeds are
-          valid (so you can store dummy funds on them), you can perform the same function on the random seed
-          and the result seed and you will almost get back to your original seed. That "almost" is important.
+        Seed tool can already get back to your original seed. Doing the XOR calculation by hand is easy, until you 
+        get to the checksum. SHA256 with a pencil and paper is a job for mathematics PhDs. 
         </p>
         <p>
-          <strong>
-            It is important that you save your original final word if you will calculate back to your original
-            seed by hand as you won't be able to calculate the checksum easily.
-          </strong>
-          Hashing with SHA by hand is really hard to do.
+        If you intend to recover 
+        your original seed by hand in future using SeedXOR, you should make a note of the original seed's final word because 
+        the chances are that you will not be able to calculate the last word by hand using XOR & SHA256. Seed tool is able to do that computation on your CPU.
         </p>
         <p>
           For more information, see <a target="_blank" rel="noopener noreferrer"
@@ -416,16 +415,31 @@ window.infoHtml = {
   OTP: /*html*/ `
         <p>
           This is a port from the <a target="_blank" rel="noopener noreferrer"
-            href="https://github.com/brndnmtthws/seed-otp">python command line tool seed-otp by Brenden Matthews</a>.
+            href="https://github.com/brndnmtthws/seed-otp">python command line tool seed-otp by Brenden Matthews</a>
+          Brenden gives a really good explanation of how it works, when it would be useful and all the tradeoffs to consider in the README which you should definitely read, 
+          for more information. Here is a snippet which provides a good summary of the approach.</p>
+
+          <p>"Combine a one-time pad with multi-factor authentication. By using mult-factor auth (something you know plus something you have) 
+          and one-time pad encryption, you have a simple yet extremely hard to crack solution. With your OTP key and seed mnemonic stored 
+          separately, it becomes onerous to obtain both. Even if someone does obtain either your mnemonic or OTP key, you would have time 
+          to move your coins to a new wallet with a brand new seed before anything happens to your coins. A one-time pad is considered 
+          perfect secrecy: it's nearly impossible to brute force attack so long as the key remains secret.</p>
+
+          <p><strong>Your auth factors are:</strong></p>
+
+          <li>Something you know: A one-time pad key which you have stored securely in a password manager, which is locked with a password only you know. 
+          The password DB is backed up securely.</li>
+          <li>Something you have: An encrypted mnemonic seed phrase stored on archival paper or another long term physical cold storage device. 
+          The phrase itself looks like a normal mnenomic phrase, which provides plausible deniability, and does not indicate to anyone who might 
+          find the phrase how it's actually used."</li>
+
         </p>
-        <p>
-          Brenden gives a really good explanation of how it works, when it would be useful and all the tradeoffs to consider in the README which you should definitely read, for more information.
-        </p>
-        <p>Two very important things to note:</p>
+        <p><strong>Two very important things to note:</strong></p>
         <ol>
           <li>If you lose your One Time Pad Key, you will not be able to decrypt your encrypted mnemonic.</li>
           <li>Your encrypted mnemonic is not a valid BIP39 seed phrase so you will not be able to use it to store funds.</li>
-        </ol>`,
+        </ol>
+        <p><strong>Do not use this tool with live seeds unless you fully understand the implications of doing so!</strong></p>`,
   ADDRESSES: /*html*/ `
         <h3>Derived Addresses</h3>
         <p>
