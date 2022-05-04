@@ -303,6 +303,11 @@ const setupDom = async () => {
   // add event listener for entropy
   DOM.entropyInput.oninput = entropyChanged;
   DOM.entropyMnemonicLengthSelect.oninput = entropyChanged;
+  // link length selectors together
+  DOM.generateRandomStrengthSelect.oninput = () => {
+    DOM.entropyMnemonicLengthSelect.value =
+      DOM.generateRandomStrengthSelect.value;
+  };
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
@@ -324,6 +329,10 @@ const setupDom = async () => {
   } else {
     DOM.onlineIcon.classList.add('hidden');
   }
+  // Listen for OTP button clicks
+  document.getElementById('otpGenerate').onclick = generateOneTimePad;
+  document.getElementById('otpEncrypt').onclick = encryptOneTimePad;
+  document.getElementById('otpDecrypt').onclick = decryptOneTimePad;
   // Watch for changes in the window size to change textarea boxes
   resizeObserver.observe(document.querySelector('body'));
   // Remove loading screen
@@ -482,6 +491,169 @@ const bip39PassphraseMessage = (msg) => {
   const msgEl = document.getElementById('bip39PassTestInfo');
   msgEl.innerHTML = msg;
   document.getElementById('loadingPage').style.display = 'none';
+  adjustPanelHeight();
+};
+
+// Remove XOR seed
+const removeXorSeed = async (event) => {
+  event.preventDefault();
+  document.getElementById('xorAddSeed').disabled = false;
+  const seeds = [...document.querySelectorAll('.xor-seed')];
+  let visibleSeeds = 0;
+  for (let i = seeds.length - 1; i > 0; i--) {
+    visibleSeeds = i;
+    const seed = seeds[i];
+    if (!seed.classList.contains('hidden')) {
+      seed.classList.add('hidden');
+      break;
+    }
+  }
+  visibleSeeds++;
+  document
+    .querySelectorAll('.xor-number-seeds')
+    .forEach((span) => (span.innerText = visibleSeeds));
+  document.getElementById('xorRemoveSeed').disabled =
+    visibleSeeds === 2 ? true : false;
+  await calculateXor();
+  adjustPanelHeight();
+};
+
+// Add an xor seed
+const addXorSeed = async (event) => {
+  event.preventDefault();
+  document.getElementById('xorRemoveSeed').disabled = false;
+  const seeds = [...document.querySelectorAll('.xor-seed')];
+  let visibleSeeds = 0;
+  for (let i = 0; i < seeds.length; i++) {
+    visibleSeeds = i;
+    const seed = seeds[i];
+    if (seed.classList.contains('hidden')) {
+      seed.classList.remove('hidden');
+      break;
+    }
+  }
+  visibleSeeds += 2;
+  document
+    .querySelectorAll('.xor-number-seeds')
+    .forEach((span) => (span.innerText = visibleSeeds));
+  document.getElementById('xorAddSeed').disabled =
+    visibleSeeds === 8 ? true : false;
+  await calculateXor();
+  adjustPanelHeight();
+};
+
+/**
+ * Converts an array of bytes to a binary string
+ * @param {number[]} byteArray
+ * @returns {string}
+ */
+const bytesToBinary = (byteArray) =>
+  byteArray.map((x) => x.toString(2).padStart(8, '0')).join('');
+
+const deriveChecksumBits = async (entropyBuffer) => {
+  const ENT = entropyBuffer.length * 8;
+  const CS = ENT / 32;
+  const hash = await crypto.subtle.digest('SHA-256', entropyBuffer);
+  return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
+};
+
+// Calculate XOR
+const calculateXor = async () => {
+  let result = getWordIndexes(phraseToWordArray());
+  const seeds = [...document.querySelectorAll('.xor-seed')]
+    .filter((div) => !div.classList.contains('hidden'))
+    .map((div) =>
+      getWordIndexes(phraseToWordArray(div.querySelector('textarea').value))
+    );
+  if (seeds.length < 1) {
+    console.error('Not enough seeds to do XOR');
+    return;
+  }
+  for (let i = 0; i < seeds.length; i++) {
+    if (seeds[i].length === 0) {
+      console.error("Can't do XOR on empty seed");
+      return;
+    }
+  }
+  seeds.forEach((seedToXor) => {
+    result = result.map((wordInd, i) => {
+      return wordInd ^ seedToXor[i];
+    });
+  });
+  const bits = result.map((x) => x.toString(2).padStart(11, '0')).join('');
+  const dividerIndex = Math.floor(bits.length / 33) * 32;
+  const entropyBits = bits.slice(0, dividerIndex);
+  const entropyBytes = entropyBits
+    .match(/(.{1,8})/g)
+    .map((bin) => parseInt(bin, 2));
+  if (
+    entropyBytes.length < 16 ||
+    entropyBytes.length > 32 ||
+    entropyBytes.length % 4 !== 0
+  ) {
+    console.error('Invalid entropy');
+    return;
+  }
+  const entropy = Uint8Array.from(entropyBytes);
+  const newChecksum = await deriveChecksumBits(entropy);
+  let newLastWordIndex = parseInt(
+    result
+      .pop()
+      .toString(2)
+      .padStart(11, '0')
+      .slice(0, 11 - newChecksum.length) + newChecksum,
+    2
+  );
+  result.push(newLastWordIndex);
+  result = result.map((n) => wordList[n]);
+  document.getElementById('xorResult').value = result.join(' ');
+};
+
+const fillRandomXorSeeds = () => {
+  document.querySelectorAll('.xor-seed').forEach((div) => {
+    div.querySelector('textarea').value = createMnemonic();
+  });
+};
+
+// Generate OTP
+const generateOneTimePad = async () => {
+  const strength = parseInt(DOM.generateRandomStrengthSelect.value);
+  key = await otp.generate(strength);
+  document.getElementById('otpKey').value = key;
+  return key;
+};
+
+// Encrypt OTP
+const encryptOneTimePad = async () => {
+  const mnemonic = getPhrase();
+  if (!bip39.validateMnemonic(mnemonic)) return;
+  const strength = parseInt(DOM.generateRandomStrengthSelect.value);
+  let key = document.getElementById('otpKey').value;
+  const keyValid = await otp.validateKey(key, strength);
+  if (!keyValid) {
+    toast('Invalid OTP Key');
+    return;
+  }
+  if (!key) {
+    key = await generateOneTimePad();
+  }
+  const cipherMnemonic = await otp.encrypt(key, mnemonic);
+  document.getElementById('otpCipherText').value = cipherMnemonic;
+};
+
+// Decrypt OTP
+const decryptOneTimePad = async () => {
+  const cipherMnemonic = normalizeString(
+    document.getElementById('otpCipherText').value
+  );
+  const key = normalizeString(document.getElementById('otpKey').value);
+  if (!cipherMnemonic || !key) return;
+  const mnemonic = await otp.decrypt(key, cipherMnemonic);
+  document.getElementById('otpDecrypted').value = mnemonic;
+  document.getElementById('otpMatched').innerHTML =
+    mnemonic === getPhrase()
+      ? 'Match'
+      : '<span class="warning">ERROR: Not Matched!</span>';
   adjustPanelHeight();
 };
 
@@ -1286,6 +1458,8 @@ const addRandomDiceWordToPassphrase = () => {
 
 // Event handler on entropy input
 const entropyChanged = async () => {
+  DOM.generateRandomStrengthSelect.value =
+    DOM.entropyMnemonicLengthSelect.value;
   // debounce?
   if (getEntropy().length === 0) {
     resetEverything();
@@ -1531,8 +1705,7 @@ const getEntropyTypeStr = (entropy) => {
 const addSpacesEveryElevenBits = (binaryStr) =>
   binaryStr.match(/.{1,11}/g).join(' ');
 
-const phraseToWordArray = () => {
-  const phrase = normalizeString(DOM.bip39Phrase.value);
+const phraseToWordArray = (phrase = getPhrase()) => {
   const words = phrase.split(/\s/g);
   const noBlanks = [];
   for (let i = 0; i < words.length; i++) {
@@ -1558,14 +1731,19 @@ const wordArrayToPhrase = (words) => {
   return phrase;
 };
 
-// Display the indexes of the mnemonic phrase
-const showWordIndexes = () => {
-  const words = phraseToWordArray();
+// Get an array of indexes from and array of words
+const getWordIndexes = (words) => {
   const wordIndexes = [];
   words.forEach((word) => {
     wordIndexes.push(wordList.indexOf(word));
   });
-  const wordIndexesStr = wordIndexes.join(', ');
+  return wordIndexes;
+};
+
+// Display the indexes of the mnemonic phrase
+const showWordIndexes = () => {
+  const words = phraseToWordArray();
+  const wordIndexesStr = getWordIndexes(words).join(', ');
   DOM.entropyWordIndexes.innerText = wordIndexesStr;
 };
 
@@ -1597,13 +1775,18 @@ const showChecksum = () => {
   DOM.entropyBinaryChecksum.innerText = checksum;
 };
 
-// Generate a random mnemonic when button is clicked
-const generateNewMnemonic = () => {
-  toast('Calculating...');
+// Get Mnemonic sentence
+const createMnemonic = () => {
   const numWords = parseInt(DOM.generateRandomStrengthSelect.value);
   const strength = (numWords / 3) * 32;
   const mnemonic = bip39.generateMnemonic(strength);
-  DOM.bip39Phrase.value = mnemonic;
+  return mnemonic;
+};
+
+// Generate a random mnemonic when button is clicked
+const generateNewMnemonic = () => {
+  toast('Calculating...');
+  DOM.bip39Phrase.value = createMnemonic();
   // DOM.knownInputTextarea.value = mnemonic;
   mnemonicToSeedPopulate();
 };
@@ -1728,6 +1911,9 @@ const mnemonicToSeedPopulate = debounce(async () => {
     calcBip85();
     calcBip47();
   }
+  fillRandomXorSeeds();
+  calculateXor();
+  await generateOneTimePad();
   adjustPanelHeight();
 }, 1000);
 
@@ -1759,6 +1945,10 @@ const resetEverything = () => {
   DOM.bip47CPPaymentCode.value = '';
   DOM.bip47CPNotificationAddress.value = '';
   DOM.bip47CPNotificationPubKey.value = '';
+  document.getElementById('otpDecrypted').value = '';
+  document.getElementById('otpMatched').innerHTML = '';
+  document.getElementById('otpKey').value = '';
+  document.getElementById('otpCipherText').value = '';
 };
 
 // Empty entropy fields
@@ -1774,3 +1964,204 @@ const clearEntropyFeedback = () => {
   DOM.entropyBinaryChecksum.innerText = '';
   DOM.entropyWordIndexes.innerText = '';
 };
+
+/*
+ * Seed One Time Pad
+ * SuperPhatArrow
+ *
+ * Ported from the python cli tool
+ * seed-otp (Unlicense)
+ * https://github.com/brndnmtthws/seed-otp
+ *
+ * Useage:
+ * await otp.generate(12)
+ *  -> returns a key for a 12 word mnemonic
+ * await otp.encrypt('AAwCnwGIAe0EWABWAI4AkAMjAFQBLgZjB1T1PJtz','abandon ability able about above absent absorb abstract absurd abuse access accident')
+ *  -> returns a scrambled mnemonic
+ * await otp.decrypt('AAwCnwGIAe0EWABWAI4AkAMjAFQBLgZjB1T1PJtz','fault couple digital merge area bar barrel grab argue cheap soap typical')
+ *  -> returns original mnemonic
+ *
+ */
+
+const otp = {
+  /**
+   * otp.generate
+   * @param {number} numberOfWords Mnemonic length
+   * @returns {string} One Time Pad Key
+   */
+  async generate(numberOfWords) {
+    if (numberOfWords % 3 !== 0 || numberOfWords < 12 || numberOfWords > 24)
+      throw new Error('Incorrect number of words');
+    const keyList = new Uint16Array(numberOfWords);
+    for (let i = 0; i < numberOfWords; i++) {
+      let randomNumber = 2048;
+      do {
+        randomNumber = crypto.getRandomValues(new Uint16Array(1))[0];
+      } while (randomNumber >= 2048);
+      keyList[i] = randomNumber;
+    }
+    const keyList8 = new Uint8Array(keyList.buffer);
+    if (!isBigEndian()) {
+      endianness(keyList8, 2);
+    }
+    const keyArray = new Uint8Array([0, numberOfWords, ...keyList8]);
+    const hash = await crypto.subtle.digest('SHA-256', keyArray);
+    const checksum = new Uint8Array(hash.slice(0, 4));
+    const full = new Uint8Array(keyArray.length + checksum.length);
+    full.set(keyArray, 0);
+    full.set(checksum, keyArray.length);
+    const base64url = await new Promise((r) => {
+      const reader = new FileReader();
+      reader.onload = () => r(reader.result);
+      reader.readAsDataURL(new Blob([full]));
+    });
+    return base64url.split(',', 2)[1].replaceAll('=', '');
+  },
+  /**
+   * otp.encrypt
+   * @param {string} key One Time Pad Key
+   * @param {string} mnemonic The Mnemonic to encrypt
+   * @returns {string} Encrypted Mnemonic
+   */
+  async encrypt(key, mnemonic) {
+    const words = normalizeString(mnemonic).split(' ');
+    while (key.length % 4 !== 0) {
+      key += '=';
+    }
+    let keyArray = this._getKeyArrayFromBase64(key);
+    if (keyArray[1] !== words.length) {
+      throw new Error('Mnemonic length does not match key');
+    }
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return;
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    const encrypted = words.map((word, i) => {
+      const wordIndex = wordList.findIndex((w) => w === word);
+      const encWord = wordList[(wordIndex + dataView[i]) % 2048];
+      return encWord;
+    });
+    return encrypted.join(' ');
+  },
+  /**
+   * otp.decrypt
+   * @param {string} key One Time Pad Key
+   * @param {string} cipherMnemonic Encripted Mnemonic
+   * @returns {string} Decrypted Mnemonic
+   */
+  async decrypt(key, cipherMnemonic) {
+    const words = normalizeString(cipherMnemonic).split(' ');
+    while (key.length % 4 !== 0) {
+      key += '=';
+    }
+    let keyArray = this._getKeyArrayFromBase64(key);
+    if (keyArray[1] !== words.length) {
+      throw new Error('Mnemonic length does not match key');
+    }
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return;
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    const decrypted = [];
+    for (let i = 0; i < words.length; i++) {
+      const cipherWord = words[i];
+      const cipherIndex = wordList.findIndex((w) => w === cipherWord);
+      const index = (cipherIndex - dataView[i] + 2048) % 2048;
+      const word = wordList[index];
+      decrypted.push(word);
+    }
+    return decrypted.join(' ');
+  },
+  async validateKey(key, numberOfWords) {
+    let keyArray = this._getKeyArrayFromBase64(key);
+    if (keyArray[1] !== numberOfWords) return false;
+    const checksumOk = await this._testChecksum(keyArray);
+    if (!checksumOk) return false;
+    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
+    const dataView = this._getUint16(keyPayload);
+    if (dataView.length !== numberOfWords) return false;
+    return true;
+  },
+  async _testChecksum(keyArray) {
+    const divider = keyArray.length - 4;
+    const keyChecksum = keyArray.slice(divider);
+    const keyPayload = new Uint8Array(keyArray.slice(0, divider));
+    const hash = await crypto.subtle.digest('SHA-256', keyPayload);
+    const checksum = new Uint8Array(hash.slice(0, 4));
+    if (keyChecksum.toString() !== checksum.toString()) {
+      console.error('Checksum does not match');
+      return false;
+    }
+    return true;
+  },
+  _getKeyArrayFromBase64(keyBase64) {
+    return window
+      .atob(keyBase64)
+      .split('')
+      .map((c) => c.charCodeAt(0));
+  },
+  _getUint16(keyPayload) {
+    const buffer = new ArrayBuffer(keyPayload.length - 2);
+    const dataView = new Uint16Array(buffer);
+    if (!isBigEndian()) {
+      let count = 2;
+      for (let i = 0; i < dataView.length; i++) {
+        dataView[i] = (keyPayload[count++] << 8) + keyPayload[count++];
+      }
+    }
+    return dataView;
+  },
+};
+
+const isBigEndian = () => {
+  const uInt32 = new Uint32Array([0x11223344]);
+  const uInt8 = new Uint8Array(uInt32.buffer);
+  return uInt8[0] === 0x11;
+};
+
+/*
+ * Endianness
+ * Copyright (c) 2017-2018 Rafael da Silva Rocha.
+ *
+ * MIT License
+ *
+ */
+
+/**
+ * @see https://github.com/rochars/endianness
+ */
+
+/**
+ * Swap the byte ordering in a buffer. The buffer is modified in place.
+ * @param {!Array|!Uint8Array} bytes The bytes.
+ * @param {number} offset The byte offset.
+ * @param {number=} start The start index. Assumes 0.
+ * @param {number=} end The end index. Assumes the buffer length.
+ * @throws {Error} If the buffer length is not valid.
+ */
+function endianness(bytes, offset, start = 0, end = bytes.length) {
+  if (end % offset) {
+    throw new Error('Bad buffer length.');
+  }
+  for (let index = start; index < end; index += offset) {
+    swap(bytes, offset, index);
+  }
+}
+
+/**
+ * Swap the byte order of a value in a buffer. The buffer is modified in place.
+ * @param {!Array|!Uint8Array} bytes The bytes.
+ * @param {number} offset The byte offset.
+ * @param {number} index The start index.
+ * @private
+ */
+function swap(bytes, offset, index) {
+  offset--;
+  for (let x = 0; x < offset; x++) {
+    /** @type {*} */
+    let theByte = bytes[index + x];
+    bytes[index + x] = bytes[index + offset];
+    bytes[index + offset] = theByte;
+    offset--;
+  }
+}

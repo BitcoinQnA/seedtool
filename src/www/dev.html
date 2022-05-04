@@ -339,24 +339,16 @@
             <option value="bip39PassGenSection">Passphrase Generator</option>
             <option value="bip39PassTestSection">Passphrase Tester</option>
             <option value="splitMnemonic">Split Mnemonic</option>
-            <option value="xor" disabled>Seed XOR (soon)</option>
-            <option value="otp" disabled>One Time Pad (soon)</option>
+            <option value="xor">Seed XOR</option>
+            <!-- <option value="hamming" disabled>Hamming Backup (soon)</option> -->
+            <option value="otp">One Time Pad</option>
           </select>
         </div>
         <section id="bip39PassGenSection" class="bip39ToolSection hidden">
-          <p>
-
-            This section uses the EFF's long diceware word <a
-              href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases"> list</a> to create
-            a random passphrase. To generate a secure passphrase, 5 words is <a
-              href="https://coldbit.com/can-bip-39-passphrase-be-cracked/"> recommended</a>.
-            You can also use dice rolls to generate a random passphrase, five rolls of a six-sided dice generates one
-            word. Keep rolling to make more words or
-            click the button below to add words at random to your passphrase. <br /><br />
-
-            <b>NOTE</b>- Bitcoin wallet passphrase fields are case sensitive and also include blank spaces. Take extreme
-            care when creating and backing them up.
-          </p>
+          <button class="btn" title="Click to learn more about Passphrase Generator"
+            onclick="openInfoModal(event, 'PASSGEN')">
+            Passphrase Generator Explained
+          </button><br>
           <p>
             <button class="btn" title="Click to add a random word to your generated passphrase"
               onclick="addRandomDiceWordToPassphrase()">
@@ -370,6 +362,10 @@
           </div>
         </section>
         <section id="bip39PassTestSection" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about Passphrase Generator"
+            onclick="openInfoModal(event, 'PASSTEST')">
+            Passphrase Tester Explained
+          </button><br>
           <p id="bip39PassTestInfo" class="warning">Please be patient, each search can take up to 20 seconds!</p>
           <label>Known Address: <textarea id="bip39KnownAddr" class="textarea-input" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"
@@ -390,6 +386,116 @@
           <p>
             <span id="bip39PhraseSplitWarn" class="phraseSplitWarn"></span>
           </p>
+        </section>
+        <section id="xor" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about Seed XOR" onclick="openInfoModal(event, 'SEEDXOR')">
+            Seed XOR Explained
+          </button><br>
+          <button class="btn" id="xorAddSeed" onclick="addXorSeed(event)">+</button><button disabled class="btn"
+            id="xorRemoveSeed" onclick="removeXorSeed(event)">-</button><button class="btn" id="xorCalculate"
+            onclick="calculateXor()">Recalculate</button>
+          <div class="xor-seed">
+            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed2" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed3" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed4" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed5" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed6" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed7" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="xor-seed hidden">
+            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span></label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorSeed8" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div>
+            <label for="xorResult">XOR Result</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="xorResult" class="xor-result textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
+        </section>
+        <section id="hamming" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about Hamming Backups"
+            onclick="openInfoModal(event, 'HAMMING')">
+            Hamming Backups Explained
+          </button><br>
+        </section>
+        <section id="otp" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about One Time Pads" onclick="openInfoModal(event, 'OTP')">
+            One Time Pads Explained
+          </button><br>
+          <button id="otpGenerate" class="btn">NEW KEY</button>
+          <button id="otpEncrypt" class="btn">ENCRYPT</button>
+          <div>
+            <label for="otpKey">One time pad key</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpKey" class="textarea-input" title="These words should be kept safe, secure and private."
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div>
+            <label for="otpCipherText">One time pad encrypted seed</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpCipherText" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <button id="otpDecrypt" class="btn">DECRYPT</button>
+          <div>
+            <span id="otpMatched" style="float: right;"></span>
+            <label for="otpDecrypted">One time pad decrypted seed</label>
+            <div class="copy-wrapper private-data">
+              <textarea id="otpDecrypted" class="textarea-input"
+                title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" readonly></textarea>
+            </div>
+          </div>
         </section>
         <br>
       </div>
@@ -675,21 +781,25 @@
         <h3 id="libraries">Libraries & Tools</h3>
         <ul>
           <li><a href="https://github.com/iancoleman/bip39" target="_blank" rel="noopener noreferrer">BIP39 Seed Tool by
-              Ian Coleman - MIT License</a></li>
+              Ian Coleman - MIT</a></li>
           <li><a href="https://github.com/dropbox/zxcvbn" target="_blank" rel="noopener noreferrer">zxcvbn by Dropbox -
-              MIT License</a></li>
+              MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip32" target="_blank" rel="noopener noreferrer">BitcoinJS-lib by
-              BitcoinJS Contributors - MIT License</a></li>
+              BitcoinJS Contributors - MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip32" target="_blank" rel="noopener noreferrer">BIP32 by BitcoinJS
-              Contributors - MIT License</a></li>
+              Contributors - MIT</a></li>
           <li><a href="https://github.com/bitcoinjs/bip39" target="_blank" rel="noopener noreferrer">BIP39 by BitcoinJS
-              Contributors - MIT License</a></li>
+              Contributors - MIT</a></li>
           <li><a href="https://code.samourai.io/dojo/bip47-js" target="_blank" rel="noopener noreferrer">BIP47-js by
-              Samourai - GNU GPL v3 License</a></li>
+              Samourai - GNU GPL v3</a></li>
           <li><a href="https://github.com/AndreasGassmann/bip85" target="_blank" rel="noopener noreferrer">BIP85 by
               Andreas Gassmann - MIT</a></li>
           <li><a href="http://www.onlinewebfonts.com" target="_blank" rel="noopener noreferrer">Icon Fonts - CC BY
               3.0</a></li>
+          <li><a href="https://github.com/gf3/Levenshtein" target="_blank" rel="noopener noreferrer">Levenshtein by gf3
+              - Unlicense</a></li>
+          <li><a href="https://github.com/rochars/endianness" target="_blank" rel="noopener noreferrer">Endianness by
+              Rafael da Silva Rocha - MIT</a></li>
         </ul>
       </div>
     </div>
