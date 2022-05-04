@@ -379,6 +379,7 @@ hr {
   max-height: 80%;
   overflow-y: scroll;
   overflow-x: hidden;
+  max-width: 70em;
 }
 .modal-content a,
 .modal-content a:any-link {
@@ -405,8 +406,8 @@ hr {
   background-color: var(--q-blue);
 }
 #infoModalText {
-  max-width: 60em;
   margin: auto;
+  padding: 5%;
 }
 .copy-icon {
   color: var(--q-orange);
