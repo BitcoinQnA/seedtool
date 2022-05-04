@@ -51,8 +51,25 @@ body {
   background: var(--q-blue);
   background-attachment: fixed !important;
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh + 1px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--q-white) var(--q-blue);
 }
+
+*::-webkit-scrollbar {
+  width: 11px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--q-blue);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--q-white);
+  border-radius: 6px;
+  border: 3px solid var(--q-blue);
+}
+
 #homeLink {
   position: absolute;
   top: 15px;
@@ -101,14 +118,29 @@ p {
 .small {
   font-size: small;
 }
+
 .btn {
   background-color: var(--q-orange);
   color: var(--q-blue);
   border: 1px solid var(--q-white);
-  border-radius: 2px;
-  padding: 5px;
   margin: 10px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1.25;
+  min-height: 2rem;
+  padding: calc(0.3rem - 1px) calc(1.5rem - 1px);
+  text-decoration: none;
+  transition: all 250ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  width: auto;
+  align-items: center;
+  border-radius: 0.25rem;
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
 }
 .btn:disabled {
   background-color: var(--q-blue);
@@ -116,9 +148,28 @@ p {
   border: 1px solid var(--q-white);
   cursor: not-allowed;
 }
-.warning {
+.btn:hover,
+.btn:focus {
+  border-color: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--q-orange);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  /* color: rgba(0, 0, 0, 0.65); */
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  background-color: var(--q-white);
+  border-color: var(--q-orange);
+  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
   color: var(--q-blue);
-  background-color: var(--q-orange);
+  transform: translateY(1px);
+}
+.warning {
+  color: var(--q-orange);
+  background-color: var(--q-blue);
   border: 1px solid var(--q-orange);
   border-radius: 5px;
   padding: 5px;
@@ -136,6 +187,10 @@ textarea {
   background-color: var(--q-light-blue);
   color: var(--q-white);
   padding: 4px;
+  border-radius: 5px;
+}
+hr {
+  display: none;
 }
 .accordion {
   color: var(--q-white);
@@ -147,6 +202,10 @@ textarea {
   border: none;
   outline: none;
   transition: 0.4s;
+  border: 1px solid var(--q-white);
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 .accordion.accordion--active,
 .accordion:hover {
@@ -158,7 +217,7 @@ textarea {
   background-color: var(--q-blue);
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.2s ease-in-out;
+  transition: max-height 0.3s ease-in-out;
 }
 .accordion:after {
   content: '\02795';
@@ -174,6 +233,7 @@ textarea {
   overflow: hidden;
   border: 1px solid var(--q-white);
   background-color: var(--q-blue);
+  border-radius: 5px;
 }
 .tab-addresses {
   height: 50px;
@@ -205,6 +265,7 @@ textarea {
   padding: 6px 12px;
   border: 1px solid var(--q-white);
   border-top: none;
+  border-radius: 5px;
 }
 .entropy-details--flex-container {
   display: flex;
@@ -265,6 +326,7 @@ textarea {
   background-color: var(--q-light-blue);
   color: var(--q-orange);
   padding: 8px;
+  border-radius: 5px;
 }
 .path-text-input {
   width: 100%;
@@ -301,8 +363,8 @@ textarea {
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%;
-  overflow: auto;
+  height: 100vh;
+  overflow: hidden;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.8);
 }
@@ -310,11 +372,14 @@ textarea {
 .modal-content {
   background-color: var(--q-white);
   color: var(--q-blue);
-  margin: 15% auto;
+  margin: 8% auto;
   padding: 20px;
-  border: 1px solid var(--q-orange);
   width: 80%;
-  border-radius: 20px;
+  border-radius: 5px;
+  max-height: 80%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-width: 70em;
 }
 .modal-content a,
 .modal-content a:any-link {
@@ -327,13 +392,22 @@ textarea {
   float: right;
   font-size: 28px;
   font-weight: bold;
+  border: 2px solid var(--q-blue);
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
 }
 
 #modalClose:hover,
 #modalClose:focus {
-  color: var(--q-blue);
+  color: var(--q-orange);
   text-decoration: none;
   cursor: pointer;
+  background-color: var(--q-blue);
+}
+#infoModalText {
+  margin: auto;
+  padding: 5%;
 }
 .copy-icon {
   color: var(--q-orange);
@@ -445,11 +519,8 @@ textarea {
   color: var(--q-orange);
   box-shadow: 0 0 4px 2px var(--q-orange);
   margin: 4px;
-  cursor: pointer;
-}
-
-.chip:hover {
-  background-color: var(--q-light-blue);
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .chip-img {
