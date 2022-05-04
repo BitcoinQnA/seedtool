@@ -452,7 +452,7 @@ window.infoHtml = {
           <li>V1.0.1 - FIX: social preview information</li>
           <li>V1.0.2 - FIX: loading issue on iOS devices</li>
           <li>V1.0.3 - ADD: passphrase tester tool</li>
-          <li>V1.0.4 - ADD: SeedXOR & One Time Pads</li>
+          <li>V1.0.4 - ADD: SeedXOR, One Time Pads & UI Updates.  FIX: Entropy filtering</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
