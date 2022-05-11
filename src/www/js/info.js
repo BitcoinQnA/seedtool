@@ -407,6 +407,10 @@ window.infoHtml = {
         your original seed by hand in future using SeedXOR, you should make a note of the original seed's final word because 
         the chances are that you will not be able to calculate the last word by hand using XOR & SHA256. Seed tool is able to do that computation on your CPU.
         </p>
+        <h3>Recovering an XOR'd Seed</h3>
+          To recover a seed that has been split using the XOR function using Seed Tool or an XOR compatible signing device, enter one of the seeds into the 'BIP39 Mnemonic' box
+          above, then enter the second seed into the 'Seed 2 of 2' box below. Repeat step 2 for any additional seeds used when creating your XOR split, then press 'Recalculate'.
+          Your original seed will then be calculated into the 'XOR result' box.
         <p>
           For more information, see <a target="_blank" rel="noopener noreferrer"
             href="https://seedxor.com">seedxor.com</a>
