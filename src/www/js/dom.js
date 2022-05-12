@@ -401,8 +401,35 @@ const selectBip39Tool = () => {
   const section = document.getElementById(DOM.bip39ToolSelect.value);
   if (section) {
     section.classList.remove('hidden');
+    if (DOM.bip39ToolSelect.value === 'lastWord') randEntropy();
   }
   adjustPanelHeight();
+};
+
+// Flip a bit for last word entropy
+const flip = async (bit, spins) => {
+  if (spins === 0) return;
+  await sleep(100);
+  bit.classList.toggle('is-flipped');
+  spins--;
+  flip(bit, spins);
+};
+
+// Randomize last word entropy
+const randEntropy = () => {
+  DOM.lastWordBits.forEach(async (bit, i) => {
+    if (bit.classList.contains('hidden')) return;
+    const bits = crypto
+      .getRandomValues(new Uint8Array(1))[0]
+      .toString(2)
+      .padStart(8, '0')
+      .split('');
+    // Math random is not used for entropy
+    // it is just used to make an arbitrary even number for the animation
+    // so that the bits complete flipping at different times
+    const n = (Math.floor(Math.random() * 7) + 7) * 2 + parseInt(bits[7 - i]);
+    flip(bit, n);
+  });
 };
 
 // bip39 Passphrase Test
