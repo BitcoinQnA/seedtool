@@ -183,7 +183,8 @@ p {
 textarea {
   resize: none;
 }
-.textarea-input {
+.textarea-input,
+.lastWord-word {
   background-color: var(--q-light-blue);
   color: var(--q-white);
   padding: 4px;
@@ -291,6 +292,71 @@ hr {
   padding: 2px;
   overflow-wrap: anywhere;
 }
+.lastWord-bit-scene {
+  width: 3em;
+  height: 3em;
+  perspective: 600px;
+  margin: 0.5em;
+  display: inline-flex;
+}
+.lastWord-bit {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.lastWord-bit.is-flipped {
+  transform: rotateY(180deg);
+}
+.lastWord-bit-face {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  backface-visibility: hidden;
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
+  text-align: center;
+  font-family: monospace;
+  line-height: 3em;
+  border-radius: 50%;
+  border: 1px solid;
+  user-select: none;
+}
+.lastWord-bit-face--one {
+  transform: rotateY(180deg);
+}
+#lastWordSeedWords {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+.lastWord-word {
+  width: 9em;
+  font-family: monospace;
+}
+.lastWord-label {
+  flex: 0 0 25%;
+  min-width: 9em;
+  font-family: monospace;
+}
+.lastWord-word {
+  padding-left: 3em;
+}
+.lastWord-label::after {
+  content: attr(data-number) ':';
+  position: absolute;
+  top: 8px;
+  left: 1em;
+  font-family: monospace;
+  display: block;
+  color: var(--q-white);
+}
+.relative {
+  position: relative;
+}
 .address-block {
   border: 1px solid var(--q-white);
   overflow: hidden;
@@ -314,6 +380,12 @@ hr {
 }
 .bip85-item {
   margin-top: 5px;
+}
+select {
+  background-color: var(--q-light-blue);
+  color: var(--q-orange);
+  padding: 8px;
+  border-radius: 5px;
 }
 #bip141ScriptSemantics,
 #derivedPathSelect,

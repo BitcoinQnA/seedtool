@@ -236,6 +236,12 @@ const setupDom = async () => {
   DOM.onlineIcon = document.getElementById('networkIndicator');
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
+  DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
+  DOM.lastWordBits.forEach((bit) => {
+    bit.addEventListener('click', () => {
+      bit.classList.toggle('is-flipped');
+    });
+  });
   // set network now
   network = bitcoin.networks.bitcoin;
   // BIP39 Tool select
