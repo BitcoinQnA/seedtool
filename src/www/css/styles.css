@@ -328,8 +328,13 @@ hr {
   transform: rotateY(180deg);
 }
 #lastWordSeedWords {
-  column-count: auto;
-  column-width: 15em;
+  column-count: 4;
+  column-width: 9em;
+}
+.lastWord-div {
+  width: 9em;
+  margin: 0 auto;
+  justify-content: center;
 }
 .lastWord-word {
   width: 9em;
