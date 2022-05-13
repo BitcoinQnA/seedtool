@@ -305,6 +305,7 @@ hr {
   position: relative;
   transition: transform 0.3s;
   transform-style: preserve-3d;
+  cursor: pointer;
 }
 .lastWord-bit.is-flipped {
   transform: rotateY(180deg);

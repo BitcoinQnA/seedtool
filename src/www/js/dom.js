@@ -237,11 +237,19 @@ const setupDom = async () => {
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
   DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
+  DOM.lastWordLength = document.getElementById('lastWordStrength');
+  DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
+  // Flip bits when clicked
   DOM.lastWordBits.forEach((bit) => {
     bit.addEventListener('click', () => {
       bit.classList.toggle('is-flipped');
+      getBits();
     });
   });
+  // Change bits and word inputs when strength changes
+  DOM.lastWordLength.oninput = changeLastWordLength;
+  // Set it now
+  changeLastWordLength();
   // set network now
   network = bitcoin.networks.bitcoin;
   // BIP39 Tool select
@@ -417,18 +425,53 @@ const flip = async (bit, spins) => {
 
 // Randomize last word entropy
 const randEntropy = () => {
-  DOM.lastWordBits.forEach(async (bit, i) => {
+  let bitString = '';
+  DOM.lastWordBits.forEach((bit, i) => {
+    // reset bits to zero
+    bit.classList.remove('is-flipped');
     if (bit.classList.contains('hidden')) return;
     const bits = crypto
       .getRandomValues(new Uint8Array(1))[0]
       .toString(2)
       .padStart(8, '0')
       .split('');
+    const thisBit = bits[7 - i];
+    bitString += thisBit;
     // Math random is not used for entropy
     // it is just used to make an arbitrary even number for the animation
     // so that the bits complete flipping at different times
-    const n = (Math.floor(Math.random() * 7) + 7) * 2 + parseInt(bits[7 - i]);
+    const n = (Math.floor(Math.random() * 7) + 7) * 2 + parseInt(thisBit);
     flip(bit, n);
+  });
+  DOM.lastWordZeroWarning.classList.toggle('hidden', bitString.includes('1'));
+  adjustPanelHeight();
+};
+
+// get last word user entropy
+const getBits = () => {
+  let bitString = '';
+  DOM.lastWordBits.forEach((bit) => {
+    if (!bit.classList.contains('hidden')) {
+      bitString += bit.classList.contains('is-flipped') ? '1' : '0';
+    }
+  });
+  DOM.lastWordZeroWarning.classList.toggle('hidden', bitString.includes('1'));
+  adjustPanelHeight();
+  return bitString;
+};
+
+// last word mnemonic length change handler
+const changeLastWordLength = () => {
+  // change number of bits
+  const numWords = parseInt(DOM.lastWordLength.value);
+  const n = 11 - numWords / 3;
+  DOM.lastWordBits.forEach(async (bit, i) => {
+    bit.classList.toggle('hidden', i >= n);
+  });
+  randEntropy();
+  // hide unused words
+  document.querySelectorAll('.lastWord-label').forEach((el, i) => {
+    el.classList.toggle('hidden', i >= numWords);
   });
 };
 
@@ -1137,14 +1180,15 @@ function toast(message) {
 }
 
 // resizes layout of panels in accordion and textarea boxes
-function adjustPanelHeight() {
+// debounce as this gets called a lot
+const adjustPanelHeight = debounce(() => {
   textareaResize();
   DOM.accordionPanels.forEach((panel) => {
     panel.style.maxHeight = panel.classList.contains('accordion-panel--active')
       ? panel.scrollHeight + 'px'
       : null;
   });
-}
+}, 50);
 
 // event handler for when the path is changed
 const changePath = () => {
