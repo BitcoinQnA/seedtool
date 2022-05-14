@@ -239,11 +239,13 @@ const setupDom = async () => {
   DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
   DOM.lastWordLength = document.getElementById('lastWordStrength');
   DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
+  DOM.lastWordFinalWord = document.querySelectorAll('.lastWord-word')[23];
   // Flip bits when clicked
   DOM.lastWordBits.forEach((bit) => {
     bit.addEventListener('click', () => {
       bit.classList.toggle('is-flipped');
       getBits();
+      calculateLastWord();
     });
   });
   // Change bits and word inputs when strength changes
@@ -445,6 +447,7 @@ const randEntropy = () => {
   });
   DOM.lastWordZeroWarning.classList.toggle('hidden', bitString.includes('1'));
   adjustPanelHeight();
+  calculateLastWord(bitString);
 };
 
 // get last word user entropy
@@ -470,8 +473,58 @@ const changeLastWordLength = () => {
   });
   randEntropy();
   // hide unused words
-  document.querySelectorAll('.lastWord-label').forEach((el, i) => {
+  document.querySelectorAll('.lastWord-div').forEach((el, i) => {
     el.classList.toggle('hidden', i >= numWords);
+    const input = el.querySelector('.lastWord-word');
+    input.readOnly = i + 1 === numWords;
+    if (i + 1 === numWords) {
+      DOM.lastWordFinalWord = input;
+    }
+  });
+  calculateLastWord();
+};
+
+// calc last word
+const calculateLastWord = debounce(async (entBits = getBits()) => {
+  const numWords = parseInt(DOM.lastWordLength.value);
+  const words = [];
+  const userWordElements = document.querySelectorAll('.lastWord-word');
+  userWordElements.forEach((el, i) => {
+    if (i + 1 < numWords) words.push(normalizeString(el.value));
+  });
+  // check the user has entered enough words
+  if (words.includes('')) {
+    DOM.lastWordFinalWord.value = '';
+    return;
+  }
+  const wordIndexes = words.map((w) => wordList.indexOf(w));
+  // check all words exist
+  let wordsAreWrong = false;
+  wordIndexes.forEach((wi, i) => {
+    if (wi === -1) wordsAreWrong = true;
+    userWordElements[i].style.backgroundColor = wi === -1 ? 'red' : '';
+  });
+  if (wordsAreWrong) {
+    // one or more of the words are wrong
+    DOM.lastWordFinalWord.value = '';
+    return;
+  }
+  const bin =
+    wordIndexes.map((n) => n.toString(2).padStart(11, '0')).join('') + entBits;
+  const binBytes = bin.match(/[0-1]{8}/g);
+  const arr = binBytes.map((b) => parseInt(b, 2));
+  const buf = new Uint8Array(arr);
+  const checkSumBits = await deriveChecksumBits(buf);
+  const lastWordBits = entBits + checkSumBits;
+  const lastWord = wordList[parseInt(lastWordBits, 2)];
+  DOM.lastWordFinalWord.value = lastWord;
+}, 1000);
+
+// temp func for testing
+const bacon = () => {
+  const numWords = parseInt(DOM.lastWordLength.value);
+  document.querySelectorAll('.lastWord-word').forEach((el, i) => {
+    el.value = i + 1 < numWords ? 'bacon' : '';
   });
 };
 
