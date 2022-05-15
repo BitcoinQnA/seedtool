@@ -444,10 +444,10 @@ window.infoHtml = {
           <li>Your encrypted mnemonic is not a valid BIP39 seed phrase so you will not be able to use it to store funds.</li>
         </ol>
         <p><strong>Do not use this tool with live seeds unless you fully understand the implications of doing so!</strong></p>`,
-  ADDRESSES: /*html*/ `
-        <h3>Derived Addresses</h3>
+  LASTWORD: /*html*/ `
+        <h3>Last Word Generator</h3>
         <p>
-          About Derived Addresses
+          About Last Word Generator
         </p>`,
   CHANGELOG: /*html*/ `
         <h3>Changelog</h3>

@@ -342,7 +342,7 @@
             <option value="xor">Seed XOR</option>
             <!-- <option value="hamming" disabled>Hamming Backup (soon)</option> -->
             <option value="otp">One Time Pad</option>
-            <option value="lastWord">Last Word Calculator</option>
+            <option value="lastWord">Last Word Generator</option>
           </select>
         </div>
         <section id="bip39PassGenSection" class="bip39ToolSection hidden">
@@ -499,6 +499,10 @@
           </div>
         </section>
         <section id="lastWord" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about The Last Word Generator"
+            onclick="openInfoModal(event, 'LASTWORD')">
+            The Last Word Generator Explained
+          </button><br>
           <p>
             Calculate the last word of a <select id="lastWordStrength"
               title="Select the number of words for your Mnemonic">
@@ -506,7 +510,7 @@
               <option value="15">15</option>
               <option value="18">18</option>
               <option value="21">21</option>
-              <option value="24" selected>24</option>
+              <option value="24">24</option>
             </select> word seed.
           </p>
           <p>
