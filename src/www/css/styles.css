@@ -335,6 +335,7 @@ hr {
   width: 9em;
   margin: 0 auto;
   justify-content: center;
+  position: relative;
 }
 .lastWord-word {
   width: 9em;
@@ -352,6 +353,25 @@ hr {
   font-family: monospace;
   display: block;
   color: var(--q-white);
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid var(--q-orange);
+  border-bottom: none;
+  z-index: 95;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: var(--q-blue);
+  border-bottom: 1px solid var(--q-orange);
+}
+.autocomplete-items div:hover {
+  background-color: var(--q-light-blue);
+}
+.autocomplete-active {
+  background-color: var(--q-orange) !important;
+  color: var(--q-blue);
 }
 .relative {
   position: relative;

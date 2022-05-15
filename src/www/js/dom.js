@@ -240,6 +240,16 @@ const setupDom = async () => {
   DOM.lastWordLength = document.getElementById('lastWordStrength');
   DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
   DOM.lastWordFinalWord = document.querySelectorAll('.lastWord-word')[23];
+  // Event listener to clear autocomplete suggestions
+  document.addEventListener('click', (e) => clearAutocompleteItems(e.target));
+  // move autocomplete suggestions on scroll
+  document.addEventListener('scroll', autocompletePositionUpdate);
+  // Autocomplete key presses
+  document
+    .querySelectorAll('.lastWord-word')
+    .forEach((input) =>
+      input.addEventListener('keydown', keyPressAutocompleteHandler)
+    );
   // Flip bits when clicked
   DOM.lastWordBits.forEach((bit) => {
     bit.addEventListener('click', () => {
@@ -490,7 +500,7 @@ const calculateLastWord = debounce(async (entBits = getBits()) => {
   const words = [];
   const userWordElements = document.querySelectorAll('.lastWord-word');
   userWordElements.forEach((el, i) => {
-    if (i + 1 < numWords) words.push(normalizeString(el.value));
+    if (i + 1 < numWords) words.push(normalizeString(el.value).toLowerCase());
   });
   // check the user has entered enough words
   if (words.includes('')) {
@@ -520,11 +530,119 @@ const calculateLastWord = debounce(async (entBits = getBits()) => {
   DOM.lastWordFinalWord.value = lastWord;
 }, 1000);
 
-// temp func for testing
-const bacon = () => {
+// Autocomplete
+const currentAuto = {
+  input: null,
+  focus: -1,
+  term: '',
+};
+const clearAutocompleteItems = (el) => {
+  document.querySelectorAll('.autocomplete-items').forEach((item) => {
+    if (el !== item && el !== currentAuto.input)
+      item.parentNode.removeChild(item);
+  });
+};
+const lastWordAutocomplete = (input) => {
+  const searchText = input.value.toLowerCase();
+  if (searchText === currentAuto.term && currentAuto.input === input) return;
+  if (currentAuto.input !== input) currentAuto.focus = -1;
+  currentAuto.input = input;
+  currentAuto.term = searchText;
+  clearAutocompleteItems();
+  if (searchText === '') return;
+  const searchResults = [
+    ...new Set(
+      wordList
+        .filter((word) => word.startsWith(searchText))
+        .concat(wordList.filter((word) => word.includes(searchText)))
+    ),
+  ].slice(0, 5);
+  if (searchResults.length === 1 && searchResults[0] === searchText) {
+    // user has found their word
+    clearAutocompleteItems();
+    calculateLastWord();
+    return;
+  }
+  const resultsContainer = document.createElement('DIV');
+  resultsContainer.setAttribute('class', 'autocomplete-items');
+  document.body.appendChild(resultsContainer);
+  autocompletePositionUpdate();
+  searchResults.forEach((word) => {
+    const resultDiv = document.createElement('DIV');
+    resultDiv.innerHTML = word.replaceAll(
+      searchText,
+      `<strong>${searchText}</strong>`
+    );
+    resultDiv.dataset.word = word;
+    resultDiv.addEventListener('click', function () {
+      currentAuto.input.value = this.dataset.word;
+      clearAutocompleteItems();
+      focusOnNextWord();
+    });
+    resultsContainer.appendChild(resultDiv);
+  });
+};
+
+const autocompletePositionUpdate = () => {
+  // check we have a list
+  const autocompleteContainer = document.querySelector('.autocomplete-items');
+  if (!autocompleteContainer || !currentAuto.input) return;
+  const rect = currentAuto.input.getBoundingClientRect();
+  // position the list
+  autocompleteContainer.style.width = rect.width + 'px';
+  autocompleteContainer.style.top = 3 + rect.bottom + scrollY + 'px';
+  autocompleteContainer.style.left = rect.left + scrollX + 'px';
+};
+
+const keyPressAutocompleteHandler = (e) => {
+  calculateLastWord();
+  let suggestionList = document.querySelectorAll('.autocomplete-items>div');
+  if (!suggestionList) return;
+  if (e.keyCode == 40) {
+    /*If the arrow DOWN key is pressed,
+          increase the currentAuto.focus variable:*/
+    currentAuto.focus++;
+    /*and and make the current item more visible:*/
+    addAutocompleteActive();
+  } else if (e.keyCode == 38) {
+    //up
+    /*If the arrow UP key is pressed,
+          decrease the currentAuto.focus variable:*/
+    currentAuto.focus--;
+    /*and and make the current item more visible:*/
+    addAutocompleteActive();
+  } else if (e.keyCode == 13) {
+    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+    e.preventDefault();
+    if (currentAuto.focus > -1) {
+      /*and simulate a click on the "active" item:*/
+      if (suggestionList) suggestionList[currentAuto.focus].click();
+    }
+  }
+};
+
+const addAutocompleteActive = () => {
+  removeAutocompleteActive();
+  const suggestions = document.querySelectorAll('.autocomplete-items>div');
+  if (!suggestions) return;
+  if (currentAuto.focus >= suggestions.length) currentAuto.focus = 0;
+  if (currentAuto.focus < 0) currentAuto.focus = suggestions.length - 1;
+  suggestions[currentAuto.focus].classList.add('autocomplete-active');
+};
+
+const removeAutocompleteActive = () => {
+  document
+    .querySelectorAll('.autocomplete-items>div')
+    .forEach((div) => div.classList.remove('autocomplete-active'));
+};
+
+const focusOnNextWord = () => {
+  const inputs = document.querySelectorAll('.lastWord-word');
   const numWords = parseInt(DOM.lastWordLength.value);
-  document.querySelectorAll('.lastWord-word').forEach((el, i) => {
-    el.value = i + 1 < numWords ? 'bacon' : '';
+  inputs.forEach((input, i) => {
+    if (input === currentAuto.input && i + 1 < numWords) {
+      inputs[i + 1].focus();
+    }
   });
 };
 
@@ -1540,7 +1658,7 @@ const findPhraseErrors = (phraseArg) => {
   }
   // Check each word
   for (let i = 0; i < words.length; i++) {
-    var word = words[i];
+    const word = words[i];
     if (!wordList.includes(word)) {
       const nearestWord = findNearestWord(word);
       return `"${word}" was not found in the list, did you mean "${nearestWord}"`;
