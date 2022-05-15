@@ -505,6 +505,7 @@ const calculateLastWord = debounce(async (entBits = getBits()) => {
   // check the user has entered enough words
   if (words.includes('')) {
     DOM.lastWordFinalWord.value = '';
+    canLoadLastWordSeed(false);
     return;
   }
   const wordIndexes = words.map((w) => wordList.indexOf(w));
@@ -517,6 +518,7 @@ const calculateLastWord = debounce(async (entBits = getBits()) => {
   if (wordsAreWrong) {
     // one or more of the words are wrong
     DOM.lastWordFinalWord.value = '';
+    canLoadLastWordSeed(false);
     return;
   }
   const bin =
@@ -528,6 +530,7 @@ const calculateLastWord = debounce(async (entBits = getBits()) => {
   const lastWordBits = entBits + checkSumBits;
   const lastWord = wordList[parseInt(lastWordBits, 2)];
   DOM.lastWordFinalWord.value = lastWord;
+  canLoadLastWordSeed(true);
 }, 1000);
 
 // Autocomplete
@@ -581,6 +584,24 @@ const lastWordAutocomplete = (input) => {
     });
     resultsContainer.appendChild(resultDiv);
   });
+  if (searchResults.length === 1) {
+    currentAuto.focus = 0;
+    addAutocompleteActive();
+  }
+};
+
+const canLoadLastWordSeed = (bool) => {
+  document.querySelector('#lastWordLoad').disabled = !bool;
+};
+
+const loadLastWordSeed = () => {
+  const words = [...document.querySelectorAll('.lastWord-word')]
+    .map((w) => w.value)
+    .filter((w) => !!w)
+    .join(' ');
+  DOM.bip39Phrase.value = words;
+  toast('Loading Seed...');
+  mnemonicToSeedPopulate();
 };
 
 const autocompletePositionUpdate = () => {
@@ -597,7 +618,16 @@ const autocompletePositionUpdate = () => {
 const keyPressAutocompleteHandler = (e) => {
   calculateLastWord();
   let suggestionList = document.querySelectorAll('.autocomplete-items>div');
-  if (!suggestionList) return;
+  if (!suggestionList.length) {
+    if (
+      e.keyCode == 13 &&
+      wordList.includes(normalizeString(currentAuto?.input?.value))
+    ) {
+      e.preventDefault();
+      focusOnNextWord();
+    }
+    return;
+  }
   if (e.keyCode == 40) {
     /*If the arrow DOWN key is pressed,
           increase the currentAuto.focus variable:*/
@@ -624,7 +654,7 @@ const keyPressAutocompleteHandler = (e) => {
 const addAutocompleteActive = () => {
   removeAutocompleteActive();
   const suggestions = document.querySelectorAll('.autocomplete-items>div');
-  if (!suggestions) return;
+  if (!suggestions || !suggestions.length) return;
   if (currentAuto.focus >= suggestions.length) currentAuto.focus = 0;
   if (currentAuto.focus < 0) currentAuto.focus = suggestions.length - 1;
   suggestions[currentAuto.focus].classList.add('autocomplete-active');
