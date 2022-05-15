@@ -236,6 +236,32 @@ const setupDom = async () => {
   DOM.onlineIcon = document.getElementById('networkIndicator');
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
+  DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
+  DOM.lastWordLength = document.getElementById('lastWordStrength');
+  DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
+  DOM.lastWordFinalWord = document.querySelectorAll('.lastWord-word')[23];
+  // Event listener to clear autocomplete suggestions
+  document.addEventListener('click', (e) => clearAutocompleteItems(e.target));
+  // move autocomplete suggestions on scroll
+  document.addEventListener('scroll', autocompletePositionUpdate);
+  // Autocomplete key presses
+  document
+    .querySelectorAll('.lastWord-word')
+    .forEach((input) =>
+      input.addEventListener('keydown', keyPressAutocompleteHandler)
+    );
+  // Flip bits when clicked
+  DOM.lastWordBits.forEach((bit) => {
+    bit.addEventListener('click', () => {
+      bit.classList.toggle('is-flipped');
+      getBits();
+      calculateLastWord();
+    });
+  });
+  // Change bits and word inputs when strength changes
+  DOM.lastWordLength.oninput = changeLastWordLength;
+  // Set it now
+  changeLastWordLength();
   // set network now
   network = bitcoin.networks.bitcoin;
   // BIP39 Tool select
@@ -395,8 +421,259 @@ const selectBip39Tool = () => {
   const section = document.getElementById(DOM.bip39ToolSelect.value);
   if (section) {
     section.classList.remove('hidden');
+    if (DOM.bip39ToolSelect.value === 'lastWord') randEntropy();
   }
   adjustPanelHeight();
+};
+
+// Flip a bit for last word entropy
+const flip = async (bit, spins) => {
+  if (spins === 0) return;
+  await sleep(100);
+  bit.classList.toggle('is-flipped');
+  spins--;
+  flip(bit, spins);
+};
+
+// Randomize last word entropy
+const randEntropy = () => {
+  let bitString = '';
+  DOM.lastWordBits.forEach((bit, i) => {
+    // reset bits to zero
+    bit.classList.remove('is-flipped');
+    if (bit.classList.contains('hidden')) return;
+    const bits = crypto
+      .getRandomValues(new Uint8Array(1))[0]
+      .toString(2)
+      .padStart(8, '0')
+      .split('');
+    const thisBit = bits[7 - i];
+    bitString += thisBit;
+    // Math random is not used for entropy
+    // it is just used to make an arbitrary even number for the animation
+    // so that the bits complete flipping at different times
+    const n = (Math.floor(Math.random() * 7) + 7) * 2 + parseInt(thisBit);
+    flip(bit, n);
+  });
+  DOM.lastWordZeroWarning.classList.toggle('hidden', bitString.includes('1'));
+  adjustPanelHeight();
+  calculateLastWord(bitString);
+};
+
+// get last word user entropy
+const getBits = () => {
+  let bitString = '';
+  DOM.lastWordBits.forEach((bit) => {
+    if (!bit.classList.contains('hidden')) {
+      bitString += bit.classList.contains('is-flipped') ? '1' : '0';
+    }
+  });
+  DOM.lastWordZeroWarning.classList.toggle('hidden', bitString.includes('1'));
+  adjustPanelHeight();
+  return bitString;
+};
+
+// last word mnemonic length change handler
+const changeLastWordLength = () => {
+  // change number of bits
+  const numWords = parseInt(DOM.lastWordLength.value);
+  const n = 11 - numWords / 3;
+  DOM.lastWordBits.forEach(async (bit, i) => {
+    bit.classList.toggle('hidden', i >= n);
+  });
+  randEntropy();
+  // hide unused words
+  document.querySelectorAll('.lastWord-div').forEach((el, i) => {
+    el.classList.toggle('hidden', i >= numWords);
+    const input = el.querySelector('.lastWord-word');
+    input.readOnly = i + 1 === numWords;
+    if (i + 1 === numWords) {
+      DOM.lastWordFinalWord = input;
+    }
+  });
+  calculateLastWord();
+};
+
+// calc last word
+const calculateLastWord = debounce(async (entBits = getBits()) => {
+  const numWords = parseInt(DOM.lastWordLength.value);
+  const words = [];
+  const userWordElements = document.querySelectorAll('.lastWord-word');
+  userWordElements.forEach((el, i) => {
+    if (i + 1 < numWords) words.push(normalizeString(el.value).toLowerCase());
+  });
+  // check the user has entered enough words
+  if (words.includes('')) {
+    DOM.lastWordFinalWord.value = '';
+    canLoadLastWordSeed(false);
+    return;
+  }
+  const wordIndexes = words.map((w) => wordList.indexOf(w));
+  // check all words exist
+  let wordsAreWrong = false;
+  wordIndexes.forEach((wi, i) => {
+    if (wi === -1) wordsAreWrong = true;
+    userWordElements[i].style.backgroundColor = wi === -1 ? 'red' : '';
+  });
+  if (wordsAreWrong) {
+    // one or more of the words are wrong
+    DOM.lastWordFinalWord.value = '';
+    canLoadLastWordSeed(false);
+    return;
+  }
+  const bin =
+    wordIndexes.map((n) => n.toString(2).padStart(11, '0')).join('') + entBits;
+  const binBytes = bin.match(/[0-1]{8}/g);
+  const arr = binBytes.map((b) => parseInt(b, 2));
+  const buf = new Uint8Array(arr);
+  const checkSumBits = await deriveChecksumBits(buf);
+  const lastWordBits = entBits + checkSumBits;
+  const lastWord = wordList[parseInt(lastWordBits, 2)];
+  DOM.lastWordFinalWord.value = lastWord;
+  canLoadLastWordSeed(true);
+}, 1000);
+
+// Autocomplete
+const currentAuto = {
+  input: null,
+  focus: -1,
+  term: '',
+};
+const clearAutocompleteItems = (el) => {
+  document.querySelectorAll('.autocomplete-items').forEach((item) => {
+    if (el !== item && el !== currentAuto.input)
+      item.parentNode.removeChild(item);
+  });
+};
+const lastWordAutocomplete = (input) => {
+  const searchText = input.value.toLowerCase();
+  if (searchText === currentAuto.term && currentAuto.input === input) return;
+  if (currentAuto.input !== input) currentAuto.focus = -1;
+  currentAuto.input = input;
+  currentAuto.term = searchText;
+  clearAutocompleteItems();
+  if (searchText === '') return;
+  const searchResults = [
+    ...new Set(
+      wordList
+        .filter((word) => word.startsWith(searchText))
+        .concat(wordList.filter((word) => word.includes(searchText)))
+    ),
+  ].slice(0, 5);
+  if (searchResults.length === 1 && searchResults[0] === searchText) {
+    // user has found their word
+    clearAutocompleteItems();
+    calculateLastWord();
+    return;
+  }
+  const resultsContainer = document.createElement('DIV');
+  resultsContainer.setAttribute('class', 'autocomplete-items');
+  document.body.appendChild(resultsContainer);
+  autocompletePositionUpdate();
+  searchResults.forEach((word) => {
+    const resultDiv = document.createElement('DIV');
+    resultDiv.innerHTML = word.replaceAll(
+      searchText,
+      `<strong>${searchText}</strong>`
+    );
+    resultDiv.dataset.word = word;
+    resultDiv.addEventListener('click', function () {
+      currentAuto.input.value = this.dataset.word;
+      clearAutocompleteItems();
+      focusOnNextWord();
+    });
+    resultsContainer.appendChild(resultDiv);
+  });
+  if (searchResults.length === 1) {
+    currentAuto.focus = 0;
+    addAutocompleteActive();
+  }
+};
+
+const canLoadLastWordSeed = (bool) => {
+  document.querySelector('#lastWordLoad').disabled = !bool;
+};
+
+const loadLastWordSeed = () => {
+  const words = [...document.querySelectorAll('.lastWord-word')]
+    .map((w) => w.value)
+    .filter((w) => !!w)
+    .join(' ');
+  DOM.bip39Phrase.value = words;
+  toast('Loading Seed...');
+  mnemonicToSeedPopulate();
+};
+
+const autocompletePositionUpdate = () => {
+  // check we have a list
+  const autocompleteContainer = document.querySelector('.autocomplete-items');
+  if (!autocompleteContainer || !currentAuto.input) return;
+  const rect = currentAuto.input.getBoundingClientRect();
+  // position the list
+  autocompleteContainer.style.width = rect.width + 'px';
+  autocompleteContainer.style.top = 3 + rect.bottom + scrollY + 'px';
+  autocompleteContainer.style.left = rect.left + scrollX + 'px';
+};
+
+const keyPressAutocompleteHandler = (e) => {
+  calculateLastWord();
+  let suggestionList = document.querySelectorAll('.autocomplete-items>div');
+  if (!suggestionList.length) {
+    if (
+      e.keyCode == 13 &&
+      wordList.includes(normalizeString(currentAuto?.input?.value))
+    ) {
+      e.preventDefault();
+      focusOnNextWord();
+    }
+    return;
+  }
+  if (e.keyCode == 40) {
+    /*If the arrow DOWN key is pressed,
+          increase the currentAuto.focus variable:*/
+    currentAuto.focus++;
+    /*and and make the current item more visible:*/
+    addAutocompleteActive();
+  } else if (e.keyCode == 38) {
+    //up
+    /*If the arrow UP key is pressed,
+          decrease the currentAuto.focus variable:*/
+    currentAuto.focus--;
+    /*and and make the current item more visible:*/
+    addAutocompleteActive();
+  } else if (e.keyCode == 13) {
+    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+    e.preventDefault();
+    if (currentAuto.focus > -1) {
+      /*and simulate a click on the "active" item:*/
+      if (suggestionList) suggestionList[currentAuto.focus].click();
+    }
+  }
+};
+
+const addAutocompleteActive = () => {
+  removeAutocompleteActive();
+  const suggestions = document.querySelectorAll('.autocomplete-items>div');
+  if (!suggestions || !suggestions.length) return;
+  if (currentAuto.focus >= suggestions.length) currentAuto.focus = 0;
+  if (currentAuto.focus < 0) currentAuto.focus = suggestions.length - 1;
+  suggestions[currentAuto.focus].classList.add('autocomplete-active');
+};
+
+const removeAutocompleteActive = () => {
+  document
+    .querySelectorAll('.autocomplete-items>div')
+    .forEach((div) => div.classList.remove('autocomplete-active'));
+};
+
+const focusOnNextWord = () => {
+  const inputs = document.querySelectorAll('.lastWord-word');
+  const numWords = parseInt(DOM.lastWordLength.value);
+  inputs.forEach((input, i) => {
+    if (input === currentAuto.input && i + 1 < numWords) {
+      inputs[i + 1].focus();
+    }
+  });
 };
 
 // bip39 Passphrase Test
@@ -1104,14 +1381,15 @@ function toast(message) {
 }
 
 // resizes layout of panels in accordion and textarea boxes
-function adjustPanelHeight() {
+// debounce as this gets called a lot
+const adjustPanelHeight = debounce(() => {
   textareaResize();
   DOM.accordionPanels.forEach((panel) => {
     panel.style.maxHeight = panel.classList.contains('accordion-panel--active')
       ? panel.scrollHeight + 'px'
       : null;
   });
-}
+}, 50);
 
 // event handler for when the path is changed
 const changePath = () => {
@@ -1410,7 +1688,7 @@ const findPhraseErrors = (phraseArg) => {
   }
   // Check each word
   for (let i = 0; i < words.length; i++) {
-    var word = words[i];
+    const word = words[i];
     if (!wordList.includes(word)) {
       const nearestWord = findNearestWord(word);
       return `"${word}" was not found in the list, did you mean "${nearestWord}"`;

@@ -342,6 +342,7 @@
             <option value="xor">Seed XOR</option>
             <!-- <option value="hamming" disabled>Hamming Backup (soon)</option> -->
             <option value="otp">One Time Pad</option>
+            <option value="lastWord">Last Word Generator</option>
           </select>
         </div>
         <section id="bip39PassGenSection" class="bip39ToolSection hidden">
@@ -496,6 +497,200 @@
                 autocapitalize="off" spellcheck="false" readonly></textarea>
             </div>
           </div>
+        </section>
+        <section id="lastWord" class="bip39ToolSection hidden">
+          <button class="btn" title="Click to learn more about The Last Word Generator"
+            onclick="openInfoModal(event, 'LASTWORD')">
+            The Last Word Generator Explained
+          </button><br>
+          <p>
+            Calculate the last word of a <select id="lastWordStrength"
+              title="Select the number of words for your Mnemonic">
+              <option value="12" selected>12</option>
+              <option value="15">15</option>
+              <option value="18">18</option>
+              <option value="21">21</option>
+              <option value="24">24</option>
+            </select> word seed.
+          </p>
+          <p>
+            Some user entropy is required. It has already been generated randomly, however you can toss a coin for these
+            bits where, for example, "heads" is zero and "tails" is one.
+          </p>
+          <p id="lastWordZeroWarning" class="warning hidden">
+            Leaving these final bits as 0 reduces the randomness of your master secret. Flip a coin or click the button
+            below to
+            randomise them.
+          </p>
+          <div style="user-select:none;">
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+            <div class="lastWord-bit-scene">
+              <div class="lastWord-bit">
+                <div class="lastWord-bit-face lastWord-bit-face--zero">0</div>
+                <div class="lastWord-bit-face lastWord-bit-face--one">1</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn" onclick="randEntropy()">Flip the bits</button>
+          <section id="lastWordSeedWords">
+            <div class="lastWord-div">
+              <label data-number="01" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="02" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="03" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="04" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="05" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="06" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="07" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="08" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="09" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="10" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="11" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="12" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="13" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="14" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="15" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="16" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="17" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="18" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="19" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="20" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="21" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="22" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="23" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <div class="lastWord-div">
+              <label data-number="24" class="lastWord-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+              </label>
+            </div>
+            <br>
+          </section>
+          <button class="btn" id="lastWordLoad" onclick="loadLastWordSeed()" disabled>Load Seed</button>
         </section>
         <br>
       </div>
