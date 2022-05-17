@@ -447,7 +447,37 @@ window.infoHtml = {
   LASTWORD: /*html*/ `
         <h3>Last Word Generator</h3>
         <p>
-          About Last Word Generator
+          One offline method used to generate a menmonic seed is to print the <a target="_blank" rel="noopener noreferrer"
+          href="https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt">BIP39 list</a> and pick them from a hat randomly, one at a time. However, this method of 
+          seed generatrion cannot calculate the BIP39 checksum (represented as the final word), which is where this tool comes in.
+
+         Randomly picking seed words using this method provides 11 bits of entropy per word. In the case of a 12 word seed which requires 128 bits of entropy, 
+         picking the first 11 words gives 11x11=121 bits of entropy. This means there are 7 bits of entropy (ones or zeros) left over that need to be set in order
+         for the checksum (which in this case is 4 bits long) to be calculated. <strong>Final word = 7 random bits + 4 bit checksum.</strong> <br/><br/>
+         
+         This is why there are multiple valid final words for any given first 11. Each new iteration of those final 7 bits changes the checksum and subsequently the
+         BIP39 it is mapped to. The length of the checksum changes with the length of the seed, but the principle outlined above is still true. 
+         Flip some bits and see what happens! 
+
+
+          <h3>Usage Tips</h3>
+          <ol>
+          <li>Print out the <a target="_blank" rel="noopener noreferrer"
+          href="https://coldbit.com/wp-content/uploads/2019/05/bip-39-wordlist.pdf">BIP39 list</a>, cut out the individual words and place into a container.</li>
+          <li>Choose your desired seed length using the drop down box. This can be 12, 15, 18, 21 or 24 words long.</li>
+          <li>Pick one word at random and enter into the corresponding box below. Ensure you put the word back into the container after recording it.</li>
+          <li>Repeat this process until you have populated all but the final word field.</li>
+          <li>Your final word will be calculated into the last box using a randomised order of the remaining final bits. The number of final bits that are randomised will 
+          vary based on the lenth of seed you choose. 12 word seeds have 7 bits to set and 24 word seeds have 3.</li>
+          <li>You can choose to accept this final word based on the randomised order of those final bits, or add your own entropy by flipping a coin and changing the
+          1 or 0 according to the result of the flip.</li>
+          <li>Every time a bit is flipped from a 1 or a 0, the final word will change. All results are 100% valid.</li>
+        </ol>
+
+        <h3>Warning</h3>
+        Setting the final 7 bits of a 12 word seed to 0 is a bad idea since it effectively reduces the entropy of your seed to 121 bits. 7 out of a possible 128 bits 
+        may not sound much, but losing one bit of entropy halves the number of possibilities that your entropy hides in. Losing seven bits reduces that number of possibilities
+        roughly 130 times over.    
         </p>`,
   CHANGELOG: /*html*/ `
         <h3>Changelog</h3>
@@ -457,6 +487,7 @@ window.infoHtml = {
           <li>V1.0.2 - FIX: loading issue on iOS devices</li>
           <li>V1.0.3 - ADD: passphrase tester tool</li>
           <li>V1.0.4 - ADD: SeedXOR, One Time Pads & UI Updates.  FIX: Entropy filtering</li>
+          <li>V1.0.5 - ADD: Last word calculator</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
