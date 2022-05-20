@@ -1739,7 +1739,9 @@ const addRandomDiceWordToPassphrase = () => {
 // Event handler on entropy input
 const entropyChanged = async () => {
   DOM.generateRandomStrengthSelect.value =
-    DOM.entropyMnemonicLengthSelect.value;
+    DOM.entropyMnemonicLengthSelect.value === 'raw'
+      ? DOM.generateRandomStrengthSelect.value
+      : DOM.entropyMnemonicLengthSelect.value;
   // debounce?
   if (getEntropy().length === 0) {
     resetEverything();
@@ -1798,7 +1800,9 @@ const calculateEntropy = async () => {
     console.error('Error detecting entropy strength with zxcvbn:');
     console.error(e);
   }
-  const reqWords = parseInt(DOM.entropyMnemonicLengthSelect.value);
+  const reqWords = !!parseInt(DOM.entropyMnemonicLengthSelect.value)
+    ? parseInt(DOM.entropyMnemonicLengthSelect.value)
+    : wordCount;
   //
   DOM.entropyTimeToCrack.innerText = timeToCrack;
   DOM.entropyEventCount.innerText = eventCount;
@@ -1861,6 +1865,11 @@ const setMnemonicFromEntropy = async () => {
   const bits = Math.ceil(
     entropy.base.bitsPerEvent * entropy.base.events.length
   );
+  // check for raw entropy
+  if (DOM.entropyMnemonicLengthSelect.value === 'raw') {
+    setMnemonicFromRawEntropy(entropy);
+    return;
+  }
   const mnemonicLength = parseInt(DOM.entropyMnemonicLengthSelect.value);
   // Refuse to make a seed with insufficient entropy
   if ((mnemonicLength / 3) * 32 > bits) {
@@ -1886,6 +1895,31 @@ const setMnemonicFromEntropy = async () => {
   const hexedBin = hex.slice(0, end);
   // Convert entropy array to mnemonic
   const phrase = window.bip39.entropyToMnemonic(hexedBin);
+  // Set the mnemonic in the UI
+  DOM.bip39Phrase.value = phrase;
+  await writeSplitPhrase();
+  // Show the word indexes
+  showWordIndexes();
+  // Show the checksum
+  showChecksum();
+  // Calculate addresses
+  calculateAddresses();
+  fillBip32Keys();
+  calcBip85();
+  calcBip47();
+};
+
+const setMnemonicFromRawEntropy = async (entropy) => {
+  DOM.entropyWeakEntropyOverrideWarning.classList.add('hidden');
+  DOM.entropyWeakEntropyWarning.classList.add('hidden');
+  let bits = entropy.binaryStr.slice(0, 256);
+  if (bits.length < 128) return; // min bits
+  // user may still be typing
+  if (bits.length % 32 !== 0) return;
+  // convert from bin to hex
+  const phrase = window.bip39.entropyToMnemonic(
+    BigInt('0b' + bits).toString(16)
+  );
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
   await writeSplitPhrase();
