@@ -403,14 +403,14 @@ const thisBrowserIsShit = () => {
 };
 
 // Show/Hide all private data
-const toggleHideAllPrivateData = (panelHeightAdjustNotRequired) => {
+const toggleHideAllPrivateData = () => {
   hidePrivateData = !hidePrivateData;
   document.getElementById('hideIcon').classList.toggle('hidden');
   document.getElementById('showIcon').classList.toggle('hidden');
   document.querySelectorAll('.private-data').forEach((el) => {
     el.style.display = hidePrivateData ? 'none' : '';
   });
-  if (!panelHeightAdjustNotRequired) adjustPanelHeight();
+  adjustPanelHeight();
 };
 
 // Select a BIP39 Tool
@@ -1140,7 +1140,7 @@ const injectBip47Addresses = (addressDataArray) => {
   });
   if (hidePrivateData) {
     hidePrivateData = false;
-    toggleHideAllPrivateData(true);
+    toggleHideAllPrivateData();
   }
   DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
     csv
@@ -1457,7 +1457,7 @@ const injectAddresses = (addressDataArray) => {
   });
   if (hidePrivateData) {
     hidePrivateData = false;
-    toggleHideAllPrivateData(true);
+    toggleHideAllPrivateData();
   }
   DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
   adjustPanelHeight();
@@ -1742,6 +1742,13 @@ const entropyChanged = async () => {
     DOM.entropyMnemonicLengthSelect.value === 'raw'
       ? DOM.generateRandomStrengthSelect.value
       : DOM.entropyMnemonicLengthSelect.value;
+  document
+    .getElementById('rawEntropyExplain')
+    .classList.toggle(
+      'hidden',
+      DOM.entropyMnemonicLengthSelect.value !== 'raw'
+    );
+  adjustPanelHeight();
   // debounce?
   if (getEntropy().length === 0) {
     resetEverything();
@@ -1757,6 +1764,10 @@ const entropyChanged = async () => {
     if (newPhrase.length == 0) {
       resetEverything();
     } else {
+      // in case of raw entropy
+      if (DOM.entropyMnemonicLengthSelect.value === 'raw') {
+        DOM.generateRandomStrengthSelect.value = newPhrase.split(' ').length;
+      }
       mnemonicToSeedPopulate();
     }
   } else {

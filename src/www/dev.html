@@ -277,6 +277,12 @@
                 </select>
               </div>
             </div>
+            <p class="warning hidden" id="rawEntropyExplain">
+              Raw Entropy requires 128 bits of entropy to generate 12 words and a further 32 bits for every 3 words
+              after that up to a maximum of 256 bits for 24 words. Any furter bits of entropy that are not used are
+              discarded. For example, 159 bits = 12 words; 160 bits = 15 words; 256 bits = 24 words; 257 bits = 24
+              words.
+            </p>
           </div>
         </div>
         <div>
