@@ -1,0 +1,15 @@
+{
+  "name": "lib-bip86",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r bip86 -s bip86 > bip86.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "bip86": "^0.0.2"
+  }
+}

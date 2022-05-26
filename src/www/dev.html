@@ -712,6 +712,7 @@
           <option value="bip44">BIP44</option>
           <option value="bip49">BIP49</option>
           <option value="bip84" selected>BIP84</option>
+          <option value="bip86">BIP86</option>
           <!-- <option value="bip141">BIP141</option> -->
           <!-- <option value="custom">Custom Path</option> -->
         </select>
@@ -738,6 +739,12 @@
           <button class="btn" title="Click to learn more about BIP84" onclick="openInfoModal(event, 'BIP84')">
             BIP84 Explained
           </button>
+        </section>
+        <section id="bip86AddressSection" class="bipsContent">
+          <h4>BIP86: Key Derivation for Single Key P2TR Outputs</h4>
+          <button class="btn" title="Click to learn more about BIP86" onclick="openInfoModal(event, 'BIP86')">
+            BIP86 Explained
+          </button><br>
         </section>
         <section id="bip141AddressSection" class="hidden bipsContent">
           <h4>BIP141: Segregated Witness (Consensus layer)</h4>
@@ -1002,6 +1009,8 @@
               - Unlicense</a></li>
           <li><a href="https://github.com/rochars/endianness" target="_blank" rel="noopener noreferrer">Endianness by
               Rafael da Silva Rocha - MIT</a></li>
+          <li><a href="https://github.com/Anderson-Juhasc/bip86" target="_blank" rel="noopener noreferrer">BIP86 by
+              Anderson Juhasc - MIT</a></li>
         </ul>
       </div>
     </div>
@@ -1052,6 +1061,7 @@
   <script src="js/lib/bip39.js"></script>
   <script src="js/lib/bip47.js"></script>
   <script src="js/lib/bip85.js"></script>
+  <script src="js/lib/bip86.js"></script>
   <script src="js/lib/diceware.js"></script>
   <script src="js/info.js"></script>
   <script src="js/lib/entropy.js"></script>

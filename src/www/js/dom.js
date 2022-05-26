@@ -1292,8 +1292,9 @@ window.tabSelect = (event, tabId) => {
   adjustPanelHeight();
 };
 // Event handler for switching bips
-const derivedPathSelectChanged = () => {
+const derivedPathSelectChanged = (event) => {
   const bip = DOM.derivedPathSelect.value;
+  if (currentBip === bip) return;
   currentBip = bip;
   DOM.allBipsContents.forEach((element) => element.classList.add('hidden'));
   DOM.bip141ScriptSelectDiv.classList.add('hidden');
@@ -1309,6 +1310,7 @@ const derivedPathSelectChanged = () => {
   } else if (bip === 'bip32') {
     DOM.pathInputSection.classList.add('hidden');
     DOM.path.value = `m/0'/0'`;
+    DOM.addressGenerateButton.click();
   } else if (bip === 'bip141') {
     DOM.bip141ScriptSelectDiv.classList.remove('hidden');
     DOM.pathInputSection.classList.add('hidden');
@@ -1318,7 +1320,6 @@ const derivedPathSelectChanged = () => {
     document.getElementById('pathBipText').innerText = bip.toUpperCase();
     changePath();
   }
-  DOM.addressGenerateButton.click();
   adjustPanelHeight();
 };
 /**
@@ -1469,6 +1470,10 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
   if (!bip32RootKey) {
     return;
   }
+  if (currentBip === 'bip86') {
+    calculateBip86Addresses(startIndex, endIndex);
+    return;
+  }
   try {
     const node = bip32RootKey;
     const path = (i) => `${DOM.path.value}/${i}`;
@@ -1481,6 +1486,40 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
       const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
         addressNode.privateKey
       ).toWIF();
+      addressDataArray[i] = new AddressData(
+        addressPath,
+        address,
+        addressPubKey,
+        addressPrivKey
+      );
+    }
+    injectAddresses(addressDataArray);
+  } catch (error) {
+    console.error(error?.message || error);
+  }
+};
+
+// get derived addresses and pass them off to be inserted in DOM
+const calculateBip86Addresses = (startIndex = 0, endIndex = 19) => {
+  console.trace();
+  clearAddresses();
+  if (!bip32RootKey) {
+    return;
+  }
+  try {
+    const mnemonic = getPhrase();
+    const accountNumber = parseInt(DOM.pathAccount.value);
+    const root86 = new bip86.fromMnemonic(mnemonic, getPassphrase(), isTestnet);
+    const child86 = root86.deriveAccount(accountNumber);
+    const account86 = new bip86.fromXPrv(child86);
+    const isChange = !!parseInt(DOM.pathChange.value);
+    const path = (i) => `${DOM.path.value}/${i}`;
+    const addressDataArray = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      const addressPath = path(i);
+      const address = account86.getAddress(i, isChange);
+      const addressPubKey = account86.getPublicKey(i, isChange);
+      const addressPrivKey = account86.getPrivateKey(i, isChange);
       addressDataArray[i] = new AddressData(
         addressPath,
         address,

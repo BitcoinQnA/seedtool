@@ -358,6 +358,14 @@ window.infoHtml = {
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank" rel="noopener noreferrer">BIP85 page</a>
         </p>`,
+  BIP86: /*html*/ `
+        <h3>BIP86: Key Derivation for Single Key P2TR Outputs</h3>
+        <p>
+          About BIP
+        </p>
+        <p>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki" target="_blank" rel="noopener noreferrer">BITCOIN IMPROVEMENT PROPOSAL</a>
+        </p>`,
   BIP141: /*html*/ `
         <h3>BIP141: Segregated Witness (Consensus layer)</h3>
         <p>
