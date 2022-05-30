@@ -18,7 +18,7 @@ ______ _ _            _       _____        ___
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
-let currentBip = 'bip84';
+let currentBip = 'bip32';
 let network;
 let isTestnet = false;
 let wordList = [];
