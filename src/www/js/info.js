@@ -500,6 +500,7 @@ window.infoHtml = {
           <li>V1.0.4 - ADD: SeedXOR, One Time Pads & UI Updates.  FIX: Entropy filtering</li>
           <li>V1.0.5 - ADD: Last word calculator</li>
           <li>V1.0.6 - ADD: Raw Entropy Input Method</li>
+          <li>V1.0.7 - ADD: BIP86 Taproot Address Generation</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
