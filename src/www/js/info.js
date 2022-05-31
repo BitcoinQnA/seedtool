@@ -361,10 +361,13 @@ window.infoHtml = {
   BIP86: /*html*/ `
         <h3>BIP86: Key Derivation for Single Key P2TR Outputs</h3>
         <p>
-          About BIP
+        BIP86 defines the derivation standard for HD wallets whose keys are involved in single key P2TR (Pay to Taproot) outputs. 
+        These Taproot addresses begin with <b>'bc1q'</b> and should not be confused with the similar looking 'Native Segwit' addresses beginning
+         with <b>'bc1p'</b> and defined in BIP84. 
+
         </p>
         <p>
-          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki" target="_blank" rel="noopener noreferrer">BITCOIN IMPROVEMENT PROPOSAL</a>
+          Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki" target="_blank" rel="noopener noreferrer">BIP86 page</a>
         </p>`,
   BIP141: /*html*/ `
         <h3>BIP141: Segregated Witness (Consensus layer)</h3>
