@@ -362,8 +362,8 @@ window.infoHtml = {
         <h3>BIP86: Key Derivation for Single Key P2TR Outputs</h3>
         <p>
         BIP86 defines the derivation standard for HD wallets whose keys are involved in single key P2TR (Pay to Taproot) outputs. 
-        These Taproot addresses begin with <b>'bc1q'</b> and should not be confused with the similar looking 'Native Segwit' addresses beginning
-         with <b>'bc1p'</b> and defined in BIP84. 
+        These Taproot addresses begin with <b>'bc1p'</b> and should not be confused with the similar looking 'Native Segwit' addresses beginning
+         with <b>'bc1q'</b> and defined in BIP84. 
 
         </p>
         <p>
