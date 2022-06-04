@@ -337,6 +337,35 @@ const setupDom = async () => {
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
+  DOM.bip39Phrase.addEventListener('keydown', (event) => {
+    const e = event || window.event;
+    const selection = window.getSelection();
+    if (e.keyCode === 13) {
+      // Enter key
+      selection.collapseToEnd();
+      return false;
+    }
+  });
+  DOM.bip39Phrase.addEventListener('keyup', (event) => {
+    DOM.bip39Phrase.value = DOM.bip39Phrase.value.replace(/[\n\r\t\0]/gm, '');
+    const e = event || window.event;
+    const selection = window.getSelection();
+    if (e.keyCode === 13 || e.keyCode === 8 || e.keyCode === 46) {
+      // Enter / backspace / delete key
+      return false;
+    }
+    const userInput = `${DOM.bip39Phrase.value}`;
+    const wordArray = userInput.split(' ');
+    const lastWord = wordArray[wordArray.length - 1];
+    const found = wordList.find((s) => s.startsWith(lastWord));
+    if (lastWord === found || found === undefined) return false;
+    const missingLetters = found.slice(lastWord.length) + ' ';
+    const suggestedInput = userInput + missingLetters;
+    DOM.bip39Phrase.value = suggestedInput;
+    for (let i = 0; i < missingLetters.length; i++) {
+      selection.modify('extend', 'backward', 'character');
+    }
+  });
   DOM.bip39PassGenInput.oninput = diceToPassphrase;
   // Add event listener to generate new mnemonic
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
