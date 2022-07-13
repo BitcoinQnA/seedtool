@@ -384,7 +384,8 @@ hr {
   border-radius: 5px;
 }
 .address-display,
-#bip47AddressDisplay {
+#bip47AddressDisplay,
+#multisigXpubsAddressDisplay {
   max-height: 50vh;
   overflow-y: scroll;
   border-top: 1px solid;
@@ -408,11 +409,13 @@ select {
 }
 #bip141ScriptSemantics,
 #derivedPathSelect,
-#bip39ToolSelect,
+#bitcoinToolSelect,
 #pathCoin,
 #pathChange,
 #bip85Application,
-#bip85MnemonicLength {
+#bip85MnemonicLength,
+#multisigXpubsPathSelect,
+#multisigXpubsChangeSelect {
   width: 100%;
   background-color: var(--q-light-blue);
   color: var(--q-orange);

@@ -1,0 +1,14 @@
+{
+  "name": "lib-bs58check",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r bs58check -s bs58check > bs58check.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "bs58check": "^2.1.2"
+  }
+}

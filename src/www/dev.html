@@ -340,8 +340,8 @@
           </div>
         </div>
         <div>
-          <label for="bip39ToolSelect">Select a BIP39 Tool</label>
-          <select id="bip39ToolSelect" title="Select a BIP39 tool if needed">
+          <label for="bitcoinToolSelect">Select a Bitcoin Tool</label>
+          <select id="bitcoinToolSelect" title="Select a Bitcoin tool if needed">
             <option value="hidden">None</option>
             <option value="bip39PassGenSection">Passphrase Generator</option>
             <option value="bip39PassTestSection">Passphrase Tester</option>
@@ -350,6 +350,7 @@
             <!-- <option value="hamming" disabled>Hamming Backup (soon)</option> -->
             <option value="otp">One Time Pad</option>
             <option value="lastWord">Last Word Generator</option>
+            <option value="singleAddressTool">Single Address Tool</option>
           </select>
         </div>
         <section id="bip39PassGenSection" class="bip39ToolSection hidden">
@@ -699,6 +700,65 @@
           </section>
           <button class="btn" id="lastWordLoad" onclick="loadLastWordSeed()" disabled>Load Seed</button>
         </section>
+        <section id="singleAddressTool" class="bip39ToolSection hidden">
+          <fieldset>
+            <legend>Select a signature type:</legend>
+
+            <div>
+
+              <label for="singleSig">
+                <input type="radio" id="singleSig" name="drone" value="singleSig"
+                  oninput="document.querySelectorAll('.single-address-tool-section').forEach(el=>el.classList.add('hidden')); document.getElementById(this.value + 'Section').classList.remove('hidden');adjustPanelHeight();"
+                  checked> Single Signature Address
+              </label>
+            </div>
+            <div>
+              <label for="multiSig">
+                <input type="radio" id="multiSig" name="drone" value="multiSig"
+                  oninput="document.querySelectorAll('.single-address-tool-section').forEach(el=>el.classList.add('hidden')); document.getElementById(this.value + 'Section').classList.remove('hidden');adjustPanelHeight();">
+                Multiple Signature Address (m of n)
+              </label>
+            </div>
+          </fieldset>
+          <section id="singleSigSection" class="single-address-tool-section">
+            <fieldset>
+              <legend>Input a private key as WIF or Hex:</legend>
+              <textarea id="singleSigInput" class="textarea-input private-data"></textarea>
+              <button onclick="randPriv()" class="btn">🎲</button>
+              <p id="singleSigError" class="warning hidden">Error</p>
+            </fieldset>
+            <fieldset>
+              <legend>Result:</legend>
+              <label>
+                Public Key (Hex)
+                <textarea readonly id="singleSigPub" class="textarea-input private-data"></textarea>
+              </label>
+              <label>
+                Addresses
+                <textarea readonly id="singleSigAddress" class="textarea-input private-data"></textarea>
+              </label>
+            </fieldset>
+          </section>
+          <section id="multiSigSection" class="hidden single-address-tool-section">
+            <fieldset>
+              <legend>Input compressed public keys in hex format (one per line):</legend>
+              <textarea id="multiSigInput" class="textarea-input" oninput="multiSigCalc();"></textarea>
+              <label>
+                Threshold
+                <input type="number" id="multiSigThreshold" class="textarea-input" min="1" value="1"
+                  oninput="multiSigCalc();">
+              </label>
+              <p id="multiSigError" class="warning hidden">Error</p>
+            </fieldset>
+            <fieldset>
+              <legend>Result:</legend>
+              <label>
+                Addresses
+                <textarea readonly id="multiSigAddress" class="textarea-input"></textarea>
+              </label>
+            </fieldset>
+          </section>
+        </section>
         <br>
       </div>
       <hr>
@@ -935,6 +995,66 @@
         </section>
       </div>
       <hr>
+      <button class="accordion" title="Click to expand this section">
+        BIP48: Multisig
+      </button>
+      <div class="panel">
+        <button class="btn" title="Click to learn more about Multisig"
+          onclick="openInfoModal(event, 'MULTISIG')">Multisig
+          Explained</button>
+        <fieldset>
+          <legend>Current Seed Multisig Extended Serialization Format</legend>
+          <label>
+            Native Segwit
+            <div class="textarea-wrapper copy-wrapper private-data">
+              <textarea readonly id="myZpub" class="textarea-input"></textarea>
+            </div>
+          </label>
+          <label>
+            Wrapped Segwit
+            <div class="textarea-wrapper copy-wrapper private-data">
+              <textarea readonly id="myYpub" class="textarea-input"></textarea>
+            </div>
+          </label>
+          <p>Note that these are not automatically added below.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Input Cosigners and Threshold</legend>
+          <label>
+            Paste in the Ypubs/Zpubs of the cosigners in your multisig setup:
+            <textarea id="multisigXpubs" class="textarea-input multisig-oninput private-data"
+              placeholder="One per line"></textarea>
+          </label>
+          <label>
+            Threshold (number of signatures required)
+            <input type="number" id="multisigXpubsThreshold" value="1" min="1" class="textarea-input multisig-oninput">
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Chain</legend>
+          <select id="multisigXpubsChangeSelect" class="multisig-oninput">
+            <option value="0" selected>Receive Addresses - External Chain</option>
+            <option value="1">Change Addresses - Internal Chain</option>
+          </select>
+        </fieldset>
+        <p class="warning hidden" id="multisigXpubsError">No Error</p>
+        <p>
+          Display&nbsp;<input type="number" id="multisigXpubsNoOfAddresses" value="20" min="1" max="100"
+            title="Choose how many addresses to display, up to 100." class="multisig-oninput">&nbsp;
+          addresses from index <input type="number" id="multisigXpubsStartIndex" value="0" min="0"
+            title="Select an index to start calculating addresses from." class="multisig-oninput">
+        </p>
+        <div>
+          <a class="multisigXpubs-csv-download-link hidden private-data" title="Download a CSV file of these addresses"
+            href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank"
+            rel="noopener noreferrer">Download CSV
+            file</a>
+        </div>
+        <div id="multisigXpubsAddressDisplay">
+          <!-- Populated By JavaScript -->
+        </div>
+      </div>
+      <hr>
       <button class="accordion" title="Click to expand this section">BIP85: Deterministic Entropy</button>
       <div class="panel">
         <button class="btn" title="Click to learn more about BIP85" onclick="openInfoModal(event, 'BIP85')">BIP85
@@ -1035,13 +1155,17 @@
       Address: <wbr>
       <span class="address-details-text address-details--address address-copy" onclick="copyEventHandler(event)"
         title="Click to copy">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
-      Public Key: <wbr>
-      <span class="address-details-text address-details--pubKey address-copy" onclick="copyEventHandler(event)"
-        title="Click to copy">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
-      Private Key: <wbr>
-      <span class="address-details-text address-details--prvKey address-copy private-data"
-        onclick="copyEventHandler(event)"
-        title="Click to copy">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+      <span>
+        Public Key: <wbr>
+        <span class="address-details-text address-details--pubKey address-copy" onclick="copyEventHandler(event)"
+          title="Click to copy">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
+      </span>
+      <span>
+        Private Key: <wbr>
+        <span class="address-details-text address-details--prvKey address-copy private-data"
+          onclick="copyEventHandler(event)"
+          title="Click to copy">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
+      </span>
     </div>
   </template>
   <template id="copyButtonTemplate">
@@ -1062,6 +1186,8 @@
   <script src="js/lib/bip47.js"></script>
   <script src="js/lib/bip85.js"></script>
   <script src="js/lib/bip86.js"></script>
+  <script src="js/lib/bs58check.js"></script>
+  <script src="js/lib/buffer.js"></script>
   <script src="js/lib/diceware.js"></script>
   <script src="js/info.js"></script>
   <script src="js/lib/entropy.js"></script>
