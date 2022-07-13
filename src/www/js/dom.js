@@ -166,7 +166,7 @@ const setupDom = async () => {
   DOM.bip39PassphraseCrackTime = document.getElementById(
     'bip39PassphraseCrackTime'
   );
-  DOM.bip39ToolSelect = document.getElementById('bip39ToolSelect');
+  DOM.bitcoinToolSelect = document.getElementById('bitcoinToolSelect');
   DOM.hidePassphraseGeneration = document.getElementById(
     'hidePassphraseGeneration'
   );
@@ -240,6 +240,14 @@ const setupDom = async () => {
   DOM.lastWordLength = document.getElementById('lastWordStrength');
   DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
   DOM.lastWordFinalWord = document.querySelectorAll('.lastWord-word')[23];
+  DOM.msCsvDownloadLink = document.querySelector(
+    '.multisigXpubs-csv-download-link'
+  );
+  DOM.msAddressListContainer = document.querySelector(
+    '#multisigXpubsAddressDisplay'
+  );
+  DOM.singleSigInput = document.getElementById('singleSigInput');
+  DOM.singleSigInput.oninput = singleSigCalc;
   // Event listener to clear autocomplete suggestions
   document.addEventListener('click', (e) => clearAutocompleteItems(e.target));
   // move autocomplete suggestions on scroll
@@ -265,7 +273,7 @@ const setupDom = async () => {
   // set network now
   network = bitcoin.networks.bitcoin;
   // BIP39 Tool select
-  DOM.bip39ToolSelect.oninput = selectBip39Tool;
+  DOM.bitcoinToolSelect.oninput = selectBitcoinTool;
   DOM.bip39PassTestBtn.onclick = bip39PassphraseTest;
   // CHECKBOXES
   // // Show / hide split mnemonic cards
@@ -384,6 +392,10 @@ const setupDom = async () => {
   } else {
     DOM.onlineIcon.classList.add('hidden');
   }
+  // Multisig listeners
+  document.querySelectorAll('.multisig-oninput').forEach((i) => {
+    i.oninput = calcMultisigFromXpubs;
+  });
   // Listen for OTP button clicks
   document.getElementById('otpGenerate').onclick = generateOneTimePad;
   document.getElementById('otpEncrypt').onclick = encryptOneTimePad;
@@ -442,15 +454,203 @@ const toggleHideAllPrivateData = () => {
   adjustPanelHeight();
 };
 
-// Select a BIP39 Tool
-const selectBip39Tool = () => {
+const calcMultisigFromXpubs = () => {
+  const isXpubForMultisig = (xpub) => {
+    return ['Ypub', 'Zpub'].includes(xpub.substring(0, 4));
+  };
+  const convertMultisigXpubToRegularXpub = (Zpub) => {
+    let data = bs58check.decode(Zpub);
+    data = data.slice(4);
+    return bs58check.encode(
+      Buffer.Buffer.concat([Buffer.Buffer.from('0488b21e', 'hex'), data])
+    );
+  };
+  const multiSigInput = document.getElementById('multisigXpubs').value;
+  const errorBox = document.getElementById('multisigXpubsError');
+  errorBox.classList.add('hidden');
+  DOM.msAddressListContainer.innerHTML = '';
+  try {
+    const m = parseInt(document.getElementById('multisigXpubsThreshold').value);
+    if (isNaN(m) || m < 1)
+      throw new Error('Threshold must be a positive integer');
+    const Zpubs = multiSigInput.split('\n').filter((x) => x !== '');
+    const n = Zpubs.length;
+    let e = false;
+    Zpubs.forEach((x) => {
+      if (!isXpubForMultisig(x) || !x.startsWith(Zpubs[0].substring(0, 4)))
+        e = true;
+    });
+    if (e)
+      throw new Error(
+        'Please use Zpubs for Native Segwit and Ypubs for Wrapped Segwit'
+      );
+    if (m > n)
+      throw new Error('Threshold cannot be greater than number of cosigners');
+    const isNativeSegwit = Zpubs[0].startsWith('Z');
+    const change = parseInt(
+      document.getElementById('multisigXpubsChangeSelect').value
+    );
+    const xpubs = Zpubs.map((z) => convertMultisigXpubToRegularXpub(z));
+    const rootPath = `${
+      isNativeSegwit ? `m/48'/0'/0'/2'` : `m/48'/0'/0'/1'`
+    }/${change}/`;
+    const startIndex = parseInt(
+      document.getElementById('multisigXpubsStartIndex').value
+    );
+    const totalAddresses = parseInt(
+      document.getElementById('multisigXpubsNoOfAddresses').value
+    );
+    if (isNaN(startIndex) || isNaN(totalAddresses))
+      throw new Error('Number is required for address index');
+    const addresses = [];
+    for (let i = 0; i < totalAddresses; i++) {
+      const path = `${rootPath}${startIndex + i} (${m} of ${n})`;
+      const pubkeys = xpubs
+        .map((x) => bip32.fromBase58(x).derive(change).derive(i).publicKey)
+        .sort(Buffer.Buffer.compare);
+      const address = isNativeSegwit
+        ? bitcoin.payments.p2wsh({
+            redeem: bitcoin.payments.p2ms({ m, pubkeys }),
+          }).address
+        : bitcoin.payments.p2sh({
+            redeem: bitcoin.payments.p2wsh({
+              redeem: bitcoin.payments.p2ms({ m, pubkeys }),
+            }),
+          }).address;
+      addresses.push(new AddressData(path, address));
+    }
+    injectAddresses(
+      addresses,
+      DOM.msCsvDownloadLink,
+      DOM.msAddressListContainer
+    );
+  } catch (error) {
+    console.error(error);
+    errorBox.innerText = error;
+    errorBox.classList.remove('hidden');
+  }
+  adjustPanelHeight();
+};
+
+const multiSigCalc = () => {
+  const multiSigInput = document.getElementById('multiSigInput').value;
+  const errorBox = document.getElementById('multiSigError');
+  errorBox.classList.add('hidden');
+  const addressResult = document.getElementById('multiSigAddress');
+  addressResult.value = '';
+  try {
+    const m = parseInt(document.getElementById('multiSigThreshold').value);
+    const pubkeys = multiSigInput
+      .split('\n')
+      .map((hex) => Buffer.Buffer.from(hex, 'hex'))
+      .sort(Buffer.Buffer.compare);
+    let e = false;
+    pubkeys.forEach((k) => {
+      if (k.length !== 33) e = true;
+    });
+    if (e) throw new Error('Invalid Public Keys');
+    const legacy = () => {
+      const { address } = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2ms({
+          m,
+          pubkeys,
+        }),
+      });
+
+      return address;
+    };
+    const wrapped = () => {
+      const { address } = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2wsh({
+          redeem: bitcoin.payments.p2ms({ m, pubkeys }),
+        }),
+      });
+      return address;
+    };
+    const native = () => {
+      const { address } = bitcoin.payments.p2wsh({
+        redeem: bitcoin.payments.p2ms({ m, pubkeys }),
+      });
+      return address;
+    };
+    if (isNaN(m) || m > pubkeys.length || m < 1)
+      throw new Error('Invalid Threshold');
+    addressResult.value = `${m} of ${
+      pubkeys.length
+    } MULTISIG\nLEGACY:         ${legacy()}\nWRAPPED SEGWIT: ${wrapped()}\nNATIVE SEGWIT:  ${native()}`;
+  } catch (error) {
+    console.error(error);
+    errorBox.innerText = error;
+    errorBox.classList.remove('hidden');
+  }
+  adjustPanelHeight();
+};
+
+// single sig tool
+const singleSigCalc = () => {
+  const errorBox = document.getElementById('singleSigError');
+  errorBox.classList.add('hidden');
+  const addressResult = document.getElementById('singleSigAddress');
+  addressResult.value = '';
+  const pubResult = document.getElementById('singleSigPub');
+  pubResult.value = '';
+  const privInput = DOM.singleSigInput.value;
+  try {
+    let keyPair;
+    const legacy = () => {
+      const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
+      return address;
+    };
+    const wrapped = () => {
+      const { address } = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey }),
+      });
+      return address;
+    };
+    const native = () => {
+      const { address } = bitcoin.payments.p2wpkh({
+        pubkey: keyPair.publicKey,
+      });
+      return address;
+    };
+    let isHex =
+      privInput.length === 64 && !!privInput.match(/\p{Hex_Digit}{64}/isu);
+    if (isHex) {
+      keyPair = bitcoin.ECPair.fromPrivateKey(
+        Buffer.Buffer.from(privInput, 'hex')
+      );
+    } else {
+      // it's a wif maybe?
+      if (!privInput.match(/^[5KL][1-9A-HJ-NP-Za-km-z]{50,51}$/))
+        throw new Error('Invalid Private Key');
+      keyPair = bitcoin.ECPair.fromWIF(privInput);
+    }
+    pubResult.value = keyPair.publicKey.toString('hex');
+    addressResult.value = `LEGACY:         ${legacy()}\nWRAPPED SEGWIT: ${wrapped()}\nNATIVE SEGWIT:  ${native()}`;
+  } catch (error) {
+    console.error(error);
+    errorBox.innerText = error;
+    errorBox.classList.remove('hidden');
+  }
+  adjustPanelHeight();
+};
+
+const randPriv = () => {
+  DOM.singleSigInput.value = [...crypto.getRandomValues(new Uint8Array(32))]
+    .map((n) => n.toString(16).padStart(2, '0'))
+    .join('');
+  singleSigCalc();
+};
+
+// Select a Bitcoin Tool
+const selectBitcoinTool = () => {
   document
     .querySelectorAll('.bip39ToolSection')
     .forEach((s) => s.classList.add('hidden'));
-  const section = document.getElementById(DOM.bip39ToolSelect.value);
+  const section = document.getElementById(DOM.bitcoinToolSelect.value);
   if (section) {
     section.classList.remove('hidden');
-    if (DOM.bip39ToolSelect.value === 'lastWord') randEntropy();
+    if (DOM.bitcoinToolSelect.value === 'lastWord') randEntropy();
   }
   adjustPanelHeight();
 };
@@ -1037,7 +1237,7 @@ const fetchRobotImages = async () => {
         }
         const robotUrl =
           url + (element.id === 'bip47MyRobotSection' ? myPayCode : bobPayCode);
-        // dont add an image without a payCode
+        // don't add an image without a payCode
         if (robotUrl.length > url.length) {
           const img = document.createElement('img');
           img.src = robotUrl;
@@ -1131,52 +1331,6 @@ const clearBip47Addresses = () => {
   fetchRobotImages();
 };
 
-/**
- * Injects address data into the assigned address list
- * @param {AddressData[]} addressDataArray - an array of AddressData objects.
- * @param {string} addressListName - a string saying which address list to populate. e.g. 'bip32'
- */
-const injectBip47Addresses = (addressDataArray) => {
-  // Init the csv string with the headers
-  let csv = `path,address,public key,private key
-  `;
-  // declare DOM elements
-  DOM.bip47CsvDownloadLink.classList.remove('hidden');
-  const template = document.querySelector('#addressTemplate');
-  // Ensure not internet explorer!
-  if (!('content' in document.createElement('template'))) {
-    throw new Error(
-      'Browser Outdated! Unable to populate list and generate csv.'
-    );
-  }
-  addressDataArray.forEach((addressData) => {
-    // Append this address to csv
-    csv += `${addressData.path},${addressData.address},${addressData.pubKey},${
-      addressData.prvKey || 'N/A'
-    },
-  `;
-    // clone the address list template HTML
-    const clone = template.content.firstElementChild.cloneNode(true);
-    // Insert the path, address, public key & private key into the clone
-    for (const data in addressData) {
-      if (Object.hasOwnProperty.call(addressData, data)) {
-        clone.querySelector(`.address-details--${data}`).innerText =
-          addressData[data];
-      }
-    }
-    // Add the clone to the DOM
-    DOM.bip47AddressListContainer.appendChild(clone);
-  });
-  if (hidePrivateData) {
-    hidePrivateData = false;
-    toggleHideAllPrivateData();
-  }
-  DOM.bip47CsvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(
-    csv
-  )}`;
-  adjustPanelHeight();
-};
-
 // generates an array of addresses and passes them on to be displayed
 const calculateBip47Addresses = () => {
   clearBip47Addresses();
@@ -1248,7 +1402,11 @@ const calculateBip47Addresses = () => {
         prvKey
       );
     }
-    injectBip47Addresses(addressDataArray);
+    injectAddresses(
+      addressDataArray,
+      DOM.bip47CsvDownloadLink,
+      DOM.bip47AddressListContainer
+    );
   } catch (error) {
     console.error(error?.message || error);
     console.error(error);
@@ -1441,14 +1599,14 @@ class AddressData {
    * Create an AddressData object.
    * @param {string} path - The path used to generate the address.
    * @param {string} address - The address.
-   * @param {string} pubKey - The public key.
+   * @param {string=} pubKey - The public key.
    * @param {string=} prvKey - The private key.
    */
   constructor(path, address, pubKey, prvKey) {
     this.path = path;
     this.address = address;
-    this.pubKey = pubKey;
-    this.prvKey = prvKey;
+    this.pubKey = pubKey || '';
+    this.prvKey = prvKey || '';
   }
 }
 /**
@@ -1456,12 +1614,12 @@ class AddressData {
  * @param {AddressData[]} addressDataArray - an array of AddressData objects.
  * @param {string} addressListName - a string saying which address list to populate. e.g. 'bip32'
  */
-const injectAddresses = (addressDataArray) => {
+const injectAddresses = (addressDataArray, csvLink, addressDiv) => {
   // Init the csv string with the headers
   let csv = `path,address,public key,private key
   `;
   // declare DOM elements
-  DOM.csvDownloadLink.classList.remove('hidden');
+  csvLink.classList.remove('hidden');
   const template = document.querySelector('#addressTemplate');
   // Ensure not internet explorer!
   if (!('content' in document.createElement('template'))) {
@@ -1471,25 +1629,32 @@ const injectAddresses = (addressDataArray) => {
   }
   addressDataArray.forEach((addressData) => {
     // Append this address to csv
-    csv += `${addressData.path},${addressData.address},${addressData.pubKey},${addressData.prvKey},
+    csv += `${addressData.path},${addressData.address},${
+      addressData.pubKey || 'N/A'
+    },${addressData.prvKey || 'N/A'},
   `;
     // clone the address list template HTML
     const clone = template.content.firstElementChild.cloneNode(true);
     // Insert the path, address, public key & private key into the clone
     for (const data in addressData) {
       if (Object.hasOwnProperty.call(addressData, data)) {
-        clone.querySelector(`.address-details--${data}`).innerText =
-          addressData[data];
+        const span = clone.querySelector(`.address-details--${data}`);
+        if (!addressData[data]) {
+          span.parentElement.classList.add('hidden');
+        } else {
+          span.parentElement.classList.remove('hidden');
+          span.innerText = addressData[data];
+        }
       }
     }
     // Add the clone to the DOM
-    DOM.addressListContainer.appendChild(clone);
+    addressDiv.appendChild(clone);
   });
   if (hidePrivateData) {
     hidePrivateData = false;
     toggleHideAllPrivateData();
   }
-  DOM.csvDownloadLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
+  csvLink.href = `data:text/csv;charset=utf-8,${encodeURI(csv)}`;
   adjustPanelHeight();
 };
 
@@ -1522,7 +1687,11 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
         addressPrivKey
       );
     }
-    injectAddresses(addressDataArray);
+    injectAddresses(
+      addressDataArray,
+      DOM.csvDownloadLink,
+      DOM.addressListContainer
+    );
   } catch (error) {
     console.error(error?.message || error);
   }
@@ -1530,7 +1699,6 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
 
 // get derived addresses and pass them off to be inserted in DOM
 const calculateBip86Addresses = (startIndex = 0, endIndex = 19) => {
-  console.trace();
   clearAddresses();
   if (!bip32RootKey) {
     return;
@@ -1556,7 +1724,11 @@ const calculateBip86Addresses = (startIndex = 0, endIndex = 19) => {
         addressPrivKey
       );
     }
-    injectAddresses(addressDataArray);
+    injectAddresses(
+      addressDataArray,
+      DOM.csvDownloadLink,
+      DOM.addressListContainer
+    );
   } catch (error) {
     console.error(error?.message || error);
   }
@@ -1610,6 +1782,25 @@ const fillBip32Keys = () => {
   if (currentBip !== 'bip32') {
     displayAccountKeys();
   }
+  fillMultisigYZ();
+};
+
+// Multisig Ypub & Zpub
+const fillMultisigYZ = () => {
+  const Zpub = bip32RootKey.derivePath(`m/48'/0'/0'/2'`).neutered().toBase58();
+  let dataZ = bs58check.decode(Zpub);
+  dataZ = dataZ.slice(4);
+  const Z = bs58check.encode(
+    Buffer.Buffer.concat([Buffer.Buffer.from('02aa7ed3', 'hex'), dataZ])
+  );
+  document.getElementById('myZpub').value = Z;
+  const Ypub = bip32RootKey.derivePath(`m/48'/0'/0'/1'`).neutered().toBase58();
+  let dataY = bs58check.decode(Ypub);
+  dataY = dataY.slice(4);
+  const Y = bs58check.encode(
+    Buffer.Buffer.concat([Buffer.Buffer.from('0295b43f', 'hex'), dataY])
+  );
+  document.getElementById('myYpub').value = Y;
 };
 
 // When currentBip isn't 32, display bip32 keys

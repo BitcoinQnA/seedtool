@@ -461,15 +461,17 @@ window.infoHtml = {
           One offline method used to generate a menmonic seed is to print the <a target="_blank" rel="noopener noreferrer"
           href="https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt">BIP39 list</a> and pick them from a hat randomly, one at a time. However, this method of 
           seed generatrion cannot calculate the BIP39 checksum (represented as the final word), which is where this tool comes in.
-
+        </p>
+        <p>
          Randomly picking seed words using this method provides 11 bits of entropy per word. In the case of a 12 word seed which requires 128 bits of entropy, 
          picking the first 11 words gives 11x11=121 bits of entropy. This means there are 7 bits of entropy (ones or zeros) left over that need to be set in order
-         for the checksum (which in this case is 4 bits long) to be calculated. <strong>Final word = 7 random bits + 4 bit checksum.</strong> <br/><br/>
-         
+         for the checksum (which in this case is 4 bits long) to be calculated. <strong>Final word = 7 random bits + 4 bit checksum.</strong>
+        </p>
+        <p>
          This is why there are multiple valid final words for any given first 11. Each new iteration of those final 7 bits changes the checksum and subsequently the
          BIP39 it is mapped to. The length of the checksum changes with the length of the seed, but the principle outlined above is still true. 
          Flip some bits and see what happens! 
-
+        </p>
 
           <h3>Usage Tips</h3>
           <ol>
@@ -486,9 +488,15 @@ window.infoHtml = {
         </ol>
 
         <h3>Warning</h3>
+        <p>
         Setting the final 7 bits of a 12 word seed to 0 is a bad idea since it effectively reduces the entropy of your seed to 121 bits. 7 out of a possible 128 bits 
         may not sound much, but losing one bit of entropy halves the number of possibilities that your entropy hides in. Losing seven bits reduces that number of possibilities
         roughly 130 times over.    
+        </p>`,
+  MULTISIG: /*html*/ `
+        <h3>Multisig</h3>
+        <p>
+          Multisig Explainer goes here.
         </p>`,
   CHANGELOG: /*html*/ `
         <h3>Changelog</h3>

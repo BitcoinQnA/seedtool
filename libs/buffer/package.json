@@ -1,0 +1,14 @@
+{
+  "name": "lib-buffer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify -r buffer/ -s Buffer > buffer.js"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "buffer": "v6.0.3"
+  }
+}
