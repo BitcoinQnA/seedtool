@@ -132,6 +132,7 @@ const setupDom = async () => {
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
+  DOM.mnemonicLengthSelect = document.getElementById('mnemonicLengthSelect');
   DOM.copyWrapper = document.querySelectorAll('.copy-wrapper');
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
@@ -341,6 +342,11 @@ const setupDom = async () => {
   DOM.generateRandomStrengthSelect.oninput = () => {
     DOM.entropyMnemonicLengthSelect.value =
       DOM.generateRandomStrengthSelect.value;
+    DOM.mnemonicLengthSelect.value = DOM.generateRandomStrengthSelect.value;
+  };
+  DOM.mnemonicLengthSelect.oninput = () => {
+    DOM.entropyMnemonicLengthSelect.value = DOM.mnemonicLengthSelect.value;
+    DOM.generateRandomStrengthSelect.value = DOM.mnemonicLengthSelect.value;
   };
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
@@ -2001,6 +2007,7 @@ const entropyChanged = async () => {
     DOM.entropyMnemonicLengthSelect.value === 'raw'
       ? DOM.generateRandomStrengthSelect.value
       : DOM.entropyMnemonicLengthSelect.value;
+  DOM.mnemonicLengthSelect.value = DOM.generateRandomStrengthSelect.value;
   document
     .getElementById('rawEntropyExplain')
     .classList.toggle(

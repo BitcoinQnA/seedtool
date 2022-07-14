@@ -155,11 +155,14 @@
         </button>
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
+          <li>📥 Enter your own (previously generated) mnemonic</li>
           <li>🎲 Enter in your own entropy</li>
         </ul>
         <div class="tab">
           <button class="tabLinks" title="Show the Generate Random Entropy Section" id="defaultOpenTab"
             onclick="tabSelect(event, 'Generate_Random')">🤖</button>
+          <button class="tabLinks" title="Show the Mnemonic Input Section"
+            onclick="tabSelect(event, 'Input_Mnemonic')">📥</button>
           <button class="tabLinks" title="Show the Entropy Section"
             onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
         </div>
@@ -177,11 +180,154 @@
             <button class="btn generate" title="Generate Entropy"><b>GENERATE</b></button>
           </p>
         </div>
-        <div id="Input_Entropy" class="tabContent">
+        <div id="Input_Mnemonic" class="tabContent">
           <p class="warning">
-            <strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
-            this feature is used incorrectly. <br />Click on the orange button above to learn more.
+            <strong>Warning!</strong> Do not try to make up your own mnemonic, you are not as random as you think!
           </p>
+          <p>
+            <label>
+              Mnemonic Length
+              <select id="mnemonicLengthSelect" title="Select the number of words for your Mnemonic">
+                <option value="12" selected>12</option>
+                <option value="15">15</option>
+                <option value="18">18</option>
+                <option value="21">21</option>
+                <option value="24">24</option>
+              </select>
+            </label>
+          </p>
+          <section id="inputMnemonicWords">
+            <div class="inputMnemonic-div">
+              <label data-number="01" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="02" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="03" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="04" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="05" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="06" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="07" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="08" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="09" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="10" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="11" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="12" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="13" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="14" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="15" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="16" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="17" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="18" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="19" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="20" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="21" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="22" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="23" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <div class="inputMnemonic-div">
+              <label data-number="24" class="inputMnemonic-label">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
+              </label>
+            </div>
+            <br>
+          </section>
+        </div>
+        <div id="Input_Entropy" class="tabContent">
+          <div class="warning">
+            <p>
+              <strong>Warning!</strong> Entropy is an advanced feature. Your mnemonic may be insecure if
+              this feature is used incorrectly.
+            </p>
+            <p>Click on the orange button above to learn more.</p>
+          </div>
           <label for="entropy">Enter your own entropy:</label>
           <div class="textarea-wrapper copy-wrapper private-data">
             <textarea id="entropy" rows="4" class="textarea-input" title="Input your own Entropy here. Use wisely."
@@ -578,122 +724,122 @@
           <section id="lastWordSeedWords">
             <div class="lastWord-div">
               <label data-number="01" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="02" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="03" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="04" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="05" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="06" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="07" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="08" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="09" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="10" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="11" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="12" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="13" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="14" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="15" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="16" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="17" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="18" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="19" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="20" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="21" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="22" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="23" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <div class="lastWord-div">
               <label data-number="24" class="lastWord-label">
-                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word lastWord-input">
+                <input type="text" onkeyup="lastWordAutocomplete(this)" class="lastWord-word">
               </label>
             </div>
             <br>

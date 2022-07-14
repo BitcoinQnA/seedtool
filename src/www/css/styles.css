@@ -184,7 +184,8 @@ textarea {
   resize: none;
 }
 .textarea-input,
-.lastWord-word {
+.lastWord-word,
+.inputMnemonic-word {
   background-color: var(--q-light-blue);
   color: var(--q-white);
   padding: 4px;
@@ -236,11 +237,7 @@ hr {
   background-color: var(--q-blue);
   border-radius: 5px;
 }
-.tab-addresses {
-  height: 50px;
-}
-.tab button,
-.tab-addresses button {
+.tab button {
   background-color: inherit;
   color: var(--q-white);
   float: left;
@@ -250,14 +247,11 @@ hr {
   padding: 14px 16px;
   transition: 0.3s;
 }
-.tab-addresses button,
 .tab button {
-  width: 50%;
+  width: calc(100% / 3);
 }
 .tab button:hover,
-.tab button.tab--active,
-.tab-addresses button:hover,
-.tab-addresses button.tab-addresses--active {
+.tab button.tab--active {
   background-color: var(--q-light-blue);
   color: var(--q-orange);
 }
@@ -327,25 +321,30 @@ hr {
 .lastWord-bit-face--one {
   transform: rotateY(180deg);
 }
-#lastWordSeedWords {
+#lastWordSeedWords,
+#inputMnemonicWords {
   column-count: 4;
   column-width: 9em;
 }
-.lastWord-div {
+.lastWord-div,
+.inputMnemonic-div {
   width: 9em;
   margin: 0 auto;
   justify-content: center;
   position: relative;
 }
-.lastWord-word {
+.lastWord-word,
+.inputMnemonic-word {
   width: 9em;
   padding-left: 3em;
   font-family: monospace;
 }
-.lastWord-label {
+.lastWord-label,
+.inputMnemonic-label {
   font-family: monospace;
 }
-.lastWord-label::after {
+.lastWord-label::after,
+.inputMnemonic-label::after {
   content: attr(data-number) ':';
   position: absolute;
   top: 8px;
