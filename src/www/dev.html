@@ -1003,25 +1003,31 @@
           onclick="openInfoModal(event, 'MULTISIG')">Multisig
           Explained</button>
         <fieldset>
-          <legend>Current Seed Multisig Extended Serialization Format</legend>
+          <legend>Loaded Seed Master Extended Public Keys</legend>
           <label>
             Native Segwit
             <div class="textarea-wrapper copy-wrapper private-data">
               <textarea readonly id="myZpub" class="textarea-input"></textarea>
             </div>
           </label>
+          <button class="btn"
+            onclick="document.querySelector('#multisigXpubs').value += document.querySelector('#myZpub').value;">Add as
+            Cosigner</button>
           <label>
             Wrapped Segwit
             <div class="textarea-wrapper copy-wrapper private-data">
               <textarea readonly id="myYpub" class="textarea-input"></textarea>
             </div>
           </label>
-          <p>Note that these are not automatically added below.</p>
+          <button class="btn"
+            onclick="document.querySelector('#multisigXpubs').value += document.querySelector('#myYpub').value;">Add as
+            Cosigner</button>
         </fieldset>
+        <br>
         <fieldset>
           <legend>Input Cosigners and Threshold</legend>
           <label>
-            Paste in the Ypubs/Zpubs of the cosigners in your multisig setup:
+            Paste each Ypub/Zpub of all cosigners onto a new line:
             <textarea id="multisigXpubs" class="textarea-input multisig-oninput private-data"
               placeholder="One per line"></textarea>
           </label>
@@ -1030,11 +1036,12 @@
             <input type="number" id="multisigXpubsThreshold" value="1" min="1" class="textarea-input multisig-oninput">
           </label>
         </fieldset>
+        <br>
         <fieldset>
-          <legend>Chain</legend>
+          <legend>Address Type</legend>
           <select id="multisigXpubsChangeSelect" class="multisig-oninput">
-            <option value="0" selected>Receive Addresses - External Chain</option>
-            <option value="1">Change Addresses - Internal Chain</option>
+            <option value="0" selected>Receive Addresses</option>
+            <option value="1">Change Addresses</option>
           </select>
         </fieldset>
         <p class="warning hidden" id="multisigXpubsError">No Error</p>
