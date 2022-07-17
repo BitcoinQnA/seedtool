@@ -132,6 +132,7 @@ const setupDom = async () => {
   DOM.generateRandomStrengthSelect = document.getElementById(
     'generateRandomStrength'
   );
+  DOM.mnemonicLengthSelect = document.getElementById('mnemonicLengthSelect');
   DOM.copyWrapper = document.querySelectorAll('.copy-wrapper');
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
@@ -247,6 +248,7 @@ const setupDom = async () => {
     '#multisigXpubsAddressDisplay'
   );
   DOM.singleSigInput = document.getElementById('singleSigInput');
+  DOM.mnemonicInputs = document.querySelectorAll('.inputMnemonic-div');
   DOM.singleSigInput.oninput = singleSigCalc;
   // Event listener to clear autocomplete suggestions
   document.addEventListener('click', (e) => clearAutocompleteItems(e.target));
@@ -255,6 +257,11 @@ const setupDom = async () => {
   // Autocomplete key presses
   document
     .querySelectorAll('.lastWord-word')
+    .forEach((input) =>
+      input.addEventListener('keydown', keyPressAutocompleteHandler)
+    );
+  document
+    .querySelectorAll('.inputMnemonic-word')
     .forEach((input) =>
       input.addEventListener('keydown', keyPressAutocompleteHandler)
     );
@@ -275,20 +282,8 @@ const setupDom = async () => {
   // BIP39 Tool select
   DOM.bitcoinToolSelect.oninput = selectBitcoinTool;
   DOM.bip39PassTestBtn.onclick = bip39PassphraseTest;
-  // CHECKBOXES
-  // // Show / hide split mnemonic cards
-  // DOM.bip39ShowSplitMnemonic.oninput = bip39ShowSplitMnemonic;
-  // // Show / hide Passphrase Generation
-  // DOM.hidePassphraseGeneration.oninput = hidePassphraseGeneration;
-  // // Show / hide Passphrase Tester
-  // DOM.hidePassphraseTest.oninput = hidePassphraseTest;
   // hide private data
   DOM.showHide.onclick = toggleHideAllPrivateData;
-  // call these now in case checkbox is not in expected state
-  // e.g. user navigates back to site from another page
-  // bip39ShowSplitMnemonic();
-  // hidePassphraseGeneration();
-  // hidePassphraseTest();
   // listen for entropy method changes
   DOM.entropyMethod.oninput = entropyTypeChanged;
   // listen for address generate button clicks
@@ -341,39 +336,46 @@ const setupDom = async () => {
   DOM.generateRandomStrengthSelect.oninput = () => {
     DOM.entropyMnemonicLengthSelect.value =
       DOM.generateRandomStrengthSelect.value;
+    DOM.mnemonicLengthSelect.value = DOM.generateRandomStrengthSelect.value;
+    mnemonicInputLengthAdjust();
+  };
+  DOM.mnemonicLengthSelect.oninput = () => {
+    DOM.entropyMnemonicLengthSelect.value = DOM.mnemonicLengthSelect.value;
+    DOM.generateRandomStrengthSelect.value = DOM.mnemonicLengthSelect.value;
+    mnemonicInputLengthAdjust();
   };
   // add event listener for new mnemonic / passphrase
   DOM.bip39Passphrase.oninput = mnemonicToSeedPopulate;
   DOM.bip39Phrase.oninput = mnemonicToSeedPopulate;
-  DOM.bip39Phrase.addEventListener('keydown', (event) => {
-    const e = event || window.event;
-    const selection = window.getSelection();
-    if (e.keyCode === 13) {
-      // Enter key
-      selection.collapseToEnd();
-      return false;
-    }
-  });
-  DOM.bip39Phrase.addEventListener('keyup', (event) => {
-    DOM.bip39Phrase.value = DOM.bip39Phrase.value.replace(/[\n\r\t\0]/gm, '');
-    const e = event || window.event;
-    const selection = window.getSelection();
-    if (e.keyCode === 13 || e.keyCode === 8 || e.keyCode === 46) {
-      // Enter / backspace / delete key
-      return false;
-    }
-    const userInput = `${DOM.bip39Phrase.value}`;
-    const wordArray = userInput.split(' ');
-    const lastWord = wordArray[wordArray.length - 1];
-    const found = wordList.find((s) => s.startsWith(lastWord));
-    if (lastWord === found || found === undefined) return false;
-    const missingLetters = found.slice(lastWord.length) + ' ';
-    const suggestedInput = userInput + missingLetters;
-    DOM.bip39Phrase.value = suggestedInput;
-    for (let i = 0; i < missingLetters.length; i++) {
-      selection.modify('extend', 'backward', 'character');
-    }
-  });
+  // DOM.bip39Phrase.addEventListener('keydown', (event) => {
+  //   const e = event || window.event;
+  //   const selection = window.getSelection();
+  //   if (e.keyCode === 13) {
+  //     // Enter key
+  //     selection.collapseToEnd();
+  //     return false;
+  //   }
+  // });
+  // DOM.bip39Phrase.addEventListener('keyup', (event) => {
+  //   DOM.bip39Phrase.value = DOM.bip39Phrase.value.replace(/[\n\r\t\0]/gm, '');
+  //   const e = event || window.event;
+  //   const selection = window.getSelection();
+  //   if (e.keyCode === 13 || e.keyCode === 8 || e.keyCode === 46) {
+  //     // Enter / backspace / delete key
+  //     return false;
+  //   }
+  //   const userInput = `${DOM.bip39Phrase.value}`;
+  //   const wordArray = userInput.split(' ');
+  //   const lastWord = wordArray[wordArray.length - 1];
+  //   const found = wordList.find((s) => s.startsWith(lastWord));
+  //   if (lastWord === found || found === undefined) return false;
+  //   const missingLetters = found.slice(lastWord.length) + ' ';
+  //   const suggestedInput = userInput + missingLetters;
+  //   DOM.bip39Phrase.value = suggestedInput;
+  //   for (let i = 0; i < missingLetters.length; i++) {
+  //     selection.modify('extend', 'backward', 'character');
+  //   }
+  // });
   DOM.bip39PassGenInput.oninput = diceToPassphrase;
   // Add event listener to generate new mnemonic
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
@@ -404,6 +406,7 @@ const setupDom = async () => {
   resizeObserver.observe(document.querySelector('body'));
   // Remove loading screen
   document.getElementById('loadingPage').style.display = 'none';
+  mnemonicInputLengthAdjust();
   // Pause for dramatic effect
   await sleep(200);
   // open the about panel on load
@@ -441,6 +444,57 @@ const thisBrowserIsShit = () => {
 
   // return result
   return isShit;
+};
+
+// Load seed from mnemonic input
+const mnemonicInputSeedLoad = () => {
+  const errorText = document.getElementById('inputMnemonicError');
+  errorText.classList.add('hidden');
+  try {
+    const len = parseInt(DOM.mnemonicLengthSelect.value);
+    if (isNaN(len)) {
+      throw new Error('mnemonic length is not a number');
+    }
+    const mnemonicArray = [];
+    DOM.mnemonicInputs.forEach((div, i) => {
+      if (i < len) {
+        const word = normalizeString(div.querySelector('input').value);
+        if (!wordList.includes(word)) {
+          const nearestWord = findNearestWord(word);
+          throw new Error(
+            word
+              ? `${word} (at position ${
+                  i + 1
+                }) is not in the BIP39 English word list, please check it and try again. Did you mean "${nearestWord}"?`
+              : `Missing word (at position ${i + 1})`
+          );
+        }
+        mnemonicArray.push(word);
+      }
+    });
+    if (!bip39.validateMnemonic(mnemonicArray.join(' '))) {
+      throw new Error('Invalid Mnemonic Phrase! Unable to load seed.');
+    }
+    DOM.bip39Phrase.value = mnemonicArray.join(' ');
+    mnemonicToSeedPopulate();
+  } catch (e) {
+    console.error(e);
+    errorText.innerText = e;
+    errorText.classList.remove('hidden');
+  }
+  adjustPanelHeight;
+};
+
+// Change the number of boxes based on mnemonic length
+const mnemonicInputLengthAdjust = () => {
+  const len = parseInt(DOM.mnemonicLengthSelect.value);
+  if (isNaN(len)) {
+    console.error('mnemonic length is not a number');
+    return;
+  }
+  DOM.mnemonicInputs.forEach((div, i) => {
+    div.classList.toggle('hidden', i >= len);
+  });
 };
 
 // Show/Hide all private data
@@ -896,8 +950,12 @@ const removeAutocompleteActive = () => {
 };
 
 const focusOnNextWord = () => {
-  const inputs = document.querySelectorAll('.lastWord-word');
-  const numWords = parseInt(DOM.lastWordLength.value);
+  const inputs = document.querySelectorAll('.' + currentAuto.input.className);
+  const numWords = parseInt(
+    currentAuto.input.className.startsWith('lastWord')
+      ? DOM.lastWordLength.value
+      : DOM.mnemonicLengthSelect.value
+  );
   inputs.forEach((input, i) => {
     if (input === currentAuto.input && i + 1 < numWords) {
       inputs[i + 1].focus();
@@ -2001,6 +2059,8 @@ const entropyChanged = async () => {
     DOM.entropyMnemonicLengthSelect.value === 'raw'
       ? DOM.generateRandomStrengthSelect.value
       : DOM.entropyMnemonicLengthSelect.value;
+  DOM.mnemonicLengthSelect.value = DOM.generateRandomStrengthSelect.value;
+  mnemonicInputLengthAdjust();
   document
     .getElementById('rawEntropyExplain')
     .classList.toggle(
