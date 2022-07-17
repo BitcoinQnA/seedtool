@@ -196,7 +196,7 @@
               </select>
             </label>
           </p>
-          <section id="inputMnemonicWords">
+          <section id="inputMnemonicWords" class="private-data">
             <div class="inputMnemonic-div">
               <label data-number="01" class="inputMnemonic-label">
                 <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
@@ -317,8 +317,14 @@
                 <input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word">
               </label>
             </div>
-            <br>
           </section>
+          <p class="warning">
+            <strong>NOTE:</strong> You can enter your BIP39 Passphrase below.
+          </p>
+          <button class="btn" onclick="mnemonicInputSeedLoad();"
+            title="Click to load the words entered above into the seed tool">Load Seed</button>
+          <p class="warning hidden" id="inputMnemonicError"></p>
+          <br>
         </div>
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
