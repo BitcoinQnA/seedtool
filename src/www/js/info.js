@@ -493,6 +493,11 @@ window.infoHtml = {
         may not sound much, but losing one bit of entropy halves the number of possibilities that your entropy hides in. Losing seven bits reduces that number of possibilities
         roughly 130 times over.    
         </p>`,
+  SINGLE_ADDRESS: /*html*/ `
+        <h3>Single Address Tool</h3>
+        <p>
+          Single Address Tool Explainer goes here.
+        </p>`,
   MULTISIG: /*html*/ `
         <h3>Multisig</h3>
         <p>
