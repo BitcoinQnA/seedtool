@@ -496,12 +496,26 @@ window.infoHtml = {
   SINGLE_ADDRESS: /*html*/ `
         <h3>Single Address Tool</h3>
         <p>
-          Single Address Tool Explainer goes here.
+          Use this tool to enter private keys in <b>WIF</b> (Wallet Import Format) or <b>Hex</b> format to view the corresponding Public Key (in Hex format) and addresses in Legacy, Wrapped Segwit 
+          and Native Segwit derivations.
+        </p>
+        <p>
+          Selecting 'Multiple Signature Address', defining the signing threshold and importing more than one public key in the same format outlined above will derive the
+          corresponding multisignature addresses. For importing BIP49 Ypubs or BIP84 Zpubs to check multisig address derivation, please use the separate 'BIP48 Multisig' section
+          further down the page.
         </p>`,
   MULTISIG: /*html*/ `
         <h3>Multisig</h3>
         <p>
-          Multisig Explainer goes here.
+        <a target="_blank" rel="noopener noreferrer"
+        href="https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki">BIP48</a> defines a logical hierarchy for deterministic multisig wallets based on an algorithm described 
+        in BIP67. This BIP solidifies the industry wide practice of utilizing m/48' derivation paths in hierarchical deterministic multisig wallets.
+
+        The hierarchy proposed allows the handling of multiple accounts, receive and change address lists per account, multiple script types and millions of addresses per chain. 
+        </p>
+        <p>
+          Use this tool to sense check the address derivation of any multisig coordinator software. Simply enter the extended public keys of each cosigner in the quorum
+          (you can also use the extended key of the seed loaded into the tool) and select the number of keys required to sign a transaction (signing threshold). <b>Be sure to add each new public key onto a new line.</b>
         </p>`,
   CHANGELOG: /*html*/ `
         <h3>Changelog</h3>
@@ -514,6 +528,7 @@ window.infoHtml = {
           <li>V1.0.5 - ADD: Last word calculator</li>
           <li>V1.0.6 - ADD: Raw Entropy Input Method</li>
           <li>V1.0.7 - ADD: BIP86 Taproot Address Generation</li>
+          <li>V2.0.0 - ADD: Predictive seed word input, Single Address Tool and BIP48 Multisig Address Derivation</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
