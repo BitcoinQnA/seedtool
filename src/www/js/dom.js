@@ -223,6 +223,7 @@ const setupDom = async () => {
   DOM.bip47StartIndex = document.querySelector('#bip47StartIndex');
   DOM.bip47NoOfAddresses = document.querySelector('#bip47NoOfAddresses');
   DOM.bip47AddressSection = document.getElementById('bip47AddressSection');
+  DOM.bip47Network = document.getElementById('bip47NetworkSelect');
   DOM.csvDownloadLink = document.querySelector('.csv-download-link');
   DOM.addressListContainer = document.querySelector('.address-display-content');
   DOM.addressGenerateButton = document.querySelector(
@@ -300,6 +301,11 @@ const setupDom = async () => {
   DOM.bip47SendReceive.oninput = calculateBip47Addresses;
   DOM.bip47StartIndex.oninput = calculateBip47Addresses;
   DOM.bip47NoOfAddresses.oninput = calculateBip47Addresses;
+  DOM.bip47Network.oninput = () => {
+    calcBip47();
+    calcBip47CounterParty();
+    calculateBip47Addresses();
+  };
   // listen for bip85 changes
   DOM.bip85Application.oninput = calcBip85;
   DOM.bip85MnemonicLength.oninput = calcBip85;
@@ -1302,7 +1308,11 @@ const calcBip47 = () => {
   // make sure we have a valid seed and mnemonic
   if (!getPhrase() || !bip32RootKey) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
-  myPayCode = bip47.fromWalletSeed(mySeed, 0, network);
+  myPayCode = bip47.fromWalletSeed(
+    mySeed,
+    0,
+    bip47.utils.networks[DOM.bip47Network.value]
+  );
   const myNotify = myPayCode.derive(0);
   const myPrvKey = myNotify.privateKey;
   const myPubKey = myNotify.publicKey;
@@ -1322,7 +1332,7 @@ const calcBip47 = () => {
  */
 const isValidPaymentCode = (paymentCode) => {
   try {
-    bip47.fromBase58(paymentCode, network);
+    bip47.fromBase58(paymentCode, bip47.utils.networks[DOM.bip47Network.value]);
     return true;
   } catch (_error) {
     return false;
@@ -1338,7 +1348,10 @@ const calcBip47CounterParty = () => {
     return;
   }
   DOM.bip47CPGenSection.classList.remove('hidden');
-  bobPayCode = bip47.fromBase58(bobPcBase58, network);
+  bobPayCode = bip47.fromBase58(
+    bobPcBase58,
+    bip47.utils.networks[DOM.bip47Network.value]
+  );
   const bobNotifyPubKey = bobPayCode.derive(0).publicKey;
   const bobNotifyAddress = bobPayCode.getNotificationAddress();
   DOM.bip47CPNotificationAddress.value = bobNotifyAddress;
@@ -1398,26 +1411,27 @@ const calculateBip47Addresses = () => {
       }
       const payPubKey = pCode.derivePaymentPublicKey(key, i);
       let address;
+      const network47 = bip47.utils.networks[DOM.bip47Network.value];
       switch (addressType) {
         case 'P2PKH':
           address = bitcoin.payments.p2pkh({
             pubkey: payPubKey,
-            network: network,
+            network: network47,
           }).address;
           break;
         case 'P2WPKH':
           address = bitcoin.payments.p2wpkh({
             pubkey: payPubKey,
-            network: network,
+            network: network47,
           }).address;
           break;
         case 'P2WPKH/P2SH':
           address = bitcoin.payments.p2sh({
             redeem: bitcoin.payments.p2wpkh({
               pubkey: payPubKey,
-              network: network,
+              network: network47,
             }),
-            network: network,
+            network: network47,
           }).address;
           break;
         default:

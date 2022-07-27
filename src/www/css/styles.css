@@ -414,7 +414,8 @@ select {
 #bip85Application,
 #bip85MnemonicLength,
 #multisigXpubsPathSelect,
-#multisigXpubsChangeSelect {
+#multisigXpubsChangeSelect,
+#bip47NetworkSelect {
   width: 100%;
   background-color: var(--q-light-blue);
   color: var(--q-orange);
