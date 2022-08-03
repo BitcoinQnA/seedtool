@@ -529,6 +529,7 @@ window.infoHtml = {
           <li>V1.0.6 - ADD: Raw Entropy Input Method</li>
           <li>V1.0.7 - ADD: BIP86 Taproot Address Generation</li>
           <li>V2.0.0 - ADD: Predictive seed word input, Single Address Tool and BIP48 Multisig Address Derivation</li>
+          <li>V2.0.1 - ADD: Version number to header.    FIX: BIP47 testnet derivation </li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
