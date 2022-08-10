@@ -15,6 +15,34 @@ ______ _ _            _       _____        ___
 \____/ \___|\___|\__,_|   \_/\___/ \___/|_|
                                            
 */
+// Byte QRCode
+/*
+const bytes = Uint8ClampedArray.from(
+  s2b(
+    '00001010110010111011101000000000100011011001101110100000000001011111010110011001011010110100000010100011010001110101110011011001'
+  )
+);
+QRCode.toDataURL(
+  [
+    {
+      data: bytes,
+      mode: 'byte',
+    },
+  ],
+  {
+    errorCorrectionLevel: 'L',
+    width: 500,
+    color: {
+      light: '#f99925ff',
+      dark: '#00151aFF',
+    },
+  },
+  function (err, url) {
+    console.log(url);
+  }
+);
+*/
+
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
