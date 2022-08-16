@@ -499,9 +499,28 @@ select {
   cursor: pointer;
   background-color: var(--q-blue);
 }
-#infoModalText {
+#infoModalText,
+#qrModalCanvas {
   margin: auto;
   padding: 5%;
+}
+#compactSeedQRCanvas,
+#bip85CompactSeedQRCanvas {
+  display: block;
+  margin: auto;
+}
+#compactSeedQR,
+#bip85CompactSeedQR {
+  border: 1px solid var(--q-white);
+  border-radius: 5px;
+  padding: 5px;
+  background-color: var(--q-light-blue);
+}
+.qr-icon {
+  height: 1.1em;
+  background: var(--q-blue);
+  fill: var(--q-orange);
+  cursor: pointer;
 }
 .copy-icon {
   color: var(--q-orange);

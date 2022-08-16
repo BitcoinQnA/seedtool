@@ -41,6 +41,10 @@ QRCode.toDataURL(
     console.log(url);
   }
 );
+//Addresses
+// extended public keys
+BIP85 child seeds
+//Payment codes
 */
 
 let seed = null;
@@ -266,6 +270,8 @@ const setupDom = async () => {
   DOM.onlineIcon = document.getElementById('networkIndicator');
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
+  DOM.qrModal = document.getElementById('qrModal');
+  DOM.qrModalCanvas = document.getElementById('qrModalCanvas');
   DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
   DOM.lastWordLength = document.getElementById('lastWordStrength');
   DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
@@ -634,9 +640,21 @@ const multiSigCalc = () => {
     };
     if (isNaN(m) || m > pubkeys.length || m < 1)
       throw new Error('Invalid Threshold');
-    addressResult.value = `${m} of ${
+    addressResult.innerHTML = `${m} of ${
       pubkeys.length
-    } MULTISIG\nLEGACY:         ${legacy()}\nWRAPPED SEGWIT: ${wrapped()}\nNATIVE SEGWIT:  ${native()}`;
+    } MULTISIG<br>LEGACY<span class="qr-button-holder" id="multiSigAddressQRLegacy"></span>:         ${legacy()}<br>WRAPPED SEGWIT<span class="qr-button-holder" id="multiSigAddressQRWrapped"></span>: ${wrapped()}<br>NATIVE SEGWIT<span class="qr-button-holder" id="multiSigAddressQRNative"></span>:  ${native()}`;
+    addQRIcon(
+      addressResult.querySelector('#multiSigAddressQRLegacy'),
+      legacy()
+    );
+    addQRIcon(
+      addressResult.querySelector('#multiSigAddressQRWrapped'),
+      wrapped()
+    );
+    addQRIcon(
+      addressResult.querySelector('#multiSigAddressQRNative'),
+      native()
+    );
   } catch (error) {
     console.error(error);
     errorBox.innerText = error;
@@ -685,7 +703,19 @@ const singleSigCalc = () => {
       keyPair = bitcoin.ECPair.fromWIF(privInput);
     }
     pubResult.value = keyPair.publicKey.toString('hex');
-    addressResult.value = `LEGACY:         ${legacy()}\nWRAPPED SEGWIT: ${wrapped()}\nNATIVE SEGWIT:  ${native()}`;
+    addressResult.innerHTML = `LEGACY<span class="qr-button-holder" id="singleSigAddressQRLegacy"></span>:         ${legacy()}<br>WRAPPED SEGWIT<span class="qr-button-holder" id="singleSigAddressQRWrapped"></span>: ${wrapped()}<br>NATIVE SEGWIT<span class="qr-button-holder" id="singleSigAddressQRNative"></span>:  ${native()}`;
+    addQRIcon(
+      addressResult.querySelector('#singleSigAddressQRLegacy'),
+      legacy()
+    );
+    addQRIcon(
+      addressResult.querySelector('#singleSigAddressQRWrapped'),
+      wrapped()
+    );
+    addQRIcon(
+      addressResult.querySelector('#singleSigAddressQRNative'),
+      native()
+    );
   } catch (error) {
     console.error(error);
     errorBox.innerText = error;
@@ -1243,6 +1273,20 @@ const resizeObserver = new ResizeObserver(() => {
   adjustPanelHeight();
 });
 
+// QR Code icon
+const addQRIcon = (element, data) => {
+  while (element.firstChild) {
+    element.removeChild(element.lastChild);
+  }
+  const template = document.getElementById('qrTemplate');
+  const clone = template.content.firstElementChild.cloneNode(true);
+  clone.dataset.qrCode = data;
+  clone.addEventListener('click', () => {
+    window.openQrModal(data);
+  });
+  element.append(clone);
+};
+
 // Add Copy Buttons
 const setupCopyButton = (element) => {
   const template = document.getElementById('copyButtonTemplate');
@@ -1351,6 +1395,14 @@ const calcBip47 = () => {
     bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
   fetchRobotImages();
+  addQRIcon(
+    document.getElementById('bip47MyPaymentCodeQR'),
+    `bitcoin:${myPayCode.toBase58()}`
+  );
+  addQRIcon(
+    document.getElementById('bip47MyNotificationAddressQR'),
+    myNotificationAddress
+  );
 };
 
 /**
@@ -1387,6 +1439,14 @@ const calcBip47CounterParty = () => {
   calculateBip47Addresses();
   adjustPanelHeight();
   fetchRobotImages();
+  addQRIcon(
+    document.getElementById('bip47CPPaymentCodeQR'),
+    `bitcoin:${bobPcBase58}`
+  );
+  addQRIcon(
+    document.getElementById('bip47CPNotificationAddressQR'),
+    bobNotifyAddress
+  );
 };
 
 // Remove data from bip47 section
@@ -1605,8 +1665,102 @@ window.openInfoModal = (_event, section) => {
  * @param {Event} event Click Event on area outside the dialog
  */
 window.onclick = function (event) {
-  if (event.target == DOM.infoModal) {
+  if (event.target === DOM.infoModal) {
     clearInfoModal();
+  }
+};
+/**
+ * SeedQR
+ */
+const clearCompactSeedQR = () => {
+  const canvas = document.getElementById('compactSeedQRCanvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  const canvas85 = document.getElementById('bip85CompactSeedQRCanvas');
+  canvas85.getContext('2d').clearRect(0, 0, canvas85.width, canvas85.height);
+};
+const makeCompactSeedQR = () => {
+  const canvas = document.getElementById('compactSeedQRCanvas');
+  clearCompactSeedQR();
+  const phrase = getPhrase();
+  if (!bip39.validateMnemonic(phrase)) return;
+  const arr = phrase
+    .split(' ')
+    .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
+    .join('')
+    .match(/[01]{8}/g)
+    .map((bin) => parseInt(bin, 2))
+    .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
+  window.QRCode.toCanvas(
+    canvas,
+    [
+      {
+        data: arr,
+        mode: 'byte',
+      },
+    ],
+    {
+      errorCorrectionLevel: 'L',
+      width: 300,
+      color: {
+        light: '#f99925ff',
+        dark: '#00151aFF',
+      },
+    },
+    function (err) {
+      if (err) console.log(err);
+    }
+  );
+};
+/**
+ * QR dialog / Modal
+ */
+
+/**
+ * Hide the modal and clear it's text
+ */
+const clearQRModal = () => {
+  DOM.qrModal.style.display = 'none';
+  const context = DOM.qrModalCanvas.getContext('2d');
+  context.clearRect(0, 0, DOM.qrModalCanvas.width, DOM.qrModalCanvas.height);
+};
+/**
+ * Open the QnA Explains dialog
+ * @param {Event} _event Not used
+ * @param {string} section string for the key to get value from info.js
+ */
+window.openQrModal = (data) => {
+  clearQRModal();
+  const dataCopy = data.startsWith('[') ? JSON.parse(data) : data;
+  window.QRCode.toCanvas(
+    DOM.qrModalCanvas,
+    [
+      {
+        data: dataCopy,
+        mode: 'byte',
+      },
+    ],
+    {
+      errorCorrectionLevel: 'L',
+      width: 500,
+      color: {
+        light: '#f99925ff',
+        dark: '#00151aFF',
+      },
+    },
+    function (err) {
+      if (err) console.log(err);
+    }
+  );
+  DOM.qrModal.style.display = 'block';
+  DOM.qrModalCanvas.style.display = 'block';
+};
+/**
+ * Function to close the dialog when user clicks on the outside
+ * @param {Event} event Click Event on area outside the dialog
+ */
+window.onclick = function (event) {
+  if (event.target === DOM.qrModal) {
+    clearQRModal();
   }
 };
 /**
@@ -1715,6 +1869,12 @@ const injectAddresses = (addressDataArray, csvLink, addressDiv) => {
         } else {
           span.parentElement.classList.remove('hidden');
           span.innerText = addressData[data];
+          if (data === 'address') {
+            addQRIcon(
+              clone.querySelector('.qr-button-holder'),
+              addressData[data]
+            );
+          }
         }
       }
     }
@@ -1849,7 +2009,9 @@ const fillBip32Keys = () => {
   }
   bip32ExtendedKey = bip32RootKey.derivePath(DOM.path.value);
   DOM.bip32AccountXprv.value = bip32ExtendedKey.toBase58();
-  DOM.bip32AccountXpub.value = bip32ExtendedKey.neutered().toBase58();
+  const xpub = bip32ExtendedKey.neutered().toBase58();
+  DOM.bip32AccountXpub.value = xpub;
+  addQRIcon(document.getElementById('bip32AccountXpubQR'), xpub);
   if (currentBip !== 'bip32') {
     displayAccountKeys();
   }
@@ -1872,6 +2034,8 @@ const fillMultisigYZ = () => {
     Buffer.Buffer.concat([Buffer.Buffer.from('0295b43f', 'hex'), dataY])
   );
   document.getElementById('myYpub').value = Y;
+  addQRIcon(document.querySelector('#myZpubQR'), Z);
+  addQRIcon(document.querySelector('#myYpubQR'), Y);
 };
 
 // When currentBip isn't 32, display bip32 keys
@@ -1882,11 +2046,13 @@ const displayAccountKeys = () => {
   const accountPath = `m/${purpose}'/${coin}'/${account}'`;
   const accountExtendedKey = bip32RootKey.derivePath(accountPath);
   DOM.pathAccountXprv.value = accountExtendedKey.toBase58();
-  DOM.pathAccountXpub.value = accountExtendedKey.neutered().toBase58();
+  const xpub = accountExtendedKey.neutered().toBase58();
+  DOM.pathAccountXpub.value = xpub;
+  addQRIcon(document.getElementById('pathAccountXpubQR'), xpub);
 };
 
 // Calculate and populate the BIP85 section
-const calcBip85 = () => {
+const calcBip85 = async () => {
   const app = DOM.bip85Application.value;
   DOM.bip85MnemonicLength.parentElement.classList.add('hidden');
   DOM.bip85Bytes.parentElement.classList.add('hidden');
@@ -1903,8 +2069,8 @@ const calcBip85 = () => {
     const master = bip85.BIP85.fromBase58(rootKeyBase58);
     let result;
     const index = parseInt(DOM.bip85Index.value);
+    const length = parseInt(DOM.bip85MnemonicLength.value);
     if (app === 'bip39') {
-      const length = parseInt(DOM.bip85MnemonicLength.value);
       result = master.deriveBIP39(0, length, index).toMnemonic();
     } else if (app === 'wif') {
       result = master.deriveWIF(index).toWIF();
@@ -1916,8 +2082,44 @@ const calcBip85 = () => {
       result = master.deriveHex(bytes, index).toEntropy();
     }
     DOM.bip85ChildKey.value = result;
+    const canvas = document.getElementById('bip85CompactSeedQRCanvas');
+    // clearCompactSeedQR();
+    const phrase = master.deriveBIP39(0, length, index).toMnemonic();
+    if (!bip39.validateMnemonic(phrase)) return;
+    console.log('ping');
+    const arr = phrase
+      .split(' ')
+      .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
+      .join('')
+      .match(/[01]{8}/g)
+      .map((bin) => parseInt(bin, 2))
+      .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
+    console.log('arr :>> ', arr);
+    await sleep(500);
+    window.QRCode.toCanvas(
+      canvas,
+      [
+        {
+          data: arr,
+          mode: 'byte',
+        },
+      ],
+      {
+        errorCorrectionLevel: 'L',
+        width: 300,
+        color: {
+          light: '#f99925ff',
+          dark: '#00151aFF',
+        },
+      },
+      function (err, el) {
+        if (err) console.log(err);
+        console.log('el :>> ', el);
+      }
+    );
   } catch (e) {
     toast('BIP85: ' + e.message);
+    console.error('BIP85: ' + e.message);
     DOM.bip85ChildKey.value = '';
   }
 };
@@ -2240,6 +2442,7 @@ const setMnemonicFromEntropy = async () => {
   const phrase = window.bip39.entropyToMnemonic(hexedBin);
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
+  makeCompactSeedQR();
   await writeSplitPhrase();
   // Show the word indexes
   showWordIndexes();
@@ -2265,6 +2468,7 @@ const setMnemonicFromRawEntropy = async (entropy) => {
   );
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
+  makeCompactSeedQR();
   await writeSplitPhrase();
   // Show the word indexes
   showWordIndexes();
@@ -2450,7 +2654,7 @@ const generateNewMnemonic = () => {
 
 // Split the mnemonic phrase over 3 cards
 const writeSplitPhrase = async () => {
-  const phrase = DOM.bip39Phrase.value;
+  const phrase = getPhrase();
   const wordCount = phrase.split(/\s/g).length;
   const msgUint8 = new TextEncoder().encode(phrase);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -2571,6 +2775,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
   fillRandomXorSeeds();
   calculateXor();
   await generateOneTimePad();
+  makeCompactSeedQR();
   adjustPanelHeight();
 }, 1000);
 
@@ -2586,6 +2791,7 @@ const resetEverything = () => {
     DOM.entropyInput.value = '';
   }
   clearEntropyFeedback();
+  clearCompactSeedQR();
   DOM.bip39PhraseSplit.value = '';
   DOM.bip39Seed.value = '';
   DOM.pathAccountXprv.value = '';

@@ -473,6 +473,12 @@
           </div>
         </div>
         <div>
+          <label for="compactSeedQR">Compact SeedQR</label>
+          <div id="compactSeedQR">
+            <canvas id="compactSeedQRCanvas" height="300" width="300" style="height: 300px; width: 300px;"></canvas>
+          </div>
+        </div>
+        <div>
           <label for="bip39Passphrase">BIP39 Passphrase
             (recommended)</label>
           <div class="copy-wrapper private-data">
@@ -892,7 +898,7 @@
               </label>
               <label>
                 Addresses
-                <textarea readonly id="singleSigAddress" class="textarea-input private-data"></textarea>
+                <p readonly id="singleSigAddress" class="textarea-input private-data"></p>
               </label>
             </fieldset>
           </section>
@@ -911,7 +917,7 @@
               <legend>Result:</legend>
               <label>
                 Addresses
-                <textarea readonly id="multiSigAddress" class="textarea-input"></textarea>
+                <p readonly id="multiSigAddress" class="textarea-input"></p>
               </label>
             </fieldset>
           </section>
@@ -994,7 +1000,7 @@
               spellcheck="false"></textarea>
           </div>
           <label for="pathAccountXpub">
-            <span>Account Extended Public Key</span>
+            Account Extended Public Key <span class="qr-button-holder" id="pathAccountXpubQR"></span>
           </label>
           <div class="copy-wrapper">
             <textarea id="pathAccountXpub" type="text" class="account-xpub textarea-input"
@@ -1029,7 +1035,7 @@
             spellcheck="false"></textarea>
         </div>
         <label for="bip32AccountXpub">
-          BIP32 Extended Public Key
+          BIP32 Extended Public Key<span class="qr-button-holder" id="bip32AccountXpubQR"></span>
         </label>
         <div class="copy-wrapper">
           <textarea id="bip32AccountXpub" type="text" class="account-xpub textarea-input"
@@ -1080,14 +1086,16 @@
         </label>
         <h4>My Details</h4>
         <div>
-          <label for="bip47MyPaymentCode">Payment Code</label>
+          <label for="bip47MyPaymentCode">Payment Code <span id="bip47MyPaymentCodeQR"
+              class="qr-button-holder"></span></label>
           <div class="copy-wrapper">
             <textarea id="bip47MyPaymentCode" class="textarea-input" readonly rows="3"
               title="Your BIP47 reusable Payment code"></textarea>
           </div>
         </div>
         <div>
-          <label for="bip47MyNotificationAddress">Notification Address</label>
+          <label for="bip47MyNotificationAddress">Notification Address <span id="bip47MyNotificationAddressQR"
+              class="qr-button-holder"></span></label>
           <div class="copy-wrapper">
             <textarea id="bip47MyNotificationAddress" class="textarea-input" readonly rows="1"
               title="Your wallet should watch payments to this address for new Counterparties"></textarea>
@@ -1108,14 +1116,16 @@
         <section class="bip47PaynymSection hidden" id="bip47MyRobotSection">Paynym.is details</section>
         <h4>Counterparty Details</h4>
         <div>
-          <label for="bip47CPPaymentCode">Payment Code</label>
+          <label for="bip47CPPaymentCode">Payment Code <span id="bip47CPPaymentCodeQR"
+              class="qr-button-holder"></span></label>
           <div class="copy-wrapper"><textarea id="bip47CPPaymentCode" class="textarea-input" rows="3" autocomplete="off"
               autocorrect="off" autocapitalize="off" spellcheck="false"
               title="Input your counterparty's Payment Code here"></textarea></div>
         </div>
         <section id="bip47CPGenSection" class="hidden">
           <div>
-            <label for="bip47CPNotificationAddress">Notification Address</label>
+            <label for="bip47CPNotificationAddress">Notification Address <span id="bip47CPNotificationAddressQR"
+                class="qr-button-holder"></span></label>
             <div class="copy-wrapper"><textarea id="bip47CPNotificationAddress"
                 title="Your counterparty's notification address" class="textarea-input" readonly rows="1"></textarea>
             </div>
@@ -1170,7 +1180,7 @@
         <fieldset>
           <legend>Loaded Seed Master Extended Public Keys</legend>
           <label>
-            Native Segwit
+            Native Segwit <span class="qr-button-holder" id="myZpubQR"></span>
             <div class="textarea-wrapper copy-wrapper private-data">
               <textarea readonly id="myZpub" class="textarea-input"></textarea>
             </div>
@@ -1179,7 +1189,7 @@
             onclick="document.querySelector('#multisigXpubs').value += document.querySelector('#myZpub').value;">Add as
             Cosigner</button>
           <label>
-            Wrapped Segwit
+            Wrapped Segwit <span class="qr-button-holder" id="myYpubQR"></span>
             <div class="textarea-wrapper copy-wrapper private-data">
               <textarea readonly id="myYpub" class="textarea-input"></textarea>
             </div>
@@ -1269,6 +1279,13 @@
             <div class="copy-wrapper private-data"><textarea id="bip85ChildKey" title="Private - don't share!"
                 class="bip85Field textarea-input" readonly title="BIP85 Child Key" rows="3"></textarea></div>
           </div>
+          <div>
+            <label for="bip85CompactSeedQR">Compact SeedQR</label>
+            <div id="bip85CompactSeedQR">
+              <canvas id="bip85CompactSeedQRCanvas" height="300" width="300"
+                style="height: 300px; width: 300px;"></canvas>
+            </div>
+          </div>
           <button disabled="disabled" class="btn" id="bip85LoadParent" title="No parent key to load">Load
             Parent</button>
           <button class="btn" id="bip85LoadChild" title="Load this Child Key into the seed tool">Load Child</button>
@@ -1303,6 +1320,8 @@
               Rafael da Silva Rocha - MIT</a></li>
           <li><a href="https://github.com/Anderson-Juhasc/bip86" target="_blank" rel="noopener noreferrer">BIP86 by
               Anderson Juhasc - MIT</a></li>
+          <li><a href="https://github.com/soldair/node-qrcode" target="_blank" rel="noopener noreferrer">qrcode by
+              Ryan Day - MIT</a></li>
         </ul>
       </div>
     </div>
@@ -1318,13 +1337,19 @@
       <div id="infoModalText"></div>
     </div>
   </div>
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <span id="modalClose" title="Close" onclick="clearQRModal();">&times;</span>
+      <canvas id="qrModalCanvas"></canvas>
+    </div>
+  </div>
   <div id="toast-background">
     <div id="toast"></div>
   </div>
   <template id="addressTemplate">
     <div class="address-block">
       Path: <span class="address-details-text address-details--path">m/0/0'</span> <br>
-      Address: <wbr>
+      Address:<span class="qr-button-holder"></span> <wbr>
       <span class="address-details-text address-details--address address-copy" onclick="copyEventHandler(event)"
         title="Click to copy">34qM2FbbmMe8w8DZouYb4HGEww2GEMWMNB</span><br>
       <span>
@@ -1351,6 +1376,19 @@
         </path>
       </svg>
     </div>
+  </template>
+  <template id="qrTemplate">
+    <span class="qr-div" title="Click to display QR Code">
+      <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512" class="qr-icon">
+        <path d="M0 0v233.739h233.739V0H0zm200.348 200.348H33.391V33.391h166.957v166.957z" />
+        <path
+          d="M66.783 66.783h100.174v100.174H66.783zM278.261 0v233.739H512V0H278.261zm200.348 200.348H311.652V33.391h166.957v166.957z" />
+        <path
+          d="M345.043 66.783h100.174v100.174H345.043zM0 278.261V512h233.739V278.261H0zm200.348 200.348H33.391V311.652h166.957v166.957z" />
+        <path
+          d="M66.783 345.043h100.174v100.174H66.783zm211.478-66.782V512h66.782v-33.391h-33.391v-66.783h33.391v-33.391h-33.391v-66.783h33.391v-33.391zm200.348 0H512v33.391h-33.391zm0 200.348h-33.392V512H512V356.174h-33.391zM378.435 278.261h66.783v33.391h-66.783zm66.782 133.565h-33.391v-33.391h33.391v-33.392h-66.782v100.174h66.782zm-66.782 66.783h33.391V512h-33.391z" />
+      </svg>
+    </span>
   </template>
   <script src="js/lib/bitcoin.js"></script>
   <script src="js/lib/bip32.js"></script>
