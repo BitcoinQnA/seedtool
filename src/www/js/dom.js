@@ -1,11 +1,11 @@
 /**
-______ _ _            _       _____        ___  
+__||__ _ _            _       _____        ___  
 | ___ (_) |          (_)     |  _  |      / _ \ 
 | |_/ /_| |_ ___ ___  _ _ __ | | | |_ __ / /_\ \
 | ___ \ | __/ __/ _ \| | '_ \| | | | '_ \|  _  |
 | |_/ / | || (_| (_) | | | | \ \/' / | | | | | |
 \____/|_|\__\___\___/|_|_| |_|\_/\_\_| |_\_| |_/
-                                                
+  ||                                              
                                                 
  _____               _   _____           _ 
 /  ___|             | | |_   _|         | |
@@ -15,38 +15,6 @@ ______ _ _            _       _____        ___
 \____/ \___|\___|\__,_|   \_/\___/ \___/|_|
                                            
 */
-// Byte QRCode
-/*
-const bytes = Uint8ClampedArray.from(
-  s2b(
-    '00001010110010111011101000000000100011011001101110100000000001011111010110011001011010110100000010100011010001110101110011011001'
-  )
-);
-QRCode.toDataURL(
-  [
-    {
-      data: bytes,
-      mode: 'byte',
-    },
-  ],
-  {
-    errorCorrectionLevel: 'L',
-    width: 500,
-    color: {
-      light: '#f99925ff',
-      dark: '#00151aFF',
-    },
-  },
-  function (err, url) {
-    console.log(url);
-  }
-);
-//Addresses
-// extended public keys
-BIP85 child seeds
-//Payment codes
-*/
-
 let seed = null;
 let bip32RootKey = null;
 let bip32ExtendedKey = null;
@@ -1280,10 +1248,10 @@ const addQRIcon = (element, data) => {
   }
   const template = document.getElementById('qrTemplate');
   const clone = template.content.firstElementChild.cloneNode(true);
-  clone.dataset.qrCode = data;
   clone.addEventListener('click', () => {
     window.openQrModal(data);
   });
+  clone.style.display = hidePrivateData ? 'none' : '';
   element.append(clone);
 };
 
@@ -1673,13 +1641,16 @@ window.onclick = function (event) {
  * SeedQR
  */
 const clearCompactSeedQR = () => {
-  const canvas = document.getElementById('compactSeedQRCanvas');
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  const canvas85 = document.getElementById('bip85CompactSeedQRCanvas');
-  canvas85.getContext('2d').clearRect(0, 0, canvas85.width, canvas85.height);
+  const el = document.getElementById('compactSeedQR');
+  while (el.firstChild) {
+    el.removeChild(el.firstChild);
+  }
+  const canvas85 = document.getElementById('bip85CompactSeedQR');
+  while (canvas85.firstChild) {
+    canvas85.removeChild(canvas85.firstChild);
+  }
 };
 const makeCompactSeedQR = () => {
-  const canvas = document.getElementById('compactSeedQRCanvas');
   clearCompactSeedQR();
   const phrase = getPhrase();
   if (!bip39.validateMnemonic(phrase)) return;
@@ -1690,26 +1661,7 @@ const makeCompactSeedQR = () => {
     .match(/[01]{8}/g)
     .map((bin) => parseInt(bin, 2))
     .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
-  window.QRCode.toCanvas(
-    canvas,
-    [
-      {
-        data: arr,
-        mode: 'byte',
-      },
-    ],
-    {
-      errorCorrectionLevel: 'L',
-      width: 300,
-      color: {
-        light: '#f99925ff',
-        dark: '#00151aFF',
-      },
-    },
-    function (err) {
-      if (err) console.log(err);
-    }
-  );
+  addQRIcon(document.getElementById('compactSeedQR'), JSON.stringify(arr));
 };
 /**
  * QR dialog / Modal
@@ -2082,11 +2034,8 @@ const calcBip85 = async () => {
       result = master.deriveHex(bytes, index).toEntropy();
     }
     DOM.bip85ChildKey.value = result;
-    const canvas = document.getElementById('bip85CompactSeedQRCanvas');
-    // clearCompactSeedQR();
     const phrase = master.deriveBIP39(0, length, index).toMnemonic();
     if (!bip39.validateMnemonic(phrase)) return;
-    console.log('ping');
     const arr = phrase
       .split(' ')
       .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
@@ -2094,29 +2043,12 @@ const calcBip85 = async () => {
       .match(/[01]{8}/g)
       .map((bin) => parseInt(bin, 2))
       .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
-    console.log('arr :>> ', arr);
     await sleep(500);
-    window.QRCode.toCanvas(
-      canvas,
-      [
-        {
-          data: arr,
-          mode: 'byte',
-        },
-      ],
-      {
-        errorCorrectionLevel: 'L',
-        width: 300,
-        color: {
-          light: '#f99925ff',
-          dark: '#00151aFF',
-        },
-      },
-      function (err, el) {
-        if (err) console.log(err);
-        console.log('el :>> ', el);
-      }
+    addQRIcon(
+      document.getElementById('bip85CompactSeedQR'),
+      JSON.stringify(arr)
     );
+    adjustPanelHeight();
   } catch (e) {
     toast('BIP85: ' + e.message);
     console.error('BIP85: ' + e.message);
