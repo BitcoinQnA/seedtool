@@ -137,6 +137,7 @@ const setupDom = async () => {
   DOM.generateButton = document.querySelector('.btn.generate');
   DOM.bip32RootKey = document.getElementById('bip32RootKey');
   DOM.bip32RootFingerprint = document.getElementById('bip32RootFingerprint');
+  DOM.bip32RootWif = document.getElementById('bip32RootWif');
   DOM.entropyFilterWarning = document.getElementById('entropy-discarded-chars');
   DOM.entropyDisplay = document.querySelector('input[id="entropyDetails"]');
   DOM.entropyInput = document.getElementById('entropy');
@@ -2699,6 +2700,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
     ? bip32RootKey.fingerprint.toString('hex')
     : 'unknown';
   if (bip32RootKey) {
+    DOM.bip32RootWif.value = bip32RootKey.toWIF();
     calculateAddresses();
     fillBip32Keys();
     calcBip85();
@@ -2719,6 +2721,7 @@ const resetEverything = () => {
   bobPayCode = null;
   DOM.bip32RootKey.value = '';
   DOM.bip32RootFingerprint.value = '';
+  DOM.bip32RootWif.value = '';
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = '';
   }
