@@ -239,7 +239,7 @@ const setupDom = async () => {
   DOM.infoModal = document.getElementById('infoModal');
   DOM.infoModalText = document.getElementById('infoModalText');
   DOM.qrModal = document.getElementById('qrModal');
-  DOM.qrModalCanvas = document.getElementById('qrModalCanvas');
+  DOM.qrModalDiv = document.getElementById('qrModalDiv');
   DOM.lastWordBits = document.querySelectorAll('.lastWord-bit');
   DOM.lastWordLength = document.getElementById('lastWordStrength');
   DOM.lastWordZeroWarning = document.getElementById('lastWordZeroWarning');
@@ -455,13 +455,17 @@ const mnemonicInputSeedLoad = () => {
       throw new Error('Invalid Mnemonic Phrase! Unable to load seed.');
     }
     DOM.bip39Phrase.value = mnemonicArray.join(' ');
+    DOM.mnemonicLengthSelect.value = mnemonicArray.length;
+    DOM.entropyMnemonicLengthSelect.value = DOM.mnemonicLengthSelect.value;
+    DOM.generateRandomStrengthSelect.value = DOM.mnemonicLengthSelect.value;
+    mnemonicInputLengthAdjust();
     mnemonicToSeedPopulate();
   } catch (e) {
     console.error(e);
     errorText.innerText = e;
     errorText.classList.remove('hidden');
   }
-  adjustPanelHeight;
+  adjustPanelHeight();
 };
 
 // Change the number of boxes based on mnemonic length
@@ -1660,7 +1664,7 @@ const makeCompactSeedQR = () => {
     .join('')
     .match(/[01]{8}/g)
     .map((bin) => parseInt(bin, 2))
-    .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
+    .slice(0, (parseInt(phrase.split(' ').length) * 32) / 3 / 8);
   addQRIcon(document.getElementById('compactSeedQR'), JSON.stringify(arr));
 };
 /**
@@ -1672,8 +1676,7 @@ const makeCompactSeedQR = () => {
  */
 const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
-  const context = DOM.qrModalCanvas.getContext('2d');
-  context.clearRect(0, 0, DOM.qrModalCanvas.width, DOM.qrModalCanvas.height);
+  DOM.qrModalDiv.innerHTML = '';
 };
 /**
  * Open the QnA Explains dialog
@@ -1682,29 +1685,16 @@ const clearQRModal = () => {
  */
 window.openQrModal = (data) => {
   clearQRModal();
-  const dataCopy = data.startsWith('[') ? JSON.parse(data) : data;
-  window.QRCode.toCanvas(
-    DOM.qrModalCanvas,
-    [
-      {
-        data: dataCopy,
-        mode: 'byte',
-      },
-    ],
-    {
-      errorCorrectionLevel: 'L',
-      width: 500,
-      color: {
-        light: '#f99925ff',
-        dark: '#00151aFF',
-      },
-    },
-    function (err) {
-      if (err) console.log(err);
-    }
-  );
+  const qr = new QRCode(0, 'L');
+  qr.addData(data);
+  console.log('qr :>> ', qr);
+  qr.make();
+  DOM.qrModalDiv.innerHTML = qr.createSvgTag({
+    cellSize: 5,
+    scalable: true,
+  });
   DOM.qrModal.style.display = 'block';
-  DOM.qrModalCanvas.style.display = 'block';
+  DOM.qrModalDiv.style.display = 'block';
 };
 /**
  * Function to close the dialog when user clicks on the outside
@@ -2683,6 +2673,10 @@ const mnemonicToSeedPopulate = debounce(async () => {
   } else {
     return;
   }
+  DOM.mnemonicLengthSelect.value = mnemonic.split(' ').length;
+  DOM.entropyMnemonicLengthSelect.value = DOM.mnemonicLengthSelect.value;
+  DOM.generateRandomStrengthSelect.value = DOM.mnemonicLengthSelect.value;
+  mnemonicInputLengthAdjust();
   DOM.bip39Seed.value = seedHex;
   if (!DOM.bip39Phrase.readOnly) {
     DOM.entropyInput.value = seedHex;
