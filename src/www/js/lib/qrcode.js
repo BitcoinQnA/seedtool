@@ -25,7 +25,7 @@ window.QRCode = (function () {
      */
     constructor(typeNumber = 0, errorCorrectionLevel = 'L') {
       this.typeNumber = typeNumber;
-      this.errorCorrectionLevel = errorCorrectionLevel;
+      this.errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
       this._dataCache = null;
       this._dataList = [];
       this._modules = null;
@@ -356,28 +356,18 @@ window.QRCode = (function () {
     }
 
     #qr8BitByte(data) {
-      const _mode = 1 << 2;
-      const _data = data;
       const _bytes = this.#stringToBytes(data);
-
-      const _this = {};
-
-      _this.getMode = function () {
-        return _mode;
+      return {
+        getMode: () => 1 << 2,
+        getLength: () => _bytes.length,
+        write: (buffer) => {
+          for (let i = 0; i < _bytes.length; i++) {
+            buffer.put(_bytes[i], 8);
+          }
+        },
       };
-
-      _this.getLength = function (buffer) {
-        return _bytes.length;
-      };
-
-      _this.write = function (buffer) {
-        for (let i = 0; i < _bytes.length; i++) {
-          buffer.put(_bytes[i], 8);
-        }
-      };
-
-      return _this;
     }
+
     #createData(typeNumber, errorCorrectionLevel, dataList) {
       const rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
 
@@ -748,13 +738,13 @@ window.QRCode = (function () {
 
     const getRsBlockTable = function (typeNumber, errorCorrectionLevel) {
       switch (errorCorrectionLevel) {
-        case 'L':
+        case QRErrorCorrectionLevel.L:
           return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
-        case 'M':
+        case QRErrorCorrectionLevel.M:
           return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
-        case 'Q':
+        case QRErrorCorrectionLevel.Q:
           return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
-        case 'H':
+        case QRErrorCorrectionLevel.H:
           return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
         default:
           return undefined;
