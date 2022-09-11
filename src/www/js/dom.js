@@ -386,6 +386,7 @@ const setupDom = async () => {
   // Remove loading screen
   document.getElementById('loadingPage').style.display = 'none';
   mnemonicInputLengthAdjust();
+  document.getElementById('scanSeedQR').onclick = scanSeedQR;
   // Pause for dramatic effect
   await sleep(200);
   // open the about panel on load
@@ -423,6 +424,54 @@ const thisBrowserIsShit = () => {
 
   // return result
   return isShit;
+};
+
+const scanSeedQR = () => {
+  const problemBox = (warningText) => {
+    const p = document.getElementById('scanSeedQRWarningBox');
+    p.innerText = warningText;
+    p.classList.toggle('hidden', !warningText);
+  };
+  QRScanner.initiate({
+    onResult: function (result) {
+      problemBox('');
+      if (/^\d+$/gm.test(result.data)) {
+        const words = result.data
+          .match(/[\d]{4}/g)
+          .map((num) => wordList[parseInt(num)])
+          .join(' ');
+        if (bip39.validateMnemonic(words)) {
+          toast('Calculating');
+          DOM.bip39Phrase.value = words;
+          mnemonicToSeedPopulate();
+        } else {
+          // invalid
+          problemBox('Invalid SeedQR Code');
+        }
+      } else if (result.dataRaw.length === 16 || result.dataRaw.length === 32) {
+        console.info('Compact SeedQR');
+        const hexSeed = result.dataRaw
+          .map((n) => n.toString(16).padStart(2, '0'))
+          .join('');
+        const words = bip39.entropyToMnemonic(hexSeed);
+        toast('Calculating');
+        DOM.bip39Phrase.value = words;
+        mnemonicToSeedPopulate();
+      } else {
+        problemBox('Invalid SeedQR Code');
+      }
+      adjustPanelHeight();
+    },
+    onError: function (err) {
+      problemBox('ERROR :::: ' + err);
+      adjustPanelHeight();
+    }, // optional
+    onTimeout: function () {
+      problemBox('TIMEOUT: Unable to scan the QR Code in 30 seconds');
+      adjustPanelHeight();
+    }, // optional
+    timeout: 30000,
+  });
 };
 
 // Load seed from mnemonic input
@@ -1246,14 +1295,14 @@ const resizeObserver = new ResizeObserver(() => {
 });
 
 // QR Code icon
-const addQRIcon = (element, data) => {
+const addQRIcon = (element, data, fingerprint) => {
   while (element.firstChild) {
     element.removeChild(element.lastChild);
   }
   const template = document.getElementById('qrTemplate');
   const clone = template.content.firstElementChild.cloneNode(true);
   clone.addEventListener('click', () => {
-    window.openQrModal(data);
+    openQrModal(data, fingerprint);
   });
   clone.style.display = hidePrivateData ? 'none' : '';
   element.append(clone);
@@ -1665,7 +1714,11 @@ const makeCompactSeedQR = () => {
     .match(/[01]{8}/g)
     .map((bin) => parseInt(bin, 2))
     .slice(0, (parseInt(phrase.split(' ').length) * 32) / 3 / 8);
-  addQRIcon(document.getElementById('compactSeedQR'), JSON.stringify(arr));
+  addQRIcon(
+    document.getElementById('compactSeedQR'),
+    JSON.stringify(arr),
+    true
+  );
 };
 /**
  * QR dialog / Modal
@@ -1683,16 +1736,60 @@ const clearQRModal = () => {
  * @param {Event} _event Not used
  * @param {string} section string for the key to get value from info.js
  */
-window.openQrModal = (data) => {
+const openQrModal = (data, fingerprint) => {
   clearQRModal();
   const qr = new QRCode(0, 'L');
   qr.addData(data);
-  console.log('qr :>> ', qr);
   qr.make();
-  DOM.qrModalDiv.innerHTML = qr.createSvgTag({
+  const qrSvg = qr.createSvgTag({
     cellSize: 5,
     scalable: true,
   });
+  if (fingerprint) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.id = 'seedQRCanvas';
+    canvas.setAttribute('height', 600);
+    canvas.setAttribute('width', 500);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#00151a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.clearRect(10, 10, canvas.width - 20, canvas.height - 20);
+    ctx.fillStyle = '#f99925';
+    ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+    ctx.fillStyle = '#00151a';
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+    ctx.strokeRect(30, 30, canvas.width - 60, 80);
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      `Fingerprint: ${
+        document.getElementById('bip32RootFingerprint').value
+      }     Notes:`,
+      canvas.width / 2,
+      45
+    );
+    const qrCode = new Image();
+    qrCode.addEventListener(
+      'load',
+      () => {
+        ctx.drawImage(qrCode, 0, 100, 500, 500);
+        qrCode.remove();
+      },
+      false
+    );
+    qrCode.src = `data:image/svg+xml;charset=UTF-8,${qrSvg
+      .replace(/[\n\r\t\0]|\s{6}/gm, '')
+      .replace(
+        `<rect width="100%" height="100%" fill="#fff" cx="0" cy="0"/>`,
+        ''
+      )
+      .replace(' version="1.1"', '')}`;
+    DOM.qrModalDiv.appendChild(canvas);
+    DOM.qrModalDiv.appendChild(qrCode);
+  } else {
+    DOM.qrModalDiv.innerHTML = qrSvg;
+  }
   DOM.qrModal.style.display = 'block';
   DOM.qrModalDiv.style.display = 'block';
 };
@@ -2036,7 +2133,8 @@ const calcBip85 = async () => {
     await sleep(500);
     addQRIcon(
       document.getElementById('bip85CompactSeedQR'),
-      JSON.stringify(arr)
+      JSON.stringify(arr),
+      true
     );
     adjustPanelHeight();
   } catch (e) {
