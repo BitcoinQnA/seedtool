@@ -2130,7 +2130,7 @@ const calcBip85 = async () => {
       .match(/[01]{8}/g)
       .map((bin) => parseInt(bin, 2))
       .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
-    await sleep(500);
+    await sleep(1000);
     addQRIcon(
       document.getElementById('bip85CompactSeedQR'),
       JSON.stringify(arr),
