@@ -1177,6 +1177,21 @@ const deriveChecksumBits = async (entropyBuffer) => {
   return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
 };
 
+const showXorQr = (ev) => {
+  let phrase = '';
+  if (ev.id === 'qrXorResult') {
+    phrase = document.getElementById('xorResult').value;
+  } else {
+    //qrXor
+    phrase = document.getElementById(
+      `xorSeed${ev.id.replace('qrXor', '')}`
+    ).value;
+  }
+  // openQrModal(data, fingerprint);
+  if (!bip39.validateMnemonic(phrase)) return;
+  openQrModal(phraseToCompactQrBytes(phrase), true);
+};
+
 // Calculate XOR
 const calculateXor = async () => {
   let result = getWordIndexes(phraseToWordArray());
@@ -1693,6 +1708,14 @@ window.onclick = function (event) {
 /**
  * SeedQR
  */
+(() => {
+  [...document.querySelectorAll('.xorQrIcon')].forEach((span) => {
+    const template = document.getElementById('qrTemplate');
+    const clone = template.content.firstElementChild.cloneNode(true);
+    clone.style.display = hidePrivateData ? 'none' : '';
+    span.append(clone);
+  });
+})();
 const clearCompactSeedQR = () => {
   const el = document.getElementById('compactSeedQR');
   while (el.firstChild) {
@@ -1703,20 +1726,23 @@ const clearCompactSeedQR = () => {
     canvas85.removeChild(canvas85.firstChild);
   }
 };
+const phraseToCompactQrBytes = (phrase) =>
+  JSON.stringify(
+    phrase
+      .split(' ')
+      .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
+      .join('')
+      .match(/[01]{8}/g)
+      .map((bin) => parseInt(bin, 2))
+      .slice(0, (parseInt(phrase.split(' ').length) * 32) / 3 / 8)
+  );
 const makeCompactSeedQR = () => {
   clearCompactSeedQR();
   const phrase = getPhrase();
   if (!bip39.validateMnemonic(phrase)) return;
-  const arr = phrase
-    .split(' ')
-    .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
-    .join('')
-    .match(/[01]{8}/g)
-    .map((bin) => parseInt(bin, 2))
-    .slice(0, (parseInt(phrase.split(' ').length) * 32) / 3 / 8);
   addQRIcon(
     document.getElementById('compactSeedQR'),
-    JSON.stringify(arr),
+    phraseToCompactQrBytes(phrase),
     true
   );
 };
@@ -1742,11 +1768,12 @@ const openQrModal = (data, fingerprint) => {
   qr.addData(data);
   qr.make();
   const qrSvg = qr.createSvgTag({
-    cellSize: 5,
+    cellSize: 17,
     scalable: true,
   });
   if (fingerprint) {
     const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
     const ctx = canvas.getContext('2d');
     canvas.id = 'seedQRCanvas';
     canvas.setAttribute('height', 600);
@@ -1759,16 +1786,14 @@ const openQrModal = (data, fingerprint) => {
     ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
     ctx.fillStyle = '#00151a';
     ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-    ctx.strokeRect(30, 30, canvas.width - 60, 80);
     ctx.font = '14px monospace';
     ctx.textAlign = 'center';
     ctx.fillText(
-      `Fingerprint: ${
-        document.getElementById('bip32RootFingerprint').value
-      }     Notes:`,
+      `Fingerprint: ${document.getElementById('bip32RootFingerprint').value}`,
       canvas.width / 2,
       45
     );
+    ctx.fillText(`Notes:`, canvas.width / 2, 460);
     const qrCode = new Image();
     qrCode.addEventListener(
       'load',
@@ -1778,15 +1803,11 @@ const openQrModal = (data, fingerprint) => {
       },
       false
     );
-    qrCode.src = `data:image/svg+xml;charset=UTF-8,${qrSvg
-      .replace(/[\n\r\t\0]|\s{6}/gm, '')
-      .replace(
-        `<rect width="100%" height="100%" fill="#fff" cx="0" cy="0"/>`,
-        ''
-      )
-      .replace(' version="1.1"', '')}`;
+    const regex = /<path d="([^]*?) "/gim;
+    const arr = regex.exec(qrSvg);
+    ctx.fill(new Path2D(arr[1]));
     DOM.qrModalDiv.appendChild(canvas);
-    DOM.qrModalDiv.appendChild(qrCode);
+    // DOM.qrModalDiv.appendChild(qrCode);
   } else {
     DOM.qrModalDiv.innerHTML = qrSvg;
   }
