@@ -1694,7 +1694,7 @@ window.openQrModal = (data) => {
     ],
     {
       errorCorrectionLevel: 'L',
-      width: 500,
+      scale: 16,
       color: {
         light: '#f99925ff',
         dark: '#00151aFF',
@@ -1706,6 +1706,8 @@ window.openQrModal = (data) => {
   );
   DOM.qrModal.style.display = 'block';
   DOM.qrModalCanvas.style.display = 'block';
+  const comp = getComputedStyle(DOM.qrModalCanvas);
+  DOM.qrModalCanvas.style.height = comp.width;
 };
 /**
  * Function to close the dialog when user clicks on the outside

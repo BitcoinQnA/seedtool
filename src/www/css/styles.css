@@ -503,6 +503,7 @@ select {
 #qrModalCanvas {
   margin: auto;
   padding: 5%;
+  max-width: 100%;
 }
 #compactSeedQRCanvas,
 #bip85CompactSeedQRCanvas {
