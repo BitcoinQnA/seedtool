@@ -1272,7 +1272,6 @@ const addQRIcon = (element, data, seedPhrase) => {
   });
   clone.style.display = hidePrivateData ? 'none' : '';
   element.append(clone);
-  console.log('added to ', element);
 };
 
 // Add Copy Buttons
@@ -2086,15 +2085,8 @@ const calcBip85 = async () => {
     DOM.bip85ChildKey.value = result;
     const phrase = master.deriveBIP39(0, length, index).toMnemonic();
     if (!bip39.validateMnemonic(phrase)) {
-      console.log('object :>> ', phrase);
       return;
     }
-    console.log(
-      'adding 85 QR Icon',
-      document.getElementById('bip85CompactSeedQR'),
-      phraseToCompactQrBytes(phrase),
-      phrase
-    );
     addQRIcon(
       document.getElementById('bip85CompactSeedQR'),
       phraseToCompactQrBytes(phrase),
