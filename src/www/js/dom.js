@@ -1188,9 +1188,8 @@ const showXorQr = (ev) => {
       `xorSeed${ev.id.replace('qrXor', '')}`
     ).value;
   }
-  // openQrModal(data, fingerprint);
   if (!bip39.validateMnemonic(phrase)) return;
-  openQrModal(phraseToCompactQrBytes(phrase), true);
+  openQrModal(phraseToCompactQrBytes(phrase), phrase);
 };
 
 // Calculate XOR
@@ -1311,17 +1310,18 @@ const resizeObserver = new ResizeObserver(() => {
 });
 
 // QR Code icon
-const addQRIcon = (element, data, fingerprint) => {
+const addQRIcon = (element, data, seedPhrase) => {
   while (element.firstChild) {
     element.removeChild(element.lastChild);
   }
   const template = document.getElementById('qrTemplate');
   const clone = template.content.firstElementChild.cloneNode(true);
   clone.addEventListener('click', () => {
-    openQrModal(data, fingerprint);
+    openQrModal(data, seedPhrase);
   });
   clone.style.display = hidePrivateData ? 'none' : '';
   element.append(clone);
+  console.log('added to ', element);
 };
 
 // Add Copy Buttons
@@ -1722,10 +1722,6 @@ const clearCompactSeedQR = () => {
   while (el.firstChild) {
     el.removeChild(el.firstChild);
   }
-  const canvas85 = document.getElementById('bip85CompactSeedQR');
-  while (canvas85.firstChild) {
-    canvas85.removeChild(canvas85.firstChild);
-  }
 };
 const phraseToCompactQrBytes = (phrase) =>
   JSON.stringify(
@@ -1744,7 +1740,7 @@ const makeCompactSeedQR = () => {
   addQRIcon(
     document.getElementById('compactSeedQR'),
     phraseToCompactQrBytes(phrase),
-    true
+    phrase
   );
 };
 /**
@@ -1758,21 +1754,20 @@ const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
   DOM.qrModalDiv.innerHTML = '';
 };
-/**
- * Open the QnA Explains dialog
- * @param {Event} _event Not used
- * @param {string} section string for the key to get value from info.js
- */
-const openQrModal = (data, fingerprint) => {
+const openQrModal = (dataString, seedPhrase = '') => {
   clearQRModal();
   const qr = new QRCode(0, 'L');
-  qr.addData(data);
+  qr.addData(dataString);
   qr.make();
+  const cellSize = seedPhrase.split(' ').length === 12 ? 17 : 15;
   const qrSvg = qr.createSvgTag({
-    cellSize: 17,
+    cellSize,
     scalable: true,
   });
-  if (fingerprint) {
+  if (seedPhrase) {
+    const fp = bip32
+      .fromSeed(bip39.mnemonicToSeedSync(seedPhrase))
+      .fingerprint.toString('hex');
     const canvas = document.createElement('canvas');
     canvas.style.width = '100%';
     const ctx = canvas.getContext('2d');
@@ -1782,18 +1777,13 @@ const openQrModal = (data, fingerprint) => {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#00151a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // ctx.clearRect(10, 10, canvas.width - 20, canvas.height - 20);
     ctx.fillStyle = '#f99925';
     ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
     ctx.fillStyle = '#00151a';
     ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
     ctx.font = '14px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(
-      `Fingerprint: ${document.getElementById('bip32RootFingerprint').value}`,
-      canvas.width / 2,
-      45
-    );
+    ctx.fillText(`Fingerprint: ${fp}`, canvas.width / 2, 45);
     ctx.fillText(`Notes:`, canvas.width / 2, 460);
     const qrCode = new Image();
     qrCode.addEventListener(
@@ -2144,19 +2134,20 @@ const calcBip85 = async () => {
     }
     DOM.bip85ChildKey.value = result;
     const phrase = master.deriveBIP39(0, length, index).toMnemonic();
-    if (!bip39.validateMnemonic(phrase)) return;
-    const arr = phrase
-      .split(' ')
-      .map((word) => wordList.indexOf(word).toString(2).padStart(11, '0'))
-      .join('')
-      .match(/[01]{8}/g)
-      .map((bin) => parseInt(bin, 2))
-      .slice(0, (parseInt(DOM.entropyMnemonicLengthSelect.value) * 32) / 3 / 8);
-    await sleep(1000);
+    if (!bip39.validateMnemonic(phrase)) {
+      console.log('object :>> ', phrase);
+      return;
+    }
+    console.log(
+      'adding 85 QR Icon',
+      document.getElementById('bip85CompactSeedQR'),
+      phraseToCompactQrBytes(phrase),
+      phrase
+    );
     addQRIcon(
       document.getElementById('bip85CompactSeedQR'),
-      JSON.stringify(arr),
-      true
+      phraseToCompactQrBytes(phrase),
+      phrase
     );
     adjustPanelHeight();
   } catch (e) {
@@ -2840,6 +2831,10 @@ const resetEverything = () => {
   }
   clearEntropyFeedback();
   clearCompactSeedQR();
+  const bip85QRIconDiv = document.getElementById('bip85CompactSeedQR');
+  while (bip85QRIconDiv.firstChild) {
+    bip85QRIconDiv.removeChild(bip85QRIconDiv.firstChild);
+  }
   DOM.bip39PhraseSplit.value = '';
   DOM.bip39Seed.value = '';
   DOM.pathAccountXprv.value = '';
