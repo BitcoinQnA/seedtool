@@ -157,6 +157,7 @@
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
           <li>📥 Enter your own (previously generated) mnemonic</li>
+          <li>📷 Use your device camera to scan a SeedQR</li>
           <li>🎲 Enter in your own entropy</li>
         </ul>
         <div class="tab">
@@ -164,6 +165,8 @@
             onclick="tabSelect(event, 'Generate_Random')">🤖</button>
           <button class="tabLinks" title="Show the Mnemonic Input Section"
             onclick="tabSelect(event, 'Input_Mnemonic')">📥</button>
+          <button class="tabLinks" title="Show the SeedQR Scan Section"
+            onclick="tabSelect(event, 'Input_SeedQR')">📷</button>
           <button class="tabLinks" title="Show the Entropy Section"
             onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
         </div>
@@ -326,6 +329,13 @@
             title="Click to load the words entered above into the seed tool">Load Seed</button>
           <p class="warning hidden" id="inputMnemonicError"></p>
           <br>
+        </div>
+        <div id="Input_SeedQR" class="tabContent">
+          <p>Scan SeedQR</p>
+          <p>Click the button below to use your device camera to scan a SeedQR code and load it into Seed Tool. If you
+            have not already granted Seed Tool permission to use your camera, you will be prompted to do that.</p>
+          <button id="scanSeedQR" class="btn">📷</button>
+          <p class="warning hidden" id="scanSeedQRWarningBox"></p>
         </div>
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
@@ -570,7 +580,8 @@
             id="xorRemoveSeed" onclick="removeXorSeed(event)">-</button><button class="btn" id="xorCalculate"
             onclick="calculateXor()">Recalculate</button>
           <div class="xor-seed">
-            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor2"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed2" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -578,7 +589,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor3"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed3" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -586,7 +598,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor4"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed4" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -594,7 +607,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor5"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed5" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -602,7 +616,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor6"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed6" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -610,7 +625,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor7"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed7" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -618,7 +634,8 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span></label>
+            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor8"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed8" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -626,7 +643,8 @@
             </div>
           </div>
           <div>
-            <label for="xorResult">XOR Result</label>
+            <label for="xorResult">XOR Result <span class="xorQrIcon" onclick="showXorQr(this)"
+                id="qrXorResult"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorResult" class="xor-result textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -1345,7 +1363,7 @@
   <div id="qrModal" class="modal">
     <div class="modal-content">
       <span id="modalClose" title="Close" onclick="clearQRModal();">&times;</span>
-      <canvas id="qrModalCanvas"></canvas>
+      <div id="qrModalDiv"></div>
     </div>
   </div>
   <div id="toast-background">

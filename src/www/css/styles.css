@@ -248,7 +248,7 @@ hr {
   transition: 0.3s;
 }
 .tab button {
-  width: calc(100% / 3);
+  width: calc(100% / 4);
 }
 .tab button:hover,
 .tab button.tab--active {
@@ -500,15 +500,23 @@ select {
   background-color: var(--q-blue);
 }
 #infoModalText,
-#qrModalCanvas {
+#qrModalDiv {
   margin: auto;
   padding: 5%;
   max-width: 100%;
 }
-#compactSeedQRCanvas,
-#bip85CompactSeedQRCanvas {
+#qrModalDiv > svg,
+#qrModalDiv > canvas {
+  max-width: 500px;
+  max-height: 500px;
   display: block;
   margin: auto;
+}
+#qrModalDiv > svg > rect {
+  fill: var(--q-orange);
+}
+#qrModalDiv > svg > path {
+  fill: var(--q-blue);
 }
 #compactSeedQR,
 #bip85CompactSeedQR {
@@ -516,6 +524,7 @@ select {
   border-radius: 5px;
   padding: 5px;
   background-color: var(--q-light-blue);
+  min-height: 32px;
 }
 .qr-icon {
   height: 1.1em;
