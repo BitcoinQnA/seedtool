@@ -503,6 +503,7 @@ select {
 #qrModalDiv {
   margin: auto;
   padding: 5%;
+  max-width: 100%;
 }
 #qrModalDiv > svg,
 #qrModalDiv > canvas {

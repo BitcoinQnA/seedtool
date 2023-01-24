@@ -25,7 +25,7 @@ console.log('Building HTML file...');
         array1[0],
         `<script async>
       ${js}
-      <`
+      </script>`
       );
       console.log(`${array1[1]} added!`);
       array1 = regex1.exec(result);
