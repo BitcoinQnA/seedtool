@@ -246,9 +246,7 @@ hr {
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
-}
-.tab button {
-  width: calc(100% / 4);
+  width: calc(100% / 3);
 }
 .tab button:hover,
 .tab button.tab--active {

@@ -387,7 +387,6 @@ const setupDom = async () => {
   // Remove loading screen
   document.getElementById('loadingPage').style.display = 'none';
   mnemonicInputLengthAdjust();
-  document.getElementById('scanSeedQR').onclick = scanSeedQR;
   // Pause for dramatic effect
   await sleep(200);
   // open the about panel on load
@@ -425,54 +424,6 @@ const thisBrowserIsShit = () => {
 
   // return result
   return isShit;
-};
-
-const scanSeedQR = () => {
-  const problemBox = (warningText) => {
-    const p = document.getElementById('scanSeedQRWarningBox');
-    p.innerText = warningText;
-    p.classList.toggle('hidden', !warningText);
-  };
-  QRScanner.initiate({
-    onResult: function (result) {
-      problemBox('');
-      if (/^\d+$/gm.test(result.data)) {
-        const words = result.data
-          .match(/[\d]{4}/g)
-          .map((num) => wordList[parseInt(num)])
-          .join(' ');
-        if (bip39.validateMnemonic(words)) {
-          toast('Calculating');
-          DOM.bip39Phrase.value = words;
-          mnemonicToSeedPopulate();
-        } else {
-          // invalid
-          problemBox('Invalid SeedQR Code');
-        }
-      } else if (result.dataRaw.length === 16 || result.dataRaw.length === 32) {
-        console.info('Compact SeedQR');
-        const hexSeed = result.dataRaw
-          .map((n) => n.toString(16).padStart(2, '0'))
-          .join('');
-        const words = bip39.entropyToMnemonic(hexSeed);
-        toast('Calculating');
-        DOM.bip39Phrase.value = words;
-        mnemonicToSeedPopulate();
-      } else {
-        problemBox('Invalid SeedQR Code');
-      }
-      adjustPanelHeight();
-    },
-    onError: function (err) {
-      problemBox('ERROR :::: ' + err);
-      adjustPanelHeight();
-    }, // optional
-    onTimeout: function () {
-      problemBox('TIMEOUT: Unable to scan the QR Code in 30 seconds');
-      adjustPanelHeight();
-    }, // optional
-    timeout: 30000,
-  });
 };
 
 // Load seed from mnemonic input

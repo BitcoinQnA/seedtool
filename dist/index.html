@@ -253,9 +253,7 @@ hr {
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
-}
-.tab button {
-  width: calc(100% / 4);
+  width: calc(100% / 3);
 }
 .tab button:hover,
 .tab button.tab--active {
@@ -827,7 +825,6 @@ label {
         <ul style="list-style-type: none; padding-inline-start: 0;">
           <li>🤖 Generate a cryptographically strong random mnemonic</li>
           <li>📥 Enter your own (previously generated) mnemonic</li>
-          <li>📷 Use your device camera to scan a SeedQR</li>
           <li>🎲 Enter in your own entropy</li>
         </ul>
         <div class="tab">
@@ -835,8 +832,6 @@ label {
             onclick="tabSelect(event, 'Generate_Random')">🤖</button>
           <button class="tabLinks" title="Show the Mnemonic Input Section"
             onclick="tabSelect(event, 'Input_Mnemonic')">📥</button>
-          <button class="tabLinks" title="Show the SeedQR Scan Section"
-            onclick="tabSelect(event, 'Input_SeedQR')">📷</button>
           <button class="tabLinks" title="Show the Entropy Section"
             onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
         </div>
@@ -999,13 +994,6 @@ label {
             title="Click to load the words entered above into the seed tool">Load Seed</button>
           <p class="warning hidden" id="inputMnemonicError"></p>
           <br>
-        </div>
-        <div id="Input_SeedQR" class="tabContent">
-          <p>Scan SeedQR</p>
-          <p>Click the button below to use your device camera to scan a SeedQR code and load it into Seed Tool. If you
-            have not already granted Seed Tool permission to use your camera, you will be prompted to do that.</p>
-          <button id="scanSeedQR" class="btn">📷</button>
-          <p class="warning hidden" id="scanSeedQRWarningBox"></p>
         </div>
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
