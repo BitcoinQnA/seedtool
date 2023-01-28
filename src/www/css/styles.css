@@ -664,3 +664,26 @@ label {
   display: block; /* add this */
   padding-top: 5px;
 }
+
+.seedQrInfo {
+  color: var(--q-orange);
+  cursor: pointer;
+}
+
+.seedQrInfo:hover .seedQrTooltip {
+  display: block;
+}
+
+.seedQrTooltip {
+  display: none;
+  background: var(--q-orange);
+  color: var(--q-blue);
+  margin-left: 28px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1000;
+  width: 300px;
+  border: 1px solid var(--q-white);
+  border-radius: 15px;
+  max-width: 50%;
+}

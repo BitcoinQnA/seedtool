@@ -480,7 +480,14 @@
           </div>
         </div>
         <div>
-          <label for="compactSeedQR">Compact SeedQR</label>
+          <label for="compactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+                <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                  passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a passphrase,
+                  the seed changes and so does the fingerprint so it is correct that the seedQR fingerprint will be
+                  different to your wallet fingerprint after you enter your passphrase.</p>
+              </span></span></label>
           <div id="compactSeedQR">
 
           </div>
@@ -570,8 +577,16 @@
             id="xorRemoveSeed" onclick="removeXorSeed(event)">-</button><button class="btn" id="xorCalculate"
             onclick="calculateXor()">Recalculate</button>
           <div class="xor-seed">
-            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor2"></span></label>
+            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor2"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed2" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -579,8 +594,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor3"></span></label>
+            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor3"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed3" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -588,8 +611,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor4"></span></label>
+            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor4"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed4" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -597,8 +628,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor5"></span></label>
+            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor5"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed5" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -606,8 +645,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor6"></span></label>
+            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor6"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed6" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -615,8 +662,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor7"></span></label>
+            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor7"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed7" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -624,8 +679,16 @@
             </div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span> <span class="xorQrIcon"
-                onclick="showXorQr(this)" id="qrXor8"></span></label>
+            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon"
+                onclick="showXorQr(this)" id="qrXor8"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span
+                  class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorSeed8" class="textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -633,8 +696,17 @@
             </div>
           </div>
           <div>
-            <label for="xorResult">XOR Result <span class="xorQrIcon" onclick="showXorQr(this)"
-                id="qrXorResult"></span></label>
+            <label for="xorResult">XOR Result&nbsp;&nbsp;<span class="xorQrIcon" onclick="showXorQr(this)"
+                id="qrXorResult"></span>
+              &nbsp;&nbsp;
+              <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorResult" class="xor-result textarea-input"
                 title="These words should be kept safe, secure and private." autocomplete="off" autocorrect="off"
@@ -1295,7 +1367,14 @@
                 class="bip85Field textarea-input" readonly title="BIP85 Child Key" rows="3"></textarea></div>
           </div>
           <div>
-            <label for="bip85CompactSeedQR">Compact SeedQR</label>
+            <label for="bip85CompactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+
+                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                </span></span></label>
             <div id="bip85CompactSeedQR" class="qr-button-holder">
             </div>
           </div>
@@ -1333,6 +1412,8 @@
               Rafael da Silva Rocha - MIT</a></li>
           <li><a href="https://github.com/Anderson-Juhasc/bip86" target="_blank" rel="noopener noreferrer">BIP86 by
               Anderson Juhasc - MIT</a></li>
+          <li><a href="https://github.com/SeedSigner/seedsigner/tree/dev/docs/seed_qr" target="_blank"
+              rel="noopener noreferrer">SeedQR by SeedSigner</a></li>
           <li><a href="http://www.denso-wave.com/en/en/" target="_blank" rel="noopener noreferrer">QR Code is a
               registered trademark of DENSO WAVE INCORPORATED.</a></li>
         </ul>
