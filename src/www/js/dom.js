@@ -647,22 +647,27 @@ const singleSigCalc = () => {
   const privInput = DOM.singleSigInput.value;
   try {
     let keyPair;
-    const legacy = () => {
-      const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-      return address;
-    };
-    const wrapped = () => {
-      const { address } = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey }),
+    const legacy = (network) => {
+      const { address } = bitcoin.payments.p2pkh({
+        pubkey: keyPair.publicKey,
+        network,
       });
       return address;
     };
-    const native = () => {
+    const wrapped = (network) => {
+      const { address } = bitcoin.payments.p2sh({
+        redeem: bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, network }),
+      });
+      return address;
+    };
+    const native = (network) => {
       const { address } = bitcoin.payments.p2wpkh({
         pubkey: keyPair.publicKey,
+        network,
       });
       return address;
     };
+    let net = networks.bitcoin.bip84;
     let isHex =
       privInput.length === 64 && !!privInput.match(/\p{Hex_Digit}{64}/isu);
     if (isHex) {
@@ -671,12 +676,21 @@ const singleSigCalc = () => {
       );
     } else {
       // it's a wif maybe?
-      if (!privInput.match(/^[5KL][1-9A-HJ-NP-Za-km-z]{50,51}$/))
+      if (!privInput.match(/^[5KL9c][1-9A-HJ-NP-Za-km-z]{50,51}$/))
         throw new Error('Invalid Private Key');
-      keyPair = bitcoin.ECPair.fromWIF(privInput);
+      net = /^[9c]/.test(privInput)
+        ? networks.testnet.bip84
+        : networks.bitcoin.bip84;
+      keyPair = bitcoin.ECPair.fromWIF(privInput, net);
     }
     pubResult.value = keyPair.publicKey.toString('hex');
-    addressResult.innerHTML = `LEGACY<span class="qr-button-holder" id="singleSigAddressQRLegacy"></span>:         ${legacy()}<br>WRAPPED SEGWIT<span class="qr-button-holder" id="singleSigAddressQRWrapped"></span>: ${wrapped()}<br>NATIVE SEGWIT<span class="qr-button-holder" id="singleSigAddressQRNative"></span>:  ${native()}`;
+    addressResult.innerHTML = `LEGACY<span class="qr-button-holder" id="singleSigAddressQRLegacy"></span>:         ${legacy(
+      net
+    )}<br>WRAPPED SEGWIT<span class="qr-button-holder" id="singleSigAddressQRWrapped"></span>: ${wrapped(
+      net
+    )}<br>NATIVE SEGWIT<span class="qr-button-holder" id="singleSigAddressQRNative"></span>:  ${native(
+      net
+    )}`;
     addQRIcon(
       addressResult.querySelector('#singleSigAddressQRLegacy'),
       legacy()
