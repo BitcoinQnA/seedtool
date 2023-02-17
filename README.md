@@ -26,6 +26,23 @@ Some common use cases for this tool include:-
 
 If you find this page useful, consider [donating](https://paynym.is/+purplefire896) some sats to the lead developer [SuperPhatArrow](https://github.com/SuperPhatArrow) or to any of the open source [libraries](https://bitcoiner.guide/seed/#libraries) this tool was built on top of.
 
+### Verification
+
+To verify the tool, take the following steps.
+
+1. Download and import the public copy of the PGP signing key owned by [Bitcoin QnA](https://github.com/BitcoinQnA)
+
+`curl -sL https://bitcoiner.guide/public.key | gpg --import`
+
+2. Download the latest [release](https://github.com/BitcoinQnA/seedtool/releases) `index.html` and `signature.txt` files
+
+3. Navigate to your Downloads folder and run `sha256sum index.html`
+
+4. Check for an exact hash match as the one published in the `signature.txt` file
+
+5. Run `gpg --verify signature.txt` and look for a **Good Signature from "BitcoinQnA <bitcoinqna@tutanota.com>"**
+
+
 # Development
 
 ### Install nodejs
