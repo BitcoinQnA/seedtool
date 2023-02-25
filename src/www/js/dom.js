@@ -1381,19 +1381,22 @@ const calcBip47 = () => {
   // make sure we have a valid seed and mnemonic
   if (!getPhrase() || !bip32RootKey) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
+  const myNetwork = bip47.utils.networks[DOM.bip47Network.value];
   myPayCode = bip47.fromWalletSeed(
     mySeed,
     0,
-    bip47.utils.networks[DOM.bip47Network.value]
+    myNetwork
   );
   const myNotify = myPayCode.derive(0);
   const myPrvKey = myNotify.privateKey;
   const myPubKey = myNotify.publicKey;
   const myNotificationAddress = myPayCode.getNotificationAddress();
+  const myWIF = bitcoin.ECPair.fromPrivateKey(myPrvKey, {
+    network: myNetwork
+  }).toWIF();
   DOM.bip47MyPaymentCode.value = myPayCode.toBase58();
   DOM.bip47MyNotificationAddress.value = myNotificationAddress;
-  DOM.bip47MyNotificationPrvKey.value =
-    bitcoin.ECPair.fromPrivateKey(myPrvKey).toWIF();
+  DOM.bip47MyNotificationPrvKey.value = myWIF;
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
   fetchRobotImages();
   addQRIcon(
@@ -1924,8 +1927,9 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
       const address = getAddress(addressNode);
       const addressPubKey = addressNode.publicKey.toString('hex');
       const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
-        addressNode.privateKey
-      ).toWIF();
+        addressNode.privateKey, {
+        network: network
+      }).toWIF();
       addressDataArray[i] = new AddressData(
         addressPath,
         address,
