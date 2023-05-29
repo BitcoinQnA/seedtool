@@ -406,6 +406,8 @@ select {
   padding: 8px;
   border-radius: 5px;
 }
+#multisigXpubsNoOfAddresses,
+#multisigXpubsStartIndex,
 #bip141ScriptSemantics,
 #derivedPathSelect,
 #bitcoinToolSelect,
@@ -513,10 +515,10 @@ select {
   margin: auto;
 }
 #qrModalDiv > svg > rect {
-  fill: var(--q-orange);
+  fill: var(--q-dark);
 }
 #qrModalDiv > svg > path {
-  fill: var(--q-dark);
+  fill: var(--q-orange);
 }
 #compactSeedQR,
 #bip85CompactSeedQR {
@@ -558,7 +560,7 @@ select {
   visibility: hidden;
   min-width: 250px;
   margin-left: -125px;
-  background-color: var(--q-orange);
+  background-color: var(--q-white);
   color: var(--q-dark);
   text-align: center;
   border-radius: 20px;
@@ -663,7 +665,7 @@ pre {
   word-wrap: break-word;
 }
 label {
-  display: block; /* add this */
+  display: block;
   padding-top: 5px;
 }
 
@@ -678,27 +680,14 @@ label {
 
 .seedQrTooltip {
   display: none;
-  background: var(--q-orange);
-  color: var(--q-dark);
+  background: var(--q-dark);
+  color: var(--q-white);
   margin-left: 28px;
   padding: 10px;
   position: absolute;
   z-index: 1000;
   width: 300px;
-  border: 1px solid var(--q-white);
+  border: 1px solid var(--q-orange);
   border-radius: 15px;
   max-width: 50%;
-}
-button {
-  color: #a0a0a0;
-  font-weight: 600;
-  border-radius: 0.3rem;
-  background-color: #23262a;
-  border-color: #a0a0a0;
-  padding: 0.6em 0.6em 0.6em 0.5em;
-}
-button:hover {
-  color: #fff;
-  background-color: #393c3f;
-  border-color: #f99925;
 }

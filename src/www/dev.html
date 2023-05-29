@@ -113,17 +113,6 @@
             href="https://github.com/SuperPhatArrow" target="_blank" rel="noopener noreferrer">SuperPhatArrow</a>.
         </p>
 
-
-<div class="tips">
-       <button
-      id="nostr-zap-target"
-      data-npub="npub1fguyv0p2whngcfzpdemjpganhmamp6ngwt26q35jcw0p368jmjkqy27896"
-      data-relays=""
-    >
-      Donate to SPA ⚡️
-    </button>
-  </div>
-
         <h2>Warning</h2>
         <p>
           <b>NEVER</b> use the online version of this tool to create or interact with seeds used to manage real bitcoin.
@@ -1319,12 +1308,12 @@
           </select>
         </fieldset>
         <p class="warning hidden" id="multisigXpubsError">No Error</p>
-        <p>
-          Display&nbsp;<input type="number" id="multisigXpubsNoOfAddresses" value="20" min="1" max="100"
-            title="Choose how many addresses to display, up to 100." class="multisig-oninput">&nbsp;
+        <div>
+          Display<input type="number" id="multisigXpubsNoOfAddresses" value="20" min="1" max="100"
+            title="Choose how many addresses to display, up to 100." class="multisig-oninput">
           addresses from index <input type="number" id="multisigXpubsStartIndex" value="0" min="0"
             title="Select an index to start calculating addresses from." class="multisig-oninput">
-        </p>
+        </div>
         <div>
           <a class="multisigXpubs-csv-download-link hidden private-data" title="Download a CSV file of these addresses"
             href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank"
@@ -1496,7 +1485,6 @@
       </svg>
     </span>
   </template>
-  <script src="/js/nostr-zap@0.4.0.js"></script>
   <script class="dev-script" src="js/lib/bitcoin.js"></script>
   <script class="dev-script" src="js/lib/bip32.js"></script>
   <script class="dev-script" src="js/lib/bip39.js"></script>

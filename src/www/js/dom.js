@@ -1394,17 +1394,13 @@ const calcBip47 = () => {
   if (!getPhrase() || !bip32RootKey) return;
   const mySeed = bip39.mnemonicToSeedSync(getPhrase(), getPassphrase());
   const myNetwork = bip47.utils.networks[DOM.bip47Network.value];
-  myPayCode = bip47.fromWalletSeed(
-    mySeed,
-    0,
-    myNetwork
-  );
+  myPayCode = bip47.fromWalletSeed(mySeed, 0, myNetwork);
   const myNotify = myPayCode.derive(0);
   const myPrvKey = myNotify.privateKey;
   const myPubKey = myNotify.publicKey;
   const myNotificationAddress = myPayCode.getNotificationAddress();
   const myWIF = bitcoin.ECPair.fromPrivateKey(myPrvKey, {
-    network: myNetwork
+    network: myNetwork,
   }).toWIF();
   DOM.bip47MyPaymentCode.value = myPayCode.toBase58();
   DOM.bip47MyNotificationAddress.value = myNotificationAddress;
@@ -1754,11 +1750,11 @@ const openQrModal = (dataString, seedPhrase = '') => {
     canvas.setAttribute('height', 600);
     canvas.setAttribute('width', 500);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = '#00151a';
+    ctx.fillStyle = '#a0a0a0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#f99925';
+    ctx.fillStyle = '#23262a';
     ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
-    ctx.fillStyle = '#00151a';
+    ctx.fillStyle = '#a0a0a0';
     ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
     ctx.font = '14px monospace';
     ctx.textAlign = 'center';
@@ -1775,6 +1771,7 @@ const openQrModal = (dataString, seedPhrase = '') => {
     );
     const regex = /<path d="([^]*?) "/gim;
     const arr = regex.exec(qrSvg);
+    ctx.fillStyle = '#f99925';
     ctx.fill(new Path2D(arr[1]));
     DOM.qrModalDiv.appendChild(canvas);
     // DOM.qrModalDiv.appendChild(qrCode);
@@ -1939,9 +1936,11 @@ const calculateAddresses = (startIndex = 0, endIndex = 19) => {
       const address = getAddress(addressNode);
       const addressPubKey = addressNode.publicKey.toString('hex');
       const addressPrivKey = bitcoin.ECPair.fromPrivateKey(
-        addressNode.privateKey, {
-        network: network
-      }).toWIF();
+        addressNode.privateKey,
+        {
+          network: network,
+        }
+      ).toWIF();
       addressDataArray[i] = new AddressData(
         addressPath,
         address,
