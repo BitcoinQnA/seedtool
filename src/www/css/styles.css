@@ -1,8 +1,8 @@
 :root {
-  --q-blue: #00151a;
-  --q-light-blue: #002933;
+  --q-dark: #23262a;
+  /* --q-light-blue: #002933; */
   --q-orange: #f99925;
-  --q-white: #f0e7d5;
+  --q-white: #a0a0a0;
 }
 * {
   box-sizing: border-box;
@@ -48,12 +48,12 @@ body {
     'Noto Color Emoji';
   color: var(--q-white);
   font-weight: normal;
-  background: var(--q-blue);
+  background: var(--q-dark);
   background-attachment: fixed !important;
   display: flex;
   min-height: calc(100vh + 1px);
   scrollbar-width: thin;
-  scrollbar-color: var(--q-white) var(--q-blue);
+  scrollbar-color: var(--q-white) var(--q-dark);
 }
 
 *::-webkit-scrollbar {
@@ -61,13 +61,13 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: var(--q-blue);
+  background: var(--q-dark);
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: var(--q-white);
   border-radius: 6px;
-  border: 3px solid var(--q-blue);
+  border: 3px solid var(--q-dark);
 }
 
 #homeLink {
@@ -121,7 +121,7 @@ p {
 
 .btn {
   background-color: var(--q-orange);
-  color: var(--q-blue);
+  color: var(--q-dark);
   border: 1px solid var(--q-white);
   margin: 10px;
   cursor: pointer;
@@ -143,7 +143,7 @@ p {
   box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
 }
 .btn:disabled {
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   color: var(--q-white);
   border: 1px solid var(--q-white);
   cursor: not-allowed;
@@ -164,12 +164,12 @@ p {
   background-color: var(--q-white);
   border-color: var(--q-orange);
   box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
-  color: var(--q-blue);
+  color: var(--q-dark);
   transform: translateY(1px);
 }
 .warning {
   color: var(--q-orange);
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   border: 1px solid var(--q-orange);
   border-radius: 5px;
   padding: 5px;
@@ -177,7 +177,7 @@ p {
   margin-bottom: 7px;
 }
 .warning > a {
-  color: var(--q-blue);
+  color: var(--q-dark);
   text-decoration: underline;
 }
 textarea {
@@ -186,7 +186,7 @@ textarea {
 .textarea-input,
 .lastWord-word,
 .inputMnemonic-word {
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-white);
   padding: 4px;
   border-radius: 5px;
@@ -196,7 +196,7 @@ hr {
 }
 .accordion {
   color: var(--q-white);
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   cursor: pointer;
   padding: 18px;
   width: 100%;
@@ -211,12 +211,12 @@ hr {
 }
 .accordion.accordion--active,
 .accordion:hover {
-  background-color: var(--q-light-blue);
-  color: var(--q-orange);
+  background-color: var(--q-orange);
+  color: var(--q-dark);
 }
 .panel {
   padding: 0 18px;
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
@@ -224,7 +224,7 @@ hr {
 .accordion:after {
   content: '\02795';
   font-size: 13px;
-  color: var(--q-blue);
+  color: var(--q-dark);
   float: right;
   margin-left: 5px;
 }
@@ -234,7 +234,7 @@ hr {
 .tab {
   overflow: hidden;
   border: 1px solid var(--q-white);
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   border-radius: 5px;
 }
 .tab button {
@@ -250,8 +250,8 @@ hr {
 }
 .tab button:hover,
 .tab button.tab--active {
-  background-color: var(--q-light-blue);
-  color: var(--q-orange);
+  background-color: var(--q-orange);
+  color: var(--q-dark);
 }
 .tabContent {
   display: none;
@@ -277,7 +277,7 @@ hr {
 }
 .entropy-details--detail--text,
 .address-details-text {
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-white);
   font-family: monospace;
   border-radius: 2px;
@@ -307,7 +307,7 @@ hr {
   height: 100%;
   width: 100%;
   backface-visibility: hidden;
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
   text-align: center;
   font-family: monospace;
@@ -360,15 +360,15 @@ hr {
 .autocomplete-items div {
   padding: 10px;
   cursor: pointer;
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   border-bottom: 1px solid var(--q-orange);
 }
 .autocomplete-items div:hover {
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
 }
 .autocomplete-active {
   background-color: var(--q-orange) !important;
-  color: var(--q-blue);
+  color: var(--q-dark);
 }
 .relative {
   position: relative;
@@ -399,7 +399,7 @@ hr {
   margin-top: 5px;
 }
 select {
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
   padding: 8px;
   border-radius: 5px;
@@ -415,7 +415,7 @@ select {
 #multisigXpubsChangeSelect,
 #bip47NetworkSelect {
   width: 100%;
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
   padding: 8px;
   border-radius: 5px;
@@ -425,7 +425,7 @@ select {
   color: var(--q-orange);
 }
 .info-button {
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
   border: 1px solid var(--q-orange);
   border-radius: 5px;
@@ -433,7 +433,7 @@ select {
   padding: 6px;
 }
 .info-button:hover {
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
 }
 .one-click-copy,
@@ -462,8 +462,8 @@ select {
 }
 
 .modal-content {
-  background-color: var(--q-white);
-  color: var(--q-blue);
+  background-color: var(--q-dark);
+  color: var(--q-white);
   margin: 8% auto;
   padding: 20px;
   width: 80%;
@@ -475,16 +475,16 @@ select {
 }
 .modal-content a,
 .modal-content a:any-link {
-  color: var(--q-light-blue);
+  color: var(--q-orange);
   text-decoration: underline;
 }
 
 #modalClose {
-  color: var(--q-blue);
+  color: var(--q-white);
   float: right;
   font-size: 28px;
   font-weight: bold;
-  border: 2px solid var(--q-blue);
+  border: 2px solid var(--q-white);
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 10px;
@@ -495,7 +495,7 @@ select {
   color: var(--q-orange);
   text-decoration: none;
   cursor: pointer;
-  background-color: var(--q-blue);
+  border: 2px solid var(--q-orange);
 }
 #infoModalText,
 #qrModalDiv {
@@ -514,19 +514,19 @@ select {
   fill: var(--q-orange);
 }
 #qrModalDiv > svg > path {
-  fill: var(--q-blue);
+  fill: var(--q-dark);
 }
 #compactSeedQR,
 #bip85CompactSeedQR {
   border: 1px solid var(--q-white);
   border-radius: 5px;
   padding: 5px;
-  background-color: var(--q-light-blue);
+  background-color: var(--q-dark);
   min-height: 32px;
 }
 .qr-icon {
   height: 1.1em;
-  background: var(--q-blue);
+  background: var(--q-dark);
   fill: var(--q-orange);
   cursor: pointer;
 }
@@ -541,8 +541,8 @@ select {
   position: absolute;
   right: 3px;
   top: 3px;
-  background: var(--q-blue);
-  box-shadow: 0 0 0 5px var(--q-blue);
+  background: var(--q-dark);
+  box-shadow: 0 0 0 5px var(--q-dark);
   cursor: copy;
 }
 .copy-wrapper {
@@ -557,7 +557,7 @@ select {
   min-width: 250px;
   margin-left: -125px;
   background-color: var(--q-orange);
-  color: var(--q-blue);
+  color: var(--q-dark);
   text-align: center;
   border-radius: 20px;
   padding: 16px;
@@ -636,7 +636,7 @@ select {
   font-size: 16px;
   line-height: 50px;
   border-radius: 25px;
-  background-color: var(--q-blue);
+  background-color: var(--q-dark);
   color: var(--q-orange);
   box-shadow: 0 0 4px 2px var(--q-orange);
   margin: 4px;
@@ -677,7 +677,7 @@ label {
 .seedQrTooltip {
   display: none;
   background: var(--q-orange);
-  color: var(--q-blue);
+  color: var(--q-dark);
   margin-left: 28px;
   padding: 10px;
   position: absolute;
