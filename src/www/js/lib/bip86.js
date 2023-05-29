@@ -54867,6 +54867,7 @@ object-assign
             fromMnemonic,
             fromXPrv,
             fromXPub,
+            getP2TRAddress,
           };
         },
         {
