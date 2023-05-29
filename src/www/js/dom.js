@@ -667,6 +667,12 @@ const singleSigCalc = () => {
       });
       return address;
     };
+    const taproot = (network) => {
+      return bip86.getP2TRAddress(
+        keyPair.publicKey,
+        network.bech32.startsWith('t')
+      );
+    };
     let net = networks.bitcoin.bip84;
     let isHex =
       privInput.length === 64 && !!privInput.match(/\p{Hex_Digit}{64}/isu);
@@ -690,18 +696,24 @@ const singleSigCalc = () => {
       net
     )}<br>NATIVE SEGWIT<span class="qr-button-holder" id="singleSigAddressQRNative"></span>:  ${native(
       net
+    )}<br>TAPROOT<span class="qr-button-holder" id="singleSigAddressQRTaproot"></span>:  ${taproot(
+      net
     )}`;
     addQRIcon(
       addressResult.querySelector('#singleSigAddressQRLegacy'),
-      legacy()
+      legacy(net)
     );
     addQRIcon(
       addressResult.querySelector('#singleSigAddressQRWrapped'),
-      wrapped()
+      wrapped(net)
     );
     addQRIcon(
       addressResult.querySelector('#singleSigAddressQRNative'),
-      native()
+      native(net)
+    );
+    addQRIcon(
+      addressResult.querySelector('#singleSigAddressQRTaproot'),
+      taproot(net)
     );
   } catch (error) {
     console.error(error);
