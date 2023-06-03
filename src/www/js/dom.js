@@ -1750,11 +1750,11 @@ const openQrModal = (dataString, seedPhrase = '') => {
     canvas.setAttribute('height', 600);
     canvas.setAttribute('width', 500);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = '#a0a0a0';
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#23262a';
+    ctx.fillStyle = '#fff';
     ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
-    ctx.fillStyle = '#a0a0a0';
+    ctx.fillStyle = '#000';
     ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
     ctx.font = '14px monospace';
     ctx.textAlign = 'center';
@@ -1771,7 +1771,7 @@ const openQrModal = (dataString, seedPhrase = '') => {
     );
     const regex = /<path d="([^]*?) "/gim;
     const arr = regex.exec(qrSvg);
-    ctx.fillStyle = '#f99925';
+    ctx.fillStyle = '#000';
     ctx.fill(new Path2D(arr[1]));
     DOM.qrModalDiv.appendChild(canvas);
     // DOM.qrModalDiv.appendChild(qrCode);

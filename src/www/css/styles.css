@@ -515,10 +515,10 @@ select {
   margin: auto;
 }
 #qrModalDiv > svg > rect {
-  fill: var(--q-dark);
+  fill: #fff;
 }
 #qrModalDiv > svg > path {
-  fill: var(--q-orange);
+  fill: #000;
 }
 #compactSeedQR,
 #bip85CompactSeedQR {
