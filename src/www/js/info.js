@@ -531,6 +531,7 @@ window.infoHtml = {
           <li>V2.0.0 - ADD: Predictive seed word input, Single Address Tool and BIP48 Multisig Address Derivation</li>
           <li>V2.0.1 - ADD: Version number to header.    FIX: BIP47 testnet derivation </li>
           <li>V2.0.2 - ADD: SeedQR Support and Testnet 'Single Address' Functionality  </li>
+          <li>V2.1.0 - FIX: Update color scheme, fix testnet WIF + address derivation, show Taproot addresses in Single address tool  </li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
