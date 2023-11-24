@@ -1490,6 +1490,8 @@ const calculateBip47Addresses = () => {
   const sendReceive = DOM.bip47SendReceive.value;
   const startIndex = parseInt(DOM.bip47StartIndex.value);
   const endIndex = startIndex + parseInt(DOM.bip47NoOfAddresses.value);
+  const network47 = bip47.utils.networks[DOM.bip47Network.value];
+
   try {
     const addressDataArray = [];
     for (let i = startIndex; i < endIndex; i++) {
@@ -1506,12 +1508,12 @@ const calculateBip47Addresses = () => {
         pCode = myPayCode;
         key = bobPayCode.derive(0).publicKey;
         prvKey = bitcoin.ECPair.fromPrivateKey(
-          pCode.derivePaymentPrivateKey(key, i)
+          pCode.derivePaymentPrivateKey(key, i),
+          { network: network47 }
         ).toWIF();
       }
       const payPubKey = pCode.derivePaymentPublicKey(key, i);
       let address;
-      const network47 = bip47.utils.networks[DOM.bip47Network.value];
       switch (addressType) {
         case 'P2PKH':
           address = bitcoin.payments.p2pkh({
