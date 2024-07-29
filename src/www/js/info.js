@@ -329,7 +329,7 @@ window.infoHtml = {
   BIP84: /*html*/ `
         <h3>BIP84: Derivation scheme for P2WPKH based accounts</h3>
         <p>
-          BIP84 defines the standard for deriving P2WPKH (Pay to Withness Public Key Hash) addresses, typically referred to as 'Native Segwit' addresses.
+          BIP84 defines the standard for deriving P2WPKH (Pay to Witness Public Key Hash) addresses, typically referred to as 'Native Segwit' addresses.
           Segwit addresses beginning with <b>'bc1q'</b> are the most commonly used address type for modern bitcoin wallets. This is due to their ability to construct
           smaller transactions that save the user fees when spending. <br/><br/>
 
