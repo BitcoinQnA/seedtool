@@ -125,7 +125,7 @@ const setupDom = async () => {
   // store html elements
   DOM.accordionButtons = document.querySelectorAll('.accordion');
   DOM.accordionPanels = document.querySelectorAll('.panel');
-  DOM.aboutPanel = document.getElementById('aboutPanel');
+  DOM.firstPanel = document.getElementById('firstPanel');
   DOM.allTabContents = document.querySelectorAll('.tabContent');
   DOM.allTabLinks = document.querySelectorAll('.tabLinks');
   DOM.allBipsContents = document.querySelectorAll('.bipsContent');
@@ -390,7 +390,7 @@ const setupDom = async () => {
   // Pause for dramatic effect
   await sleep(200);
   // open the about panel on load
-  DOM.aboutPanel.click();
+  DOM.firstPanel.click();
 };
 
 // Run setupDom function when the page has loaded
@@ -2812,7 +2812,7 @@ const resetEverything = () => {
   DOM.pathAccountXprv.value = '';
   DOM.pathAccountXpub.value = '';
   DOM.bip85Application.value = 'bip39';
-  DOM.bip85MnemonicLength.value = '12';
+  DOM.bip85MnemonicLength.value = '24';
   DOM.bip85Bytes.value = '64';
   DOM.bip85Index.value = '0';
   DOM.bip85ChildKey.value = '';
