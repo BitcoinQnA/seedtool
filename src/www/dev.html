@@ -102,7 +102,8 @@
         Mnemonic Phrase Generator
       </button>
       <div class="panel">
-        <p>Generates a secure deterministic mnemonic phrase from your input.</p>
+        <p>Generates a deterministic mnemonic phrase from your input.</p>
+        <p>Warning: Use this phrase exclusively for XOR operations. Do not use it for your wallet!</p>
         <textarea class="textarea-input" id="userInput" placeholder="Enter your words/sentences" rows="5"></textarea>
         <textarea class="textarea-input" id="mnemonicXor" placeholder="Enter mnemonic to xor" rows="2"></textarea>
         <button class="btn" onclick="generatePhrase()">Generate</button>
