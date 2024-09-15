@@ -192,7 +192,11 @@ const setupDom = async () => {
   DOM.bip85MnemonicLength = document.getElementById('bip85MnemonicLength');
   DOM.bip85Bytes = document.getElementById('bip85Bytes');
   DOM.bip85Index = document.getElementById('bip85Index');
-  DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
+  DOM.bip85ChildKey0 = document.getElementById('bip85ChildKey0');
+  DOM.bip85ChildKey1 = document.getElementById('bip85ChildKey1');
+  DOM.bip85ChildKey2 = document.getElementById('bip85ChildKey2');
+  DOM.bip85ChildKey3 = document.getElementById('bip85ChildKey3');
+  DOM.bip85ChildKey4 = document.getElementById('bip85ChildKey4');
   DOM.bip85LoadParent = document.getElementById('bip85LoadParent');
   DOM.bip85LoadChild = document.getElementById('bip85LoadChild');
   DOM.bip47UsePaynym = document.getElementById('bip47UsePaynym');
@@ -2097,21 +2101,28 @@ const calcBip85 = async () => {
   }
   try {
     const master = bip85.BIP85.fromBase58(rootKeyBase58);
-    let result;
     const index = parseInt(DOM.bip85Index.value);
     const length = parseInt(DOM.bip85MnemonicLength.value);
-    if (app === 'bip39') {
-      result = master.deriveBIP39(0, length, index).toMnemonic();
-    } else if (app === 'wif') {
-      result = master.deriveWIF(index).toWIF();
-    } else if (app === 'xprv') {
-      result = master.deriveXPRV(index).toXPRV();
-    } else if (app === 'hex') {
-      const bytes = parseInt(DOM.bip85Bytes.value);
+    const bytes = parseInt(DOM.bip85Bytes.value);
 
-      result = master.deriveHex(bytes, index).toEntropy();
+    // Generate child keys for 5 consecutive indices
+    for (let i = 0; i < 5; i++) {
+      let result;
+      if (app === 'bip39') {
+        result = master.deriveBIP39(0, length, index + i).toMnemonic();
+      } else if (app === 'wif') {
+        result = master.deriveWIF(index + i).toWIF();
+      } else if (app === 'xprv') {
+        result = master.deriveXPRV(index + i).toXPRV();
+      } else if (app === 'hex') {
+        result = master.deriveHex(bytes, index + i).toEntropy();
+      }
+      DOM[`bip85ChildKey${i}`].value = result;
+
+      // Update the index span for each field
+      document.querySelectorAll('.bip85IndexSpan')[i].textContent = index + i;
     }
-    DOM.bip85ChildKey.value = result;
+
     const phrase = master.deriveBIP39(0, length, index).toMnemonic();
     if (!bip39.validateMnemonic(phrase)) {
       return;
@@ -2125,7 +2136,10 @@ const calcBip85 = async () => {
   } catch (e) {
     toast('BIP85: ' + e.message);
     console.error('BIP85: ' + e.message);
-    DOM.bip85ChildKey.value = '';
+    // Clear all child key fields on error
+    for (let i = 0; i < 5; i++) {
+      DOM[`bip85ChildKey${i}`].value = '';
+    }
   }
 };
 
@@ -2815,7 +2829,11 @@ const resetEverything = () => {
   DOM.bip85MnemonicLength.value = '24';
   DOM.bip85Bytes.value = '64';
   DOM.bip85Index.value = '0';
-  DOM.bip85ChildKey.value = '';
+  DOM.bip85ChildKey0.value = '';
+  DOM.bip85ChildKey1.value = '';
+  DOM.bip85ChildKey2.value = '';
+  DOM.bip85ChildKey3.value = '';
+  DOM.bip85ChildKey4.value = '';
   DOM.bip47MyPaymentCode.value = '';
   DOM.bip47MyNotificationAddress.value = '';
   DOM.bip47MyNotificationPrvKey.value = '';

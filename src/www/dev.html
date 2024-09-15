@@ -992,58 +992,74 @@
           Explained</button>
         <p class="warning"><strong>Warning!</strong> This is an advanced feature and should only be used if you
           understand what it does. Click on the button above to learn more.</p>
-        <container class="bip85-container">
-          <div class="bip85-item">
-            <label for="bip85Application">BIP85 Application</label>
-            <select id="bip85Application" title="Select the format you would like">
-              <option value="bip39" selected>BIP39</option>
-              <option value="wif">WIF</option>
-              <option value="xprv">Xprv</option>
-              <option value="hex">Hex</option>
-            </select>
-          </div>
-          <div class="bip85-item bip85-mnemonic-length-input">
-            <label for="bip85MnemonicLength">BIP85 Mnemonic
-              Length</label>
-            <select id="bip85MnemonicLength" class="strength" title="Select the number of words to make.">
-              <option value="12">12</option>
-              <option value="18">18</option>
-              <option value="24" selected>24</option>
-            </select>
-          </div>
-          <div class="bip85-item bip85-bytes-input bip85">
-            <label for="bip85Bytes">BIP85 Bytes</label>
-            <input id="bip85Bytes" class="textarea-input" type="number" title="Select the number of bytes to use."
-              min="16" max="64" value="64" />
-          </div>
-
-          <div class="bip85-item bip85 bip85-index-input">
-            <label for="bip85Index">BIP85 Index</label>
-            <input id="bip85Index" class="textarea-input" type="number" title="Start from Zero and increment" min="0"
-              value="0" />
-          </div>
-
-          <div class="bip85-item bip85">
-            <label for="bip85ChildKey">BIP85 Child Key</label>
-            <div class="copy-wrapper private-data"><textarea id="bip85ChildKey" title="Private - don't share!"
-                class="bip85Field textarea-input" readonly title="BIP85 Child Key" rows="3"></textarea></div>
-          </div>
-          <div>
-            <label for="bip85CompactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
-                  <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
-                    passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
-
-                  <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
-                    passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
-                    fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
-                </span></span></label>
-            <div id="bip85CompactSeedQR" class="qr-button-holder">
+          <container class="bip85-container">
+            <div class="bip85-item">
+              <label for="bip85Application">BIP85 Application</label>
+              <select id="bip85Application" title="Select the format you would like">
+                <option value="bip39" selected>BIP39</option>
+                <option value="wif">WIF</option>
+                <option value="xprv">Xprv</option>
+                <option value="hex">Hex</option>
+              </select>
             </div>
-          </div>
-          <button disabled="disabled" class="btn" id="bip85LoadParent" title="No parent key to load">Load
-            Parent</button>
-          <button class="btn" id="bip85LoadChild" title="Load this Child Key into the seed tool">Load Child</button>
-        </container>
+            <div class="bip85-item bip85-mnemonic-length-input">
+              <label for="bip85MnemonicLength">BIP85 Mnemonic Length</label>
+              <select id="bip85MnemonicLength" class="strength" title="Select the number of words to make.">
+                <option value="12">12</option>
+                <option value="18">18</option>
+                <option value="24" selected>24</option>
+              </select>
+            </div>
+            <div class="bip85-item bip85-bytes-input bip85">
+              <label for="bip85Bytes">BIP85 Bytes</label>
+              <input id="bip85Bytes" class="textarea-input" type="number" title="Select the number of bytes to use."
+                min="16" max="64" value="64" />
+            </div>
+            <div class="bip85-item bip85 bip85-index-input">
+              <label for="bip85Index">BIP85 Index</label>
+              <input id="bip85Index" class="textarea-input" type="number" title="Start from Zero and increment" min="0"
+                value="0" />
+            </div>
+            <div class="bip85-item bip85">
+              <label for="bip85ChildKey0">BIP85 Child Key (Index <span class="bip85IndexSpan">0</span>)</label>
+              <div class="copy-wrapper private-data"><textarea id="bip85ChildKey0" title="Private - don't share!"
+                  class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+            </div>
+            <div class="bip85-item bip85">
+              <label for="bip85ChildKey1">BIP85 Child Key (Index <span class="bip85IndexSpan">1</span>)</label>
+              <div class="copy-wrapper private-data"><textarea id="bip85ChildKey1" title="Private - don't share!"
+                  class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+            </div>
+            <div class="bip85-item bip85">
+              <label for="bip85ChildKey2">BIP85 Child Key (Index <span class="bip85IndexSpan">2</span>)</label>
+              <div class="copy-wrapper private-data"><textarea id="bip85ChildKey2" title="Private - don't share!"
+                  class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+            </div>
+            <div class="bip85-item bip85">
+              <label for="bip85ChildKey3">BIP85 Child Key (Index <span class="bip85IndexSpan">3</span>)</label>
+              <div class="copy-wrapper private-data"><textarea id="bip85ChildKey3" title="Private - don't share!"
+                  class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+            </div>
+            <div class="bip85-item bip85">
+              <label for="bip85ChildKey4">BIP85 Child Key (Index <span class="bip85IndexSpan">4</span>)</label>
+              <div class="copy-wrapper private-data"><textarea id="bip85ChildKey4" title="Private - don't share!"
+                  class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+            </div>
+            <div>
+              <label for="bip85CompactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+                    <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
+                      passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
+  
+                    <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
+                      passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
+                      fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+                  </span></span></label>
+              <div id="bip85CompactSeedQR" class="qr-button-holder">
+              </div>
+            </div>
+            <button disabled="disabled" class="btn" id="bip85LoadParent" title="No parent key to load">Load Parent</button>
+            <button class="btn" id="bip85LoadChild" title="Load this Child Key into the seed tool">Load Child</button>
+          </container>
       </div>
       <hr>
       <button class="accordion" title="Click to expand this section">
