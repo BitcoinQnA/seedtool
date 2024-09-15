@@ -105,13 +105,18 @@
         <p>Generates a deterministic mnemonic phrase from your input.</p>
         <p>Warning: Use this phrase exclusively for XOR operations. Do not use it for your wallet!</p>
         <textarea class="textarea-input" id="userInput" placeholder="Enter your words/sentences" rows="5"></textarea>
-        <textarea class="textarea-input" id="mnemonicXor" placeholder="Enter mnemonic to xor" rows="2"></textarea>
+        <div class="relative">
+          <textarea class="textarea-input" id="mnemonicXor" placeholder="Enter mnemonic to xor" rows="2"></textarea>
+          <span class="qr-icon" id="mnemonicXorQrIcon" title="Scan QR code" style="position: absolute; top: 10px; right: 15px;">📷</span>
+        </div>
         <button class="btn" onclick="generatePhrase()">Generate</button>
         <div>
           <b>Result</b>
           <textarea class="textarea-input" id="mnemonic" rows="2"></textarea>
+          <button class="btn" onclick="loadSeed('mnemonic')">Load Seed</button>
           <b>XOR Result</b>
           <textarea class="textarea-input" id="mnemonicXorResult" rows="2"></textarea>
+          <button class="btn" onclick="loadSeed('mnemonicXorResult')">Load Seed</button>
         </div>
         <br>
       </div>
@@ -1522,6 +1527,8 @@
   <script class="dev-script" src="js/lib/kreutix/jsbip39.js"></script>
   <script class="dev-script" src="js/lib/kreutix/wordlist_english.js"></script>
   <script class="dev-script" src="js/lib/kreutix/deterministic_phrase.js"></script>
+  <script class="dev-script" src="js/lib/kreutix//jsQR.min.js"></script>
+  <script class="dev-script" src="js/lib/kreutix/qr-scanner.js"></script>
   <script id="websocket">// NOTE: This script tag MUST be the last on the page!
     let timer;
     const setTimer = () => {

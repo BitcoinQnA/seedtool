@@ -67,3 +67,40 @@ async function generatePhrase() {
         document.getElementById('mnemonicXorResult').value = _bip39.toMnemonic(hexToBytes(xorResult));
     }
 }
+
+// Add this function at the end of the file
+function loadSeed(sourceId) {
+    const sourceText = document.getElementById(sourceId).value;
+    if (sourceText) {
+        // Set the value in the BIP39 Mnemonic textarea
+        const bip39PhraseElement = document.getElementById('bip39Phrase');
+        bip39PhraseElement.value = sourceText;
+        
+        // Simulate user input
+        bip39PhraseElement.focus();
+        bip39PhraseElement.dispatchEvent(new Event('input', { bubbles: true }));
+        bip39PhraseElement.dispatchEvent(new Event('change', { bubbles: true }));
+        bip39PhraseElement.blur();
+        
+        // Scroll to the Seed Generation/Input section
+        const seedGenerationButton = document.querySelector('button.accordion[title="Click to expand this section"]');
+        seedGenerationButton.scrollIntoView({
+            behavior: 'smooth'
+        });
+        
+        // Expand the Seed Generation/Input section if it's collapsed
+        const seedGenerationPanel = seedGenerationButton.nextElementSibling;
+        if (!seedGenerationPanel.style.maxHeight) {
+            seedGenerationButton.click(); // This should trigger the expansion
+        }
+
+        // Switch to the "Input Mnemonic" tab if it exists
+        const inputMnemonicTab = document.querySelector('.tabLinks[title="Show the Mnemonic Input Section"]');
+        if (inputMnemonicTab) {
+            inputMnemonicTab.click();
+        }
+
+    } else {
+        alert('No seed to load. Please generate a phrase first.');
+    }
+}
