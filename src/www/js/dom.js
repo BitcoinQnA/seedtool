@@ -198,7 +198,6 @@ const setupDom = async () => {
   DOM.bip85ChildKey3 = document.getElementById('bip85ChildKey3');
   DOM.bip85ChildKey4 = document.getElementById('bip85ChildKey4');
   DOM.bip85LoadParent = document.getElementById('bip85LoadParent');
-  DOM.bip85LoadChild = document.getElementById('bip85LoadChild');
   DOM.bip47UsePaynym = document.getElementById('bip47UsePaynym');
   DOM.bip47MyPaymentCode = document.getElementById('bip47MyPaymentCode');
   DOM.bip47MyNotificationAddress = document.getElementById(
@@ -319,7 +318,6 @@ const setupDom = async () => {
   DOM.bip85Bytes.oninput = calcBip85;
   DOM.bip85Index.oninput = calcBip85;
   DOM.bip85LoadParent.onclick = bip85LoadParent;
-  DOM.bip85LoadChild.onclick = bip85LoadChild;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -2123,15 +2121,6 @@ const calcBip85 = async () => {
       document.querySelectorAll('.bip85IndexSpan')[i].textContent = index + i;
     }
 
-    const phrase = master.deriveBIP39(0, length, index).toMnemonic();
-    if (!bip39.validateMnemonic(phrase)) {
-      return;
-    }
-    addQRIcon(
-      document.getElementById('bip85CompactSeedQR'),
-      phraseToCompactQrBytes(phrase),
-      phrase
-    );
     adjustPanelHeight();
   } catch (e) {
     toast('BIP85: ' + e.message);
@@ -2141,6 +2130,28 @@ const calcBip85 = async () => {
       DOM[`bip85ChildKey${i}`].value = '';
     }
   }
+};
+
+// Function to load a specific child key
+const bip85LoadSpecificChild = (childIndex) => {
+  // Save current key as parent
+  const phrase = getPhrase();
+  const passphrase = getPassphrase();
+  if (!phrase) {
+    toast('Current Mnemonic not found');
+    return;
+  }
+  bip85Lineage.push({ phrase, passphrase });
+  // Enable load parent btn
+  if (DOM.bip85LoadParent.disabled) {
+    DOM.bip85LoadParent.disabled = false;
+    DOM.bip85LoadParent.title = 'Load the parent key back into the tool';
+  }
+  // Load child
+  const childKey = DOM[`bip85ChildKey${childIndex}`].value;
+  DOM.bip39Phrase.value = childKey;
+  toast('Loading Child Seed...');
+  mnemonicToSeedPopulate();
 };
 
 // Return to the parent of the current seed, if one exists
@@ -2817,10 +2828,6 @@ const resetEverything = () => {
   }
   clearEntropyFeedback();
   clearCompactSeedQR();
-  const bip85QRIconDiv = document.getElementById('bip85CompactSeedQR');
-  while (bip85QRIconDiv.firstChild) {
-    bip85QRIconDiv.removeChild(bip85QRIconDiv.firstChild);
-  }
   DOM.bip39PhraseSplit.value = '';
   DOM.bip39Seed.value = '';
   DOM.pathAccountXprv.value = '';

@@ -114,6 +114,8 @@
           <b>Result</b>
           <textarea class="textarea-input" id="mnemonic" rows="2"></textarea>
           <button class="btn" onclick="loadSeed('mnemonic')">Load Seed</button>
+        </div>
+        <div>
           <b>XOR Result</b>
           <textarea class="textarea-input" id="mnemonicXorResult" rows="2"></textarea>
           <button class="btn" onclick="loadSeed('mnemonicXorResult')">Load Seed</button>
@@ -1024,41 +1026,33 @@
               <label for="bip85ChildKey0">BIP85 Child Key (Index <span class="bip85IndexSpan">0</span>)</label>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey0" title="Private - don't share!"
                   class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+                <button class="btn" onclick="bip85LoadSpecificChild(0)">Load Child</button>
             </div>
             <div class="bip85-item bip85">
               <label for="bip85ChildKey1">BIP85 Child Key (Index <span class="bip85IndexSpan">1</span>)</label>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey1" title="Private - don't share!"
                   class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+                <button class="btn" onclick="bip85LoadSpecificChild(1)">Load Child</button>
             </div>
             <div class="bip85-item bip85">
               <label for="bip85ChildKey2">BIP85 Child Key (Index <span class="bip85IndexSpan">2</span>)</label>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey2" title="Private - don't share!"
                   class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+                <button class="btn" onclick="bip85LoadSpecificChild(2)">Load Child</button>
             </div>
             <div class="bip85-item bip85">
               <label for="bip85ChildKey3">BIP85 Child Key (Index <span class="bip85IndexSpan">3</span>)</label>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey3" title="Private - don't share!"
                   class="bip85Field textarea-input" readonly rows="3"></textarea></div>
+                <button class="btn" onclick="bip85LoadSpecificChild(3)">Load Child</button>
             </div>
             <div class="bip85-item bip85">
               <label for="bip85ChildKey4">BIP85 Child Key (Index <span class="bip85IndexSpan">4</span>)</label>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey4" title="Private - don't share!"
                   class="bip85Field textarea-input" readonly rows="3"></textarea></div>
-            </div>
-            <div>
-              <label for="bip85CompactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
-                    <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your
-                      passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
-  
-                    <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a
-                      passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR
-                      fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
-                  </span></span></label>
-              <div id="bip85CompactSeedQR" class="qr-button-holder">
-              </div>
+                <button class="btn" onclick="bip85LoadSpecificChild(4)">Load Child</button>
             </div>
             <button disabled="disabled" class="btn" id="bip85LoadParent" title="No parent key to load">Load Parent</button>
-            <button class="btn" id="bip85LoadChild" title="Load this Child Key into the seed tool">Load Child</button>
           </container>
       </div>
       <hr>
