@@ -1,6 +1,6 @@
 let videoStream;
 
-function startQRScanner(targetElementId) {
+function startQRScanner(targetElementId, callback) {
     const popup = document.createElement('div');
     popup.style.cssText = `
         position: fixed;
@@ -61,7 +61,12 @@ function startQRScanner(targetElementId) {
             });
             if (code) {
                 videoStream.getTracks().forEach(track => track.stop());
-                document.getElementById(targetElementId).value = code.data;
+                if (targetElementId) {
+                    document.getElementById(targetElementId).value = code.data;
+                }
+                if (callback && typeof callback === 'function') {
+                    callback(code.data);
+                }
                 document.body.removeChild(popup);
                 return;
             }
@@ -72,4 +77,17 @@ function startQRScanner(targetElementId) {
 
 document.getElementById('mnemonicXorQrIcon').addEventListener('click', function() {
     startQRScanner('mnemonicXor');
+});
+
+document.getElementById('mnemonicInputQrIcon').addEventListener('click', function() {
+    startQRScanner(null, function(result) {
+        const words = result.split(' ');
+        const inputs = document.querySelectorAll('.inputMnemonic-word');
+        words.forEach((word, index) => {
+            if (inputs[index]) {
+                inputs[index].value = word;
+            }
+        });
+        mnemonicInputSeedLoad();
+    });
 });
