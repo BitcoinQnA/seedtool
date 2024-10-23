@@ -296,7 +296,7 @@ window.infoHtml = {
         receiving addresses for Bob without having to directly interact with him and knowing only his public payment code. <br/><br/>
         
         In this section you'll see the payment code derived from your seed words, this can be share publicly via any website or communication method. Below that are the notification address and 
-        associated public and private keys which are to be kept secret. If using the tool online you can also enable the PayNym.is connection to see a preview
+        associated public and private keys which are to be kept secret. If using the tool online you can also enable the PayNym.rs connection to see a preview
         of the avatar associated with your payment code, learn more about those <a href="https://bitcoiner.guide/paynym" target="_blank" rel="noopener noreferrer">here</a>. <br/><br/>
         
         Entering another payment code into the 'Counterparty Details' field will generate unique addresses to enable bitcoin sends to that entity 
