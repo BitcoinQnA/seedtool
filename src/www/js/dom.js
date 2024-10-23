@@ -359,6 +359,8 @@ const setupDom = async () => {
   DOM.bip39PassGenInput.oninput = diceToPassphrase;
   // Add event listener to generate new mnemonic
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
+  // Add event listener to paste mnemonic
+  DOM.mnemonicInputs.forEach(div => div.addEventListener('paste', pasteMnemonic));
   // update pointer to word list
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
   // show user when connected to a network for security
@@ -2655,6 +2657,27 @@ const generateNewMnemonic = () => {
   DOM.bip39Phrase.value = createMnemonic();
   // DOM.knownInputTextarea.value = mnemonic;
   mnemonicToSeedPopulate();
+};
+
+const pasteMnemonic = (event) => {
+  event.preventDefault();
+  
+  const pastedText = (event.clipboardData || window.clipboardData).getData('text') || '';
+  const words = pastedText.toLowerCase().trim().split(/\s+/);
+
+  if (![12, 15, 18, 21, 24].includes(words.length)) {
+    return;
+  }
+
+  DOM.mnemonicLengthSelect.value = words.length;
+  mnemonicInputLengthAdjust();
+
+  for (let [i, word] of words.entries()) {
+    const input = DOM.mnemonicInputs[i].querySelector('input.inputMnemonic-word');
+    input.value = word;
+  }
+
+  mnemonicInputSeedLoad();
 };
 
 // Split the mnemonic phrase over 3 cards
