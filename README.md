@@ -24,7 +24,7 @@ Some common use cases for this tool include:-
 
 ### Donations
 
-If you find this page useful, consider [donating](https://paynym.is/+purplefire896) some sats to the lead developer [SuperPhatArrow](https://github.com/SuperPhatArrow) or to any of the open source [libraries](https://bitcoiner.guide/seed/#libraries) this tool was built on top of.
+If you find this page useful, consider [donating](https://paynym.rs/+cloudystand17) some sats to the lead developer [SuperPhatArrow](https://github.com/SuperPhatArrow) or to any of the open source [libraries](https://bitcoiner.guide/seed/#libraries) this tool was built on top of.
 
 ### Verification
 

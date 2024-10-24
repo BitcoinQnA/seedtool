@@ -1342,9 +1342,9 @@ const togglePaynym = () => {
   fetchRobotImages();
 };
 
-// Use paynym.is robohash api to get a robot image
+// Use paynym.rs robohash api to get an avatar
 const fetchRobotImages = async () => {
-  const url = 'https://paynym.is/preview/';
+  const url = 'https://paynym.rs/preview/';
   const myPayCode = normalizeString(DOM.bip47MyPaymentCode.value);
   const bobPayCode = normalizeString(DOM.bip47CPPaymentCode.value);
   // Only if user wants it and there is at least one payment code
