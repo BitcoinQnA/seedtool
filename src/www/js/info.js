@@ -306,8 +306,7 @@ window.infoHtml = {
         
         
          
-        At the time of writing, the only wallets supporting BIP47 are Samourai and Sparrow. Although here is active development for implementations
-        into BDK and BlueWallet. <br/><br/>
+        At the time of writing, the wallets supporting BIP47 are Ashigaru, BlueWallet, Samourai, Sparrow and Stack Wallet.<br/><br/>
 
         </p>
         <p>
