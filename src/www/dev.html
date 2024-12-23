@@ -1385,6 +1385,26 @@
         </container>
       </div>
       <hr>
+      <button class="accordion" title="Click to expand this section">BIP85: Deterministic Passwords</button>
+      <div class="panel">
+        <button class="btn" title="Click to learn more about BIP85" onclick="openInfoModal(event, 'BIP85PWD')">BIP85 PWD
+          Explained</button>
+          <div class="bip85-item bip85-bytes-input bip85">
+            <label for="bip85PWDLength">Password Length</label>
+            <input id="bip85PWDLength" class="textarea-input" type="number" title="Select the number of bytes to use."
+              min="20" max="86" value="21" step="1" />
+          </div>
+          <div class="bip85-item bip85 bip85-index-input">
+            <label for="bip85PWDIndex">BIP85 PWD Index</label>
+            <input id="bip85PWDIndex" class="textarea-input" type="number" title="Start from Zero and increment" min="0"
+              value="0" step="1" />
+          </div>
+          <div class="bip85-item bip85">
+            <label for="bip85PWDPassword">BIP85 Password</label>
+            <div class="copy-wrapper private-data"><textarea id="bip85PWDPassword" title="Private - don't share!"
+                class="bip85Field textarea-input" readonly title="BIP85 Password" rows="3"></textarea></div>
+          </div>
+      </div>
       <button class="accordion" title="Click to expand this section">Credits and licenses</button>
       <div class="panel">
         <button class="btn" title="Click to see the changelog"

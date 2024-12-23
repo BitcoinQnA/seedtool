@@ -195,6 +195,9 @@ const setupDom = async () => {
   DOM.bip85ChildKey = document.getElementById('bip85ChildKey');
   DOM.bip85LoadParent = document.getElementById('bip85LoadParent');
   DOM.bip85LoadChild = document.getElementById('bip85LoadChild');
+  DOM.bip85PWDLength = document.getElementById('bip85PWDLength');
+  DOM.bip85PWDIndex = document.getElementById('bip85PWDIndex');
+  DOM.bip85PWDPassword = document.getElementById('bip85PWDPassword');
   DOM.bip47UsePaynym = document.getElementById('bip47UsePaynym');
   DOM.bip47MyPaymentCode = document.getElementById('bip47MyPaymentCode');
   DOM.bip47MyNotificationAddress = document.getElementById(
@@ -309,6 +312,9 @@ const setupDom = async () => {
     calcBip47CounterParty();
     calculateBip47Addresses();
   };
+  // listen for bip85PWD changes
+  DOM.bip85PWDIndex.oninput = calcBip85Password;
+  DOM.bip85PWDLength.oninput = calcBip85Password;
   // listen for bip85 changes
   DOM.bip85Application.oninput = calcBip85;
   DOM.bip85MnemonicLength.oninput = calcBip85;
@@ -2085,6 +2091,28 @@ const displayAccountKeys = () => {
   addQRIcon(document.getElementById('pathAccountXpubQR'), xpub);
 };
 
+// Calculate BIP85 Password
+const calcBip85Password = async () => {
+  const index = DOM.bip85PWDIndex.value;
+  const length = parseInt(DOM.bip85PWDLength.value);
+  const path = `m/83696968'/707764'/${length}'/${index}'`
+  const rootKeyBase58 = DOM.bip32RootKey.value;
+  if (!rootKeyBase58) {
+    return;
+  }
+  try {
+    const master = bip85.BIP85.fromBase58(rootKeyBase58);
+    const child = master.derive(path); // hex string
+    // one liner to convert hex to base64, remove whitespace and new lines, then slice to desired length removing padding
+    const pwd = btoa(child.match(/\w{2}/g).map(a=>String.fromCharCode(parseInt(a, 16))).join("")).replaceAll(/\s/g, '').slice(0, length);
+    DOM.bip85PWDPassword.value = pwd;
+  } catch (e) {
+    toast('BIP85: ' + e.message);
+    console.error('BIP85: ' + e.message);
+    DOM.bip85PWDPassword.value = '';
+  }
+}
+
 // Calculate and populate the BIP85 section
 const calcBip85 = async () => {
   const app = DOM.bip85Application.value;
@@ -2461,6 +2489,7 @@ const setMnemonicFromEntropy = async () => {
   calculateAddresses();
   fillBip32Keys();
   calcBip85();
+  calcBip85Password();
   calcBip47();
 };
 
@@ -2487,6 +2516,7 @@ const setMnemonicFromRawEntropy = async (entropy) => {
   calculateAddresses();
   fillBip32Keys();
   calcBip85();
+  calcBip85Password();
   calcBip47();
 };
 
@@ -2805,6 +2835,7 @@ const mnemonicToSeedPopulate = debounce(async () => {
     calculateAddresses();
     fillBip32Keys();
     calcBip85();
+    calcBip85Password();
     calcBip47();
   }
   fillRandomXorSeeds();
