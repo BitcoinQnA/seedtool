@@ -363,7 +363,7 @@ window.infoHtml = {
          BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can deterministically derive multiple 'Child Seeds' from a single master
          seed. BIP85 Passwords are a way to convert the deterministic entropy from BIP85 into a password by encoding the entropy in Base64 encoding. This enables a user who might have provided their own entropy
          to securely generate their own master mnemonic seed (perhaps with the help of this tool), to then generate many high entropy passwords for use with other
-         applications.
+         apps.
          </p>
          `,
   BIP86: /*html*/ `
