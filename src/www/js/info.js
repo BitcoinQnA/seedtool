@@ -357,7 +357,7 @@ window.infoHtml = {
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank" rel="noopener noreferrer">BIP85 page</a>
         </p>`,
-        BIP85PWD: /*html*/ `
+  BIP85PWD: /*html*/ `
         <h3>BIP85: Deterministic Passwords From BIP32 Keychains</h3>
         <p>
          BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can deterministically derive multiple 'Child Seeds' from a single master
