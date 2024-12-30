@@ -357,6 +357,15 @@ window.infoHtml = {
         <p>
           Read more on the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0085.mediawiki" target="_blank" rel="noopener noreferrer">BIP85 page</a>
         </p>`,
+  BIP85PWD: /*html*/ `
+        <h3>BIP85: Deterministic Passwords From BIP32 Keychains</h3>
+        <p>
+         BIP85 defines the standard for 'One seed to rule them all'. With BIP85 a user can deterministically derive multiple 'Child Seeds' from a single master
+         seed. BIP85 Passwords are a way to convert the deterministic entropy from BIP85 into a password by encoding the entropy in Base64 encoding. This enables a user who might have provided their own entropy
+         to securely generate their own master mnemonic seed (perhaps with the help of this tool), to then generate many high entropy passwords for use with other
+         apps.
+         </p>
+         `,
   BIP86: /*html*/ `
         <h3>BIP86: Key Derivation for Single Key P2TR Outputs</h3>
         <p>
