@@ -540,6 +540,7 @@ window.infoHtml = {
           <li>V2.0.1 - ADD: Version number to header.    FIX: BIP47 testnet derivation </li>
           <li>V2.0.2 - ADD: SeedQR Support and Testnet 'Single Address' Functionality  </li>
           <li>V2.1.0 - FIX: Update color scheme, fix testnet WIF + address derivation, show Taproot addresses in Single address tool  </li>
+          <li>V2.2.0 - ADD: Paste mnemonic, BIP85 passwords.    FIX: Update to paynym.rs, testnet WIF for BIP47, BIP47 library link  </li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
