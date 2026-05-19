@@ -14,7 +14,7 @@ console.log('Building HTML file...');
     result = result.replace(/<script id="websocket">[^]*<\/script>/, '');
     console.log('Hot reload Web Socket script tags removed...');
     const regex1 = new RegExp(
-      /<script class="dev-script" src="(?<path>...*)">[^]*?</
+      /<script class="dev-script" src="(?<path>[^"]+)"><\/script>/
     );
     let array1 = regex1.exec(result);
     while (array1 !== null) {
@@ -23,15 +23,14 @@ console.log('Building HTML file...');
       const js = await readFile(scriptLocation, 'utf8');
       result = result.replace(
         array1[0],
-        `<script async>
-      ${js}
-      <`
+        () =>
+          `<script async>\n${js}\n</script>`
       );
       console.log(`${array1[1]} added!`);
       array1 = regex1.exec(result);
       console.log('Done!');
     }
-    const regex2 = /<link rel="stylesheet" href="(?<path>...*)?">/;
+    const regex2 = /<link rel="stylesheet" href="(?<path>[^"]+)">/;
     let array2 = regex2.exec(result);
     while (array2 !== null) {
       const scriptLocation = path.join(__dirname, `/src/www/`, `${array2[1]}`);
@@ -39,9 +38,7 @@ console.log('Building HTML file...');
       const css = await readFile(scriptLocation, 'utf8');
       result = result.replace(
         array2[0],
-        `<style>
-      ${css}
-      </style>`
+        () => `<style>\n${css}\n</style>`
       );
       array2 = regex2.exec(result);
       console.log('Done!');

@@ -1,6 +1,6 @@
 {
   "name": "seed-tool",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Bitcoin wallet seed tool",
   "main": "index.js",
   "scripts": {
@@ -12,10 +12,31 @@
   "author": "SuperPhatArrow",
   "license": "GPLv3",
   "devDependencies": {
+    "@bcts/dcbor": "^1.0.0-beta.0",
+    "@bcts/sskr": "^1.0.0-beta.0",
+    "@bcts/uniform-resources": "^1.0.0-beta.0",
+    "@types/node": "^25.8.0",
+    "bip32": "^5.0.0-rc.0",
+    "bip322-js": "^3.0.0",
+    "bitcoinjs-lib": "^7.0.0-rc.0",
+    "bitcoinjs-message": "^2.2.0",
+    "bolt12-utils": "^0.1.1",
     "browserify": "^17.0.0",
+    "esbuild-plugin-polyfill-node": "^0.3.0",
     "fastify": "^3.27.2",
     "fastify-static": "^4.5.0",
+    "light-bolt11-decoder": "^3.2.0",
     "nodemon": "^2.0.15",
+    "silent-payments": "^2.1.0",
+    "slip39-ts": "^0.1.13",
+    "tsify": "^5.0.4",
+    "typescript": "^6.0.3",
     "ws": "^8.5.0"
+  },
+  "dependencies": {
+    "@bitcoinerlab/descriptors": "^3.1.7",
+    "@bitcoinerlab/miniscript": "^2.0.0",
+    "@bitcoinerlab/miniscript-policies": "^1.1.0",
+    "@bitcoinerlab/secp256k1": "^1.2.0"
   }
 }

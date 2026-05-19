@@ -402,7 +402,7 @@ window.infoHtml = {
   PASSTEST: /*html*/ `
         <p>
           <a
-            href="https://twitter.com/BitcoinQ_A/status/1519268818564038657" target="_blank" rel="noopener noreferrer">See the video!</a>
+            href="https://x.com/btcqna/status/1519268818564038657" target="_blank" rel="noopener noreferrer">See the video!</a>
         </p>`,
   SEEDXOR: /*html*/ `
           <h3>Seed XOR</h3>

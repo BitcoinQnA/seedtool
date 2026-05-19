@@ -111,8 +111,6 @@ const setupDom = async () => {
       alert('Something has gone wrong. please try to reload the page');
       return;
     }
-    // Log this
-    console.log(`Waiting for libs... delay number: ${libTimeoutCount}`);
     // try again in a bit
     libTimeoutCount++;
     libTimeout = setTimeout(setupDom, 300);
@@ -1384,7 +1382,7 @@ const fetchRobotImages = async () => {
       });
     }
   } catch (error) {
-    console.error(error); // TODO remove this for prod?
+    console.error(error);
     // remove robot images if they exist and add text explaining why
     DOM.bip47PaynymSections.forEach((element) => {
       while (element.firstChild) {
@@ -1678,7 +1676,22 @@ const clearInfoModal = () => {
  * @param {Event} _event Not used
  * @param {string} section string for the key to get value from info.js
  */
+const INFO_TITLES = {
+  BIP32: 'BIP32', BIP39: 'BIP39', BIP44: 'BIP44', BIP47: 'BIP47',
+  BIP49: 'BIP49', BIP84: 'BIP84', BIP85: 'BIP85', BIP86: 'BIP86',
+  BIP85PWD: 'BIP85 PWD', MULTISIG: 'Multisig', SEEDXOR: 'Seed XOR',
+  HAMMING: 'Hamming Backups', OTP: 'One Time Pads',
+  PASSGEN: 'Passphrase Generator', PASSTEST: 'Passphrase Tester',
+  LASTWORD: 'The Last Word Generator',
+  SINGLE_ADDRESS: 'The Single Address Tool',
+  CHANGELOG: 'Changelog', entropy: 'Entropy',
+};
 window.openInfoModal = (_event, section) => {
+  const chip = document.getElementById('infoModalChip');
+  if (chip) {
+    const title = INFO_TITLES[section] || section;
+    chip.textContent = section === 'CHANGELOG' ? title : `${title} Explained`;
+  }
   DOM.infoModalText.innerHTML = window.infoHtml[section];
   DOM.infoModal.style.display = 'block';
 };
@@ -1691,6 +1704,23 @@ window.onclick = function (event) {
     clearInfoModal();
   }
 };
+// Escape key closes any open modal.
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const info = DOM.infoModal;
+  const qr = document.getElementById('qrModal');
+  if (info && info.style.display === 'block') { clearInfoModal(); e.preventDefault(); return; }
+  if (qr && qr.style.display === 'block' && typeof clearQRModal === 'function') { clearQRModal(); e.preventDefault(); }
+});
+// Activate role="button" spans via Enter/Space (a11y for our clickable spans).
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target;
+  if (t && t.matches && t.matches('span[role="button"][tabindex="0"]')) {
+    e.preventDefault();
+    t.click();
+  }
+});
 /**
  * SeedQR
  */

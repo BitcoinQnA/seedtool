@@ -227,7 +227,7 @@ window.QRCode = (function () {
 
       for (let i = 0; i < 18; i++) {
         const mod = !test && ((bits >> i) & 1) == 1;
-        this._modules[Math.floor(i / 3)][(i % 3) + _moduleCount - 8 - 3] = mod;
+        this._modules[Math.floor(i / 3)][(i % 3) + this._moduleCount - 8 - 3] = mod;
       }
 
       for (let i = 0; i < 18; i++) {
