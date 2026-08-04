@@ -2363,7 +2363,12 @@ const entropyChanged = async () => {
   const newPhrase = getPhrase();
   if (newPhrase != phrase) {
     if (newPhrase.length == 0) {
-      resetEverything();
+      // The entropy is still in the box, it just cannot produce a mnemonic
+      // yet. Only the derived fields are stale, so clear those. Calling
+      // resetEverything() here would also discard the user's own input:
+      // the One Time Pad key and cipher text, the BIP85 application, length,
+      // bytes and index, and the BIP47 counterparty payment code.
+      clearDerivedSeedOutputs();
     } else {
       // in case of raw entropy
       if (DOM.entropyMnemonicLengthSelect.value === 'raw') {
@@ -2469,6 +2474,7 @@ const setMnemonicFromEntropy = async () => {
   }
   // No entropy, no seed
   if (entropy.binaryStr.length == 0) {
+    clearDerivedSeedOutputs();
     return;
   }
   // Show entropy details
@@ -2486,6 +2492,9 @@ const setMnemonicFromEntropy = async () => {
   // Refuse to make a seed with insufficient entropy
   if ((mnemonicLength / 3) * 32 > bits) {
     DOM.entropyWeakEntropyOverrideWarning.classList.remove('hidden');
+    // Anything on screen came from a different entropy value, so drop it
+    // rather than leaving it next to the warning as if it were current.
+    clearDerivedSeedOutputs();
     return;
   } else {
     DOM.entropyWeakEntropyOverrideWarning.classList.add('hidden');
@@ -2526,10 +2535,29 @@ const setMnemonicFromEntropy = async () => {
 // Blank every field derived from a previous entropy value, so that an early
 // return or a conversion error can never leave stale seed material on screen.
 const clearDerivedSeedOutputs = () => {
+  seed = null;
+  bip32RootKey = null;
+  myPayCode = null;
   DOM.bip39Phrase.value = '';
+  DOM.bip39PhraseSplit.value = '';
+  DOM.bip39Seed.value = '';
+  DOM.bip32RootKey.value = '';
+  DOM.bip32RootFingerprint.value = '';
+  DOM.bip32RootWif.value = '';
+  DOM.pathAccountXprv.value = '';
+  DOM.pathAccountXpub.value = '';
+  DOM.bip85ChildKey.value = '';
+  DOM.bip47MyPaymentCode.value = '';
+  DOM.bip47MyNotificationAddress.value = '';
+  DOM.bip47MyNotificationPrvKey.value = '';
+  DOM.bip47MyNotificationPubKey.value = '';
   DOM.entropyBinaryChecksum.innerText = '';
   DOM.entropyWordIndexes.innerText = '';
   clearCompactSeedQR();
+  const bip85QRIconDiv = document.getElementById('bip85CompactSeedQR');
+  while (bip85QRIconDiv.firstChild) {
+    bip85QRIconDiv.removeChild(bip85QRIconDiv.firstChild);
+  }
   clearAddresses();
 };
 
