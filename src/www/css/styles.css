@@ -1190,7 +1190,7 @@ input.textarea-input {
 /* Any other text/number input on the page picks up the dark theme too -
    otherwise browser defaults leave them blinding white. */
 .view--tool input[type="number"]:not(.textarea-input),
-.view--tool input[type="text"]:not(.textarea-input),
+.view--tool input[type="text"]:not(.textarea-input):not(.inputMnemonic-word):not(.lastWord-word),
 .view--tool input[type="search"]:not(.textarea-input) {
   background-color: var(--q-dark);
   color: var(--q-white);
@@ -1205,7 +1205,7 @@ input.textarea-input {
   transition: border-color 120ms, box-shadow 120ms;
 }
 .view--tool input[type="number"]:not(.textarea-input):focus,
-.view--tool input[type="text"]:not(.textarea-input):focus,
+.view--tool input[type="text"]:not(.textarea-input):not(.inputMnemonic-word):not(.lastWord-word):focus,
 .view--tool input[type="search"]:not(.textarea-input):focus {
   border-color: var(--q-orange);
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
