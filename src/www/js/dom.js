@@ -2479,7 +2479,7 @@ const setMnemonicFromEntropy = async () => {
   );
   // check for raw entropy
   if (DOM.entropyMnemonicLengthSelect.value === 'raw') {
-    setMnemonicFromRawEntropy(entropy);
+    await setMnemonicFromRawEntropy(entropy);
     return;
   }
   const mnemonicLength = parseInt(DOM.entropyMnemonicLengthSelect.value);
@@ -2523,17 +2523,41 @@ const setMnemonicFromEntropy = async () => {
   calcBip47();
 };
 
+// Blank every field derived from a previous entropy value, so that an early
+// return or a conversion error can never leave stale seed material on screen.
+const clearDerivedSeedOutputs = () => {
+  DOM.bip39Phrase.value = '';
+  DOM.entropyBinaryChecksum.innerText = '';
+  DOM.entropyWordIndexes.innerText = '';
+  clearCompactSeedQR();
+  clearAddresses();
+};
+
 const setMnemonicFromRawEntropy = async (entropy) => {
   DOM.entropyWeakEntropyOverrideWarning.classList.add('hidden');
   DOM.entropyWeakEntropyWarning.classList.add('hidden');
   let bits = entropy.binaryStr.slice(0, 256);
-  if (bits.length < 128) return; // min bits
-  // user may still be typing
-  if (bits.length % 32 !== 0) return;
-  // convert from bin to hex
-  const phrase = window.bip39.entropyToMnemonic(
-    BigInt('0b' + bits).toString(16)
-  );
+  // Not enough bits yet, or the user may still be typing. Anything already on
+  // screen came from a different entropy value, so clear it.
+  if (bits.length < 128 || bits.length % 32 !== 0) {
+    clearDerivedSeedOutputs();
+    return;
+  }
+  // Convert from bin to hex. BigInt.toString(16) emits the minimal
+  // representation, so pad back to full width, otherwise leading zero bits are
+  // dropped and the mnemonic is short or fails to build entirely.
+  let phrase;
+  try {
+    phrase = window.bip39.entropyToMnemonic(
+      BigInt('0b' + bits)
+        .toString(16)
+        .padStart(bits.length / 4, '0')
+    );
+  } catch (err) {
+    clearDerivedSeedOutputs();
+    console.error('Could not derive a mnemonic from the raw entropy:', err);
+    return;
+  }
   // Set the mnemonic in the UI
   DOM.bip39Phrase.value = phrase;
   makeCompactSeedQR();
