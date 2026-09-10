@@ -13,6 +13,28 @@ console.log('Building HTML file...');
     );
     result = result.replace(/<script id="websocket">[^]*<\/script>/, '');
     console.log('Hot reload Web Socket script tags removed...');
+    // Content Security Policy for the built page. Scripts and styles are
+    // all inline, so inline is allowed. Nothing else may load, and the only
+    // requests allowed are the two opt-in online features: PayNym avatars
+    // (images) and BIP-353 DNS-over-HTTPS lookups. dev.html has no policy,
+    // so the dev server's hot reload keeps working.
+    const csp = [
+      "default-src 'none'",
+      "script-src 'unsafe-inline'",
+      "style-src 'unsafe-inline'",
+      'img-src data: blob: https://paynym.rs',
+      'connect-src https://cloudflare-dns.com https://dns.google',
+      "base-uri 'none'",
+      "form-action 'none'",
+      "object-src 'none'",
+    ].join('; ');
+    const charset = '<meta charset="utf-8" />';
+    if (!result.includes(charset)) throw new Error('No charset meta to put the CSP after');
+    result = result.replace(
+      charset,
+      () => `${charset}\n  <meta http-equiv="Content-Security-Policy" content="${csp}">`
+    );
+    console.log('Content Security Policy added...');
     const regex1 = new RegExp(
       /<script class="dev-script" src="(?<path>[^"]+)"><\/script>/
     );
@@ -24,7 +46,7 @@ console.log('Building HTML file...');
       result = result.replace(
         array1[0],
         () =>
-          `<script async>\n${js}\n</script>`
+          `<script>\n${js}\n</script>`
       );
       console.log(`${array1[1]} added!`);
       array1 = regex1.exec(result);

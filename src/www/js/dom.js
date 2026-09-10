@@ -29,6 +29,9 @@ let lastInnerWidth = parseInt(window.innerWidth);
 let libTimeout = null;
 let libTimeoutCount = 0;
 let hidePrivateData = false;
+// The phrase the entropy box last produced. Typing more entropy only asks
+// before replacing a seed that came from somewhere else.
+let lastEntropyPhrase = '';
 const bip85Lineage = [];
 const generationProcesses = [];
 const networks = {
@@ -300,6 +303,8 @@ const setupDom = async () => {
   derivedPathSelectChanged();
   // listen for bip47 changes
   DOM.bip47UsePaynym.oninput = togglePaynym;
+  DOM.bip47FetchPaynym = document.getElementById('bip47FetchPaynym');
+  DOM.bip47FetchPaynym.onclick = fetchRobotImages;
   DOM.bip47CPPaymentCode.oninput = calcBip47CounterParty;
   DOM.bip47AddressType.oninput = calculateBip47Addresses;
   DOM.bip47SendReceive.oninput = calculateBip47Addresses;
@@ -1080,7 +1085,7 @@ const bip39PassphraseTest = async () => {
       }
     }
   } catch (error) {
-    msg = 'ERROR: ' + error?.message || error;
+    msg = 'ERROR: ' + escapeHtml(error?.message || String(error));
     bip39PassphraseMessage(msg);
     console.error(error?.message || error);
     toast('Error!');
@@ -1090,6 +1095,14 @@ const bip39PassphraseTest = async () => {
   bip39PassphraseMessage(msg);
   toast('No Match Found');
 };
+
+// Escape text for insertion into HTML
+const escapeHtml = (text) =>
+  String(text).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+  );
 
 const bip39PassphraseMessage = (msg) => {
   const msgEl = document.getElementById('bip39PassTestInfo');
@@ -1175,105 +1188,161 @@ const showXorQr = (ev) => {
   openQrModal(phraseToCompactQrBytes(phrase), phrase);
 };
 
-// Calculate XOR
-const calculateXor = async () => {
-  let result = getWordIndexes(phraseToWordArray());
-  const seeds = [...document.querySelectorAll('.xor-seed')]
-    .filter((div) => !div.classList.contains('hidden'))
-    .map((div) =>
-      getWordIndexes(phraseToWordArray(div.querySelector('textarea').value))
-    );
-  if (seeds.length < 1) {
-    console.error('Not enough seeds to do XOR');
-    return;
-  }
-  for (let i = 0; i < seeds.length; i++) {
-    if (seeds[i].length === 0) {
-      console.error("Can't do XOR on empty seed");
-      return;
-    }
-  }
-  seeds.forEach((seedToXor) => {
-    result = result.map((wordInd, i) => {
-      return wordInd ^ seedToXor[i];
-    });
-  });
-  const bits = result.map((x) => x.toString(2).padStart(11, '0')).join('');
-  const dividerIndex = Math.floor(bits.length / 33) * 32;
-  const entropyBits = bits.slice(0, dividerIndex);
-  const entropyBytes = entropyBits
-    .match(/(.{1,8})/g)
-    .map((bin) => parseInt(bin, 2));
-  if (
-    entropyBytes.length < 16 ||
-    entropyBytes.length > 32 ||
-    entropyBytes.length % 4 !== 0
-  ) {
-    console.error('Invalid entropy');
-    return;
-  }
-  const entropy = Uint8Array.from(entropyBytes);
-  const newChecksum = await deriveChecksumBits(entropy);
-  let newLastWordIndex = parseInt(
-    result
-      .pop()
-      .toString(2)
-      .padStart(11, '0')
-      .slice(0, 11 - newChecksum.length) + newChecksum,
-    2
-  );
-  result.push(newLastWordIndex);
-  result = result.map((n) => wordList[n]);
-  document.getElementById('xorResult').value = result.join(' ');
+// Plain-language versions of findPhraseErrors() messages, for tools that
+// check several phrases at once
+const describePhraseError = (errorText) => {
+  if (errorText === 'Blank mnemonic') return 'no words entered';
+  if (errorText === 'Invalid mnemonic')
+    return 'fails the BIP39 checksum, check for a mistyped or out of order word';
+  return errorText;
 };
 
+/**
+ * XOR two or more BIP39 mnemonics together (Seed XOR, as on COLDCARD): the
+ * entropy of every phrase is XORed and a fresh checksum word derived.
+ * Every phrase must be a valid mnemonic and all must be the same length. A
+ * bad word or a short share would otherwise still produce a checksummed,
+ * valid looking, wrong mnemonic, so they are refused instead.
+ * @param {string[]} phrases The loaded seed followed by each share
+ * @returns {{phrase: string}|{error: string}}
+ */
+const xorMnemonics = (phrases) => {
+  if (phrases.length < 2) {
+    return { error: 'Seed XOR needs the loaded seed and at least one share.' };
+  }
+  const wordArrays = phrases.map((phrase) =>
+    phraseToWordArray(normalizeString(phrase))
+  );
+  for (let i = 0; i < phrases.length; i++) {
+    const label = i === 0 ? 'The loaded seed' : `Seed ${i + 1}`;
+    const errorText = findPhraseErrors(phrases[i]);
+    if (errorText) {
+      return { error: `${label}: ${describePhraseError(errorText)}.` };
+    }
+    if (wordArrays[i].length !== wordArrays[0].length) {
+      return {
+        error: `${label} has ${wordArrays[i].length} words but the loaded seed has ${wordArrays[0].length}. Every share must be the same length.`,
+      };
+    }
+  }
+  const entropies = wordArrays.map((words) =>
+    window.bip39.mnemonicToEntropy(wordArrayToPhrase(words))
+  );
+  let xored = '';
+  for (let i = 0; i < entropies[0].length; i += 2) {
+    const byte = entropies.reduce(
+      (acc, hex) => acc ^ parseInt(hex.slice(i, i + 2), 16),
+      0
+    );
+    xored += byte.toString(16).padStart(2, '0');
+  }
+  return { phrase: window.bip39.entropyToMnemonic(xored) };
+};
+
+// Calculate XOR from the loaded seed and every visible share
+const calculateXor = () => {
+  const shares = [...document.querySelectorAll('.xor-seed')]
+    .filter((div) => !div.classList.contains('hidden'))
+    .map((div) => div.querySelector('textarea').value);
+  const { phrase, error } = xorMnemonics([getPhrase(), ...shares]);
+  // Never leave an earlier result on screen beside an error
+  document.getElementById('xorResult').value = phrase || '';
+  const errorEl = document.getElementById('xorError');
+  errorEl.textContent = error || '';
+  errorEl.classList.toggle('hidden', !error);
+  adjustPanelHeight();
+};
+
+// Offer random shares for splitting the loaded seed. A share the user typed
+// is never replaced; one this tool generated is refreshed for the new seed.
 const fillRandomXorSeeds = () => {
-  document.querySelectorAll('.xor-seed').forEach((div) => {
-    div.querySelector('textarea').value = createMnemonic();
+  document.querySelectorAll('.xor-seed textarea').forEach((textarea) => {
+    const current = normalizeString(textarea.value);
+    if (current && current !== textarea.dataset.generated) return;
+    textarea.value = createMnemonic();
+    textarea.dataset.generated = textarea.value;
   });
+};
+
+// Show a result or a problem beside the One Time Pad output
+const showOtpMessage = (text, isWarning) => {
+  const el = document.getElementById('otpMatched');
+  el.textContent = '';
+  if (!text) return;
+  const span = document.createElement('span');
+  if (isWarning) span.className = 'warning';
+  span.textContent = text;
+  el.appendChild(span);
+  adjustPanelHeight();
 };
 
 // Generate OTP
 const generateOneTimePad = async () => {
   const strength = parseInt(DOM.generateRandomStrengthSelect.value);
-  key = await otp.generate(strength);
+  const key = await otp.generate(strength);
   document.getElementById('otpKey').value = key;
   return key;
 };
 
 // Encrypt OTP
 const encryptOneTimePad = async () => {
+  const cipherEl = document.getElementById('otpCipherText');
+  cipherEl.value = '';
+  showOtpMessage('');
   const mnemonic = getPhrase();
-  if (!bip39.validateMnemonic(mnemonic)) return;
-  const strength = parseInt(DOM.generateRandomStrengthSelect.value);
-  let key = document.getElementById('otpKey').value;
-  const keyValid = await otp.validateKey(key, strength);
-  if (!keyValid) {
-    toast('Invalid OTP Key');
+  if (!bip39.validateMnemonic(mnemonic)) {
+    showOtpMessage('Load a valid seed before encrypting.', true);
     return;
   }
-  if (!key) {
-    key = await generateOneTimePad();
+  let key = normalizeString(document.getElementById('otpKey').value);
+  if (!key) key = await generateOneTimePad();
+  try {
+    cipherEl.value = await otp.encrypt(key, mnemonic);
+  } catch (error) {
+    showOtpMessage(error.message, true);
   }
-  const cipherMnemonic = await otp.encrypt(key, mnemonic);
-  document.getElementById('otpCipherText').value = cipherMnemonic;
+  adjustPanelHeight();
 };
 
 // Decrypt OTP
 const decryptOneTimePad = async () => {
+  const decryptedEl = document.getElementById('otpDecrypted');
+  decryptedEl.value = '';
+  showOtpMessage('');
   const cipherMnemonic = normalizeString(
     document.getElementById('otpCipherText').value
   );
   const key = normalizeString(document.getElementById('otpKey').value);
-  if (!cipherMnemonic || !key) return;
-  const mnemonic = await otp.decrypt(key, cipherMnemonic);
-  document.getElementById('otpDecrypted').value = mnemonic;
+  if (!cipherMnemonic || !key) {
+    showOtpMessage('Enter the key and the encrypted words to decrypt.', true);
+    return;
+  }
+  let mnemonic;
+  try {
+    mnemonic = await otp.decrypt(key, cipherMnemonic);
+  } catch (error) {
+    showOtpMessage(error.message, true);
+    return;
+  }
+  // A wrong key or a mistyped encrypted word still decrypts to real words,
+  // so the checksum is the only sign of it. Show nothing rather than a
+  // plausible wrong seed.
+  if (!bip39.validateMnemonic(mnemonic)) {
+    showOtpMessage(
+      'The decrypted words fail the BIP39 checksum. Check the key and the encrypted words for typos.',
+      true
+    );
+    return;
+  }
+  decryptedEl.value = mnemonic;
   const loadedMnemonic = getPhrase();
-  if (loadedMnemonic)
-    document.getElementById('otpMatched').innerHTML =
-      mnemonic === loadedMnemonic
-        ? 'Matches the loaded seed'
-        : '<span class="warning">ERROR: Does not match the loaded seed</span>';
+  if (loadedMnemonic) {
+    const matches = mnemonic === loadedMnemonic;
+    showOtpMessage(
+      matches ? 'Matches the loaded seed' : 'Does not match the loaded seed',
+      !matches
+    );
+  }
   adjustPanelHeight();
 };
 
@@ -1336,17 +1405,21 @@ const copyEventHandler = (event) => {
 // BIP47 functions
 // Show/Hide paynym sections
 const togglePaynym = () => {
-  DOM.bip47PaynymSections.forEach((element) => {
-    if (DOM.bip47UsePaynym.checked) {
-      element.classList.remove('hidden');
-    } else {
-      element.classList.add('hidden');
-    }
-  });
-  fetchRobotImages();
+  const show = DOM.bip47UsePaynym.checked;
+  DOM.bip47PaynymSections.forEach((element) =>
+    element.classList.toggle('hidden', !show)
+  );
+  DOM.bip47FetchPaynym.classList.toggle('hidden', !show);
+  clearRobotImages();
 };
 
-// Use paynym.rs robohash api to get an avatar
+// Remove PayNym avatars; they belong to the payment codes they were fetched for
+const clearRobotImages = () => {
+  DOM.bip47PaynymSections.forEach((element) => emptyElement(element));
+};
+
+// Fetch PayNym avatars from paynym.rs. Only runs when the user presses the
+// button, because it sends the payment codes to that site.
 const fetchRobotImages = async () => {
   const url = 'https://paynym.rs/preview/';
   const myPayCode = normalizeString(DOM.bip47MyPaymentCode.value);
@@ -1412,7 +1485,7 @@ const calcBip47 = () => {
   DOM.bip47MyNotificationAddress.value = myNotificationAddress;
   DOM.bip47MyNotificationPrvKey.value = myWIF;
   DOM.bip47MyNotificationPubKey.value = myPubKey.toString('hex');
-  fetchRobotImages();
+  clearRobotImages();
   addQRIcon(
     document.getElementById('bip47MyPaymentCodeQR'),
     `bitcoin:${myPayCode.toBase58()}`
@@ -1456,7 +1529,7 @@ const calcBip47CounterParty = () => {
   DOM.bip47CPNotificationPubKey.value = bobNotifyPubKey.toString('hex');
   calculateBip47Addresses();
   adjustPanelHeight();
-  fetchRobotImages();
+  clearRobotImages();
   addQRIcon(
     document.getElementById('bip47CPPaymentCodeQR'),
     `bitcoin:${bobPcBase58}`
@@ -1476,7 +1549,6 @@ const clearBip47Addresses = () => {
     );
   }
   adjustPanelHeight();
-  fetchRobotImages();
 };
 
 // generates an array of addresses and passes them on to be displayed
@@ -1699,11 +1771,11 @@ window.openInfoModal = (_event, section) => {
  * Function to close the dialog when user clicks on the outside
  * @param {Event} event Click Event on area outside the dialog
  */
-window.onclick = function (event) {
+window.addEventListener('click', (event) => {
   if (event.target === DOM.infoModal) {
     clearInfoModal();
   }
-};
+});
 // Escape key closes any open modal.
 window.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
@@ -1825,11 +1897,11 @@ const openQrModal = (dataString, seedPhrase = '') => {
  * Function to close the dialog when user clicks on the outside
  * @param {Event} event Click Event on area outside the dialog
  */
-window.onclick = function (event) {
+window.addEventListener('click', (event) => {
   if (event.target === DOM.qrModal) {
     clearQRModal();
   }
-};
+});
 /**
  * Copy text to clipboard
  * @param {string} text text to copy
@@ -2174,20 +2246,19 @@ const calcBip85 = async () => {
       result = master.deriveHex(bytes, index).toEntropy();
     }
     DOM.bip85ChildKey.value = result;
-    const phrase = master.deriveBIP39(0, length, index).toMnemonic();
-    if (!bip39.validateMnemonic(phrase)) {
-      return;
+    // The QR is a Compact SeedQR, so it only exists for a BIP39 child. For
+    // WIF, xprv or hex it would hold a different secret from the one shown.
+    const qrHolder = document.getElementById('bip85CompactSeedQR');
+    emptyElement(qrHolder);
+    if (app === 'bip39' && bip39.validateMnemonic(result)) {
+      addQRIcon(qrHolder, phraseToCompactQrBytes(result), result);
     }
-    addQRIcon(
-      document.getElementById('bip85CompactSeedQR'),
-      phraseToCompactQrBytes(phrase),
-      phrase
-    );
     adjustPanelHeight();
   } catch (e) {
     toast('BIP85: ' + e.message);
     console.error('BIP85: ' + e.message);
     DOM.bip85ChildKey.value = '';
+    emptyElement(document.getElementById('bip85CompactSeedQR'));
   }
 };
 
@@ -2212,8 +2283,52 @@ const bip85LoadParent = (event) => {
   }
 };
 
+/**
+ * Ask before an action replaces the loaded seed.
+ * @param {string=} note Extra line for the dialog, e.g. how to get back
+ * @returns {Promise<boolean>} Whether to go ahead. Resolves true at once
+ * when no seed is loaded, since there is nothing to lose.
+ */
+const confirmReplaceSeed = (note = '') => {
+  if (!getPhrase()) return Promise.resolve(true);
+  const modal = document.getElementById('replaceSeedConfirm');
+  const confirmBtn = document.getElementById('replaceSeedConfirmBtn');
+  const cancelBtn = document.getElementById('replaceSeedCancel');
+  const noteEl = document.getElementById('replaceSeedNote');
+  noteEl.textContent = note;
+  noteEl.hidden = !note;
+  const returnFocus = document.activeElement;
+  return new Promise((resolve) => {
+    const finish = (answer) => {
+      modal.classList.remove('is-open');
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey, true);
+      if (returnFocus && returnFocus.focus) returnFocus.focus();
+      resolve(answer);
+    };
+    const onConfirm = () => finish(true);
+    const onCancel = () => finish(false);
+    const onBackdrop = (event) => {
+      if (event.target === modal) finish(false);
+    };
+    const onKey = (event) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation();
+      finish(false);
+    };
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onKey, true);
+    modal.classList.add('is-open');
+    cancelBtn.focus();
+  });
+};
+
 // Load the bip85 child seed into the tool and save the parent
-const bip85LoadChild = (event) => {
+const bip85LoadChild = async (event) => {
   event.preventDefault();
   // Save current key as parent
   const phrase = getPhrase();
@@ -2222,6 +2337,7 @@ const bip85LoadChild = (event) => {
     toast('Current Mnemonic not found');
     return;
   }
+  if (!(await confirmReplaceSeed('You can come back to it with Load Parent.'))) return;
   bip85Lineage.push({ phrase, passphrase });
   // Enable load parent btn
   if (DOM.bip85LoadParent.disabled) {
@@ -2317,17 +2433,22 @@ const showValidationError = (errorText) => {
   adjustPanelHeight();
 };
 
+// Roll a fair six sided die. Bytes of 252 and above are rerolled: 256 is
+// not a multiple of 6, so taking every byte modulo 6 would favour 1 to 4.
+const rollDie = () => {
+  const byte = new Uint8Array(1);
+  do {
+    crypto.getRandomValues(byte);
+  } while (byte[0] >= 252);
+  return (byte[0] % 6) + 1;
+};
+
 /**
  * Get a random word from the diceware list
  * @returns {string} a random word from the diceware list
  */
 const getRandomDiceWord = () =>
-  diceware[
-    crypto
-      .getRandomValues(new Uint8Array(5))
-      .map((n) => (n % 6) + 1)
-      .join('')
-  ];
+  diceware[Array.from({ length: 5 }, rollDie).join('')];
 
 const addRandomDiceWordToPassphrase = () => {
   DOM.bip39Passphrase.value += ' ' + getRandomDiceWord();
@@ -2350,15 +2471,26 @@ const entropyChanged = async () => {
       DOM.entropyMnemonicLengthSelect.value !== 'raw'
     );
   adjustPanelHeight();
-  // debounce?
   if (getEntropy().length === 0) {
-    resetEverything();
+    // Only what the old entropy produced is stale. clearDerivedSeedOutputs()
+    // keeps the user's input on other panels, which resetEverything() would
+    // discard, and a seed loaded some other way is left alone.
+    if (getPhrase() === lastEntropyPhrase) clearDerivedSeedOutputs();
     return;
+  }
+  // Typing entropy replaces the loaded seed, so ask first, unless the loaded
+  // seed is the one this entropy made
+  if (getPhrase() && getPhrase() !== lastEntropyPhrase) {
+    if (!(await confirmReplaceSeed())) {
+      DOM.entropyInput.value = '';
+      return;
+    }
   }
   // Get the current phrase to detect changes
   const phrase = getPhrase();
   // Set the phrase from the entropy
   await setMnemonicFromEntropy();
+  lastEntropyPhrase = getPhrase();
   // Recalculate addresses if the phrase has changed
   const newPhrase = getPhrase();
   if (newPhrase != phrase) {
@@ -2391,6 +2523,14 @@ const entropyTypeChanged = () => {
 // Calculate and display entropy
 const calculateEntropy = async () => {
   const input = getEntropy();
+  // A seed that did not come from this box has no entropy events to show
+  if (!input) {
+    clearEntropyFeedback();
+    await writeSplitPhrase();
+    showWordIndexes();
+    showChecksum();
+    return;
+  }
   let entropy = null;
   if (entropyTypeAutoDetect) {
     entropy = window.Entropy.fromString(input);
@@ -2559,6 +2699,56 @@ const clearDerivedSeedOutputs = () => {
     bip85QRIconDiv.removeChild(bip85QRIconDiv.firstChild);
   }
   clearAddresses();
+  clearSecondaryDerivedOutputs();
+};
+
+const emptyElement = (el) => {
+  while (el && el.firstChild) el.removeChild(el.firstChild);
+};
+
+// Blank values derived from the seed that are only rebuilt when their own
+// tool recalculates: account keys, multisig Ypub and Zpub, the BIP85
+// password, BIP47 addresses and the Seed XOR result. Left alone they would
+// sit beside a new or cleared seed as if they belonged to it.
+const clearSecondaryDerivedOutputs = () => {
+  DOM.bip32AccountXprv.value = '';
+  DOM.bip32AccountXpub.value = '';
+  DOM.bip85PWDPassword.value = '';
+  ['myZpub', 'myYpub', 'xorResult'].forEach((id) => {
+    document.getElementById(id).value = '';
+  });
+  ['bip32AccountXpubQR', 'myZpubQR', 'myYpubQR'].forEach((id) =>
+    emptyElement(document.getElementById(id))
+  );
+  clearBip47Addresses();
+  clearRobotImages();
+};
+
+/**
+ * Remove every piece of seed material from the page, including what the
+ * user typed into individual tools. Only for the explicit "Clear seed"
+ * action: resetEverything() runs on every seed change and must keep input.
+ */
+const wipeAllSeedMaterial = () => {
+  resetEverything();
+  clearDerivedSeedOutputs();
+  DOM.bip39Passphrase.value = '';
+  DOM.entropyInput.value = '';
+  bip85Lineage.length = 0;
+  DOM.bip85LoadParent.disabled = true;
+  DOM.bip85LoadParent.title = 'No parent key to load';
+  document
+    .querySelectorAll('.xor-seed textarea, .inputMnemonic-word, .lastWord-word')
+    .forEach((el) => {
+      el.value = '';
+      if (el.dataset) delete el.dataset.generated;
+    });
+  ['otpDecrypted', 'singleSigInput'].forEach((id) => {
+    document.getElementById(id).value = '';
+  });
+  ['singleSigAddress', 'singleSigPub'].forEach((id) =>
+    emptyElement(document.getElementById(id))
+  );
 };
 
 const setMnemonicFromRawEntropy = async (entropy) => {
@@ -2898,9 +3088,6 @@ const mnemonicToSeedPopulate = debounce(async () => {
   DOM.generateRandomStrengthSelect.value = DOM.mnemonicLengthSelect.value;
   mnemonicInputLengthAdjust();
   DOM.bip39Seed.value = seedHex;
-  if (!DOM.bip39Phrase.readOnly) {
-    DOM.entropyInput.value = seedHex;
-  }
   await calculateEntropy();
   if (seed) {
     const node = bip32.fromSeed(seed);
@@ -2965,6 +3152,8 @@ const resetEverything = () => {
   document.getElementById('otpMatched').innerHTML = '';
   document.getElementById('otpKey').value = '';
   document.getElementById('otpCipherText').value = '';
+  clearAddresses();
+  clearSecondaryDerivedOutputs();
 };
 
 // Empty entropy fields
@@ -3026,77 +3215,82 @@ const otp = {
     const full = new Uint8Array(keyArray.length + checksum.length);
     full.set(keyArray, 0);
     full.set(checksum, keyArray.length);
-    const base64url = await new Promise((r) => {
-      const reader = new FileReader();
-      reader.onload = () => r(reader.result);
-      reader.readAsDataURL(new Blob([full]));
-    });
-    return base64url.split(',', 2)[1].replaceAll('=', '');
+    return window.btoa(String.fromCharCode(...full)).replaceAll('=', '');
   },
   /**
    * otp.encrypt
    * @param {string} key One Time Pad Key
    * @param {string} mnemonic The Mnemonic to encrypt
-   * @returns {string} Encrypted Mnemonic
+   * @returns {Promise<string>} Encrypted Mnemonic
+   * @throws {Error} If the key is damaged or for another length, or a word
+   * is not in the word list
    */
   async encrypt(key, mnemonic) {
-    const words = normalizeString(mnemonic).split(' ');
-    while (key.length % 4 !== 0) {
-      key += '=';
-    }
-    let keyArray = this._getKeyArrayFromBase64(key);
-    if (keyArray[1] !== words.length) {
-      throw new Error('Mnemonic length does not match key');
-    }
-    const checksumOk = await this._testChecksum(keyArray);
-    if (!checksumOk) return;
-    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
-    const dataView = this._getUint16(keyPayload);
-    const encrypted = words.map((word, i) => {
-      const wordIndex = wordList.findIndex((w) => w === word);
-      const encWord = wordList[(wordIndex + dataView[i]) % 2048];
-      return encWord;
-    });
-    return encrypted.join(' ');
+    const words = normalizeString(mnemonic).split(/\s+/);
+    const pad = await this._readKey(key, words.length);
+    return words
+      .map((word, i) => wordList[(this._wordIndex(word, i) + pad[i]) % 2048])
+      .join(' ');
   },
   /**
    * otp.decrypt
    * @param {string} key One Time Pad Key
-   * @param {string} cipherMnemonic Encripted Mnemonic
-   * @returns {string} Decrypted Mnemonic
+   * @param {string} cipherMnemonic Encrypted Mnemonic
+   * @returns {Promise<string>} Decrypted Mnemonic
+   * @throws {Error} If the key is damaged or for another length, or a word
+   * is not in the word list
    */
   async decrypt(key, cipherMnemonic) {
-    const words = normalizeString(cipherMnemonic).split(' ');
-    while (key.length % 4 !== 0) {
-      key += '=';
-    }
-    let keyArray = this._getKeyArrayFromBase64(key);
-    if (keyArray[1] !== words.length) {
-      throw new Error('Mnemonic length does not match key');
-    }
-    const checksumOk = await this._testChecksum(keyArray);
-    if (!checksumOk) return;
-    const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
-    const dataView = this._getUint16(keyPayload);
-    const decrypted = [];
-    for (let i = 0; i < words.length; i++) {
-      const cipherWord = words[i];
-      const cipherIndex = wordList.findIndex((w) => w === cipherWord);
-      const index = (cipherIndex - dataView[i] + 2048) % 2048;
-      const word = wordList[index];
-      decrypted.push(word);
-    }
-    return decrypted.join(' ');
+    const words = normalizeString(cipherMnemonic).split(/\s+/);
+    const pad = await this._readKey(key, words.length);
+    return words
+      .map(
+        (word, i) =>
+          wordList[(this._wordIndex(word, i) - pad[i] + 2048) % 2048]
+      )
+      .join(' ');
   },
   async validateKey(key, numberOfWords) {
-    let keyArray = this._getKeyArrayFromBase64(key);
-    if (keyArray[1] !== numberOfWords) return false;
-    const checksumOk = await this._testChecksum(keyArray);
-    if (!checksumOk) return false;
+    try {
+      await this._readKey(key, numberOfWords);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  },
+  // Decode and check a key, returning one pad value per word
+  async _readKey(key, numberOfWords) {
+    let keyArray;
+    try {
+      keyArray = this._getKeyArrayFromBase64(normalizeString(key));
+    } catch (error) {
+      throw new Error('The One Time Pad key is not valid, check it for typos.');
+    }
+    if (keyArray.length < 6 || !(await this._testChecksum(keyArray))) {
+      throw new Error(
+        'The One Time Pad key is damaged or mistyped (its checksum does not match).'
+      );
+    }
+    if (keyArray[1] !== numberOfWords) {
+      throw new Error(
+        `The key is for ${keyArray[1]} words but there are ${numberOfWords}.`
+      );
+    }
     const keyPayload = new Uint8Array(keyArray.slice(0, keyArray.length - 4));
-    const dataView = this._getUint16(keyPayload);
-    if (dataView.length !== numberOfWords) return false;
-    return true;
+    const pad = this._getUint16(keyPayload);
+    if (pad.length !== numberOfWords) {
+      throw new Error('The One Time Pad key is not valid, check it for typos.');
+    }
+    return pad;
+  },
+  _wordIndex(word, i) {
+    const index = wordList.indexOf(word);
+    if (index === -1) {
+      throw new Error(
+        `"${word}" (word ${i + 1}) is not in the BIP39 English word list.`
+      );
+    }
+    return index;
   },
   async _testChecksum(keyArray) {
     const divider = keyArray.length - 4;
@@ -3104,28 +3298,25 @@ const otp = {
     const keyPayload = new Uint8Array(keyArray.slice(0, divider));
     const hash = await crypto.subtle.digest('SHA-256', keyPayload);
     const checksum = new Uint8Array(hash.slice(0, 4));
-    if (keyChecksum.toString() !== checksum.toString()) {
-      console.error('Checksum does not match');
-      return false;
-    }
-    return true;
+    return keyChecksum.toString() === checksum.toString();
   },
   _getKeyArrayFromBase64(keyBase64) {
+    while (keyBase64.length % 4 !== 0) {
+      keyBase64 += '=';
+    }
     return window
       .atob(keyBase64)
       .split('')
       .map((c) => c.charCodeAt(0));
   },
+  // Pad values are stored big endian, two bytes each, after a two byte
+  // header. Reading them arithmetically works on any host byte order.
   _getUint16(keyPayload) {
-    const buffer = new ArrayBuffer(keyPayload.length - 2);
-    const dataView = new Uint16Array(buffer);
-    if (!isBigEndian()) {
-      let count = 2;
-      for (let i = 0; i < dataView.length; i++) {
-        dataView[i] = (keyPayload[count++] << 8) + keyPayload[count++];
-      }
+    const pad = new Uint16Array((keyPayload.length - 2) / 2);
+    for (let i = 0; i < pad.length; i++) {
+      pad[i] = (keyPayload[2 + 2 * i] << 8) + keyPayload[3 + 2 * i];
     }
-    return dataView;
+    return pad;
   },
 };
 

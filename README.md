@@ -30,17 +30,37 @@ If you find this page useful, consider [donating](https://paynym.rs/+cloudystand
 
 To verify the tool, take the following steps.
 
-1. Download and import the public copy of the PGP signing key owned by [Bitcoin QnA](https://github.com/BitcoinQnA)
+1. Import the release signing key, which is in this repository as [`RELEASE-SIGNING-KEY.asc`](RELEASE-SIGNING-KEY.asc)
 
-`curl -sL https://bitcoiner.guide/public.key | gpg --import`
+`gpg --import RELEASE-SIGNING-KEY.asc`
 
-2. Download the latest [release](https://github.com/BitcoinQnA/seedtool/releases) `index.html` and `signature.txt` files
+2. Check the key's fingerprint is exactly `EB3D 738B EC6A 873A C274 5292 CF4F E215 EA66 63AC`
 
-3. Navigate to your Downloads folder and run `sha256sum index.html`
+`gpg --fingerprint qna@bitcoiner.guide`
 
-4. Check for an exact hash match as the one published in the `signature.txt` file
+3. Download the latest [release](https://github.com/BitcoinQnA/seedtool/releases) `index.html` and `signature.txt` files
 
-5. Run `gpg --verify signature.txt` and look for a **Good Signature from "BitcoinQnA <bitcoinqna@tutanota.com>"**
+4. Navigate to your Downloads folder and run `sha256sum index.html`
+
+5. Check for an exact hash match as the one published in the `signature.txt` file
+
+6. Run `gpg --verify signature.txt` and look for a **Good signature from "QnA <qna@bitcoiner.guide>"**
+
+### Reproducing a release
+
+`dist/index.html` is assembled from the files in `src/www` by `build.js`, which only inlines them into one page. Anyone can rebuild a release from its tag and compare the hash with the one in that release's `signature.txt`:
+
+```
+git clone https://github.com/BitcoinQnA/seedtool.git
+cd seedtool
+git checkout <release tag>
+node build.js
+sha256sum dist/index.html
+```
+
+`build.js` needs Node.js only; no packages are installed. The bundled libraries in `src/www/js/lib` are committed build outputs: six are built with esbuild by the `build_*.js` scripts from the pinned versions in `package-lock.json`, the rest are older browserify builds from `libs/`.
+
+Before tagging a release, `npm run release:check` runs the tests, rebuilds `dist/index.html` and fails if the committed file differs from the source.
 
 
 # Development
