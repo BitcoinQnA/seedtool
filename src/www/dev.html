@@ -81,10 +81,23 @@
   <div class="confirm-modal" id="clearSeedConfirm" role="dialog" aria-modal="true" aria-labelledby="clearSeedTitle">
     <div class="confirm-modal__card">
       <h2 class="confirm-modal__title" id="clearSeedTitle">Clear the loaded seed?</h2>
-      <p class="confirm-modal__body">All seed-derived fields (BIP32 root key, BIP39 mnemonic, passphrase, derived addresses, BIP85 children, etc.) will be reset. This can't be undone.</p>
+      <p class="confirm-modal__body">The seed, passphrase and everything derived from it (keys, addresses, BIP85 children, Shamir and XOR shares) will be removed from the page, along with anything typed into the other tools. This can't be undone.</p>
       <div class="confirm-modal__actions">
         <button type="button" class="btn" id="clearSeedCancel">Cancel</button>
         <button type="button" class="btn btn--danger" id="clearSeedConfirmBtn">Clear seed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Replace seed confirmation modal (dom.js confirmReplaceSeed) -->
+  <div class="confirm-modal" id="replaceSeedConfirm" role="dialog" aria-modal="true" aria-labelledby="replaceSeedTitle">
+    <div class="confirm-modal__card">
+      <h2 class="confirm-modal__title" id="replaceSeedTitle">Replace the loaded seed?</h2>
+      <p class="confirm-modal__body">This loads a different seed in its place. Anything you have not written down from the current seed will be gone from the page.</p>
+      <p class="confirm-modal__body confirm-modal__body--muted" id="replaceSeedNote" hidden></p>
+      <div class="confirm-modal__actions">
+        <button type="button" class="btn" id="replaceSeedCancel">Keep current seed</button>
+        <button type="button" class="btn btn--primary" id="replaceSeedConfirmBtn">Replace seed</button>
       </div>
     </div>
   </div>
@@ -700,8 +713,9 @@ gpg --verify signature.txt</code></pre>
       <div class="panel">
         <label class="bip47-paynym-toggle" title="Robots are fun!">
           <input type="checkbox" id="bip47UsePaynym">
-          Use paynym.rs online directory (won't work offline)
+          Show PayNym avatars from paynym.rs (online: sends the payment codes to that site)
         </label>
+        <button type="button" class="btn hidden" id="bip47FetchPaynym">Load avatars from paynym.rs</button>
         <label>
           Network Selection
           <select id="bip47NetworkSelect">
@@ -1076,6 +1090,7 @@ gpg --verify signature.txt</code></pre>
             <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor8"></span></label>
             <div class="copy-wrapper private-data"><textarea id="xorSeed8" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
+          <p id="xorError" class="warning hidden" role="alert"></p>
           <div>
             <label for="xorResult">XOR Result&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXorResult"></span></label>
             <div class="copy-wrapper private-data">
@@ -1305,7 +1320,7 @@ gpg --verify signature.txt</code></pre>
           <ul>
             <li><strong>SLIP-39</strong> (SatoshiLabs / Trezor): each share is a 20- or 33-word mnemonic from a dedicated SLIP-39 wordlist. Has its own optional passphrase. Supports hierarchical groups (e.g. "any 2 of group A plus any 3 of group B").</li>
             <li><strong>SSKR</strong> (Blockchain Commons): shares are compact binary, typically shown as hex or wrapped in UR animated QR codes. No built-in passphrase; the outer container is expected to provide encryption.</li>
-            <li><strong>Foundation Shard</strong> (Passport Prime): a dCBOR-encoded variant of the same Shamir scheme, designed for NFC KeyCard backups. Byte-for-byte compatible with Passport Prime's Magic Backups.</li>
+            <li><strong>Foundation Shard</strong> (Passport Prime): a dCBOR-encoded variant of the same Shamir scheme, designed for NFC KeyCard backups. This tool reads shares exported from Passport Prime's Magic Backups. Shares it creates use the same format but are not signed by a Passport, so a Passport will not load them.</li>
           </ul>
           <p>Shares from one format are <strong>not</strong> interchangeable with another - pick whichever matches the wallet you intend to recover with.</p>
         </div>
@@ -1402,6 +1417,7 @@ gpg --verify signature.txt</code></pre>
 
             <div class="slip39-results" id="slip39GenResults" hidden>
               <h3 class="section-heading" id="slip39ResultsHeading">Your shares</h3>
+              <p class="warning" id="shamirFoundationGenNote" hidden><strong>Not signed by a Passport.</strong> When Passport Prime reads a KeyCard it checks the shard's signature, made by its secure element with the card's ID, along with the device ID and seed fingerprint. Shares made here leave all three empty, so a Passport will not accept them. Use them to see the format or to practise recovery in this tool.</p>
               <p class="recover-hint">
                 <strong>Save each share separately.</strong> Anyone who collects the threshold number of shares can recover your seed. Anyone with fewer learns nothing.
               </p>
@@ -2750,7 +2766,6 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
           <li><a href="https://github.com/splitsec-labs/slip39-ts" target="_blank" rel="noopener noreferrer">slip39-ts (SLIP-39) by Splitsec Labs - MIT</a></li>
           <li><a href="https://github.com/paritytech/bcts/tree/main/packages/sskr" target="_blank" rel="noopener noreferrer">@bcts/sskr (SSKR) by Blockchain Commons - BSD-2-Clause-Patent</a></li>
           <li><a href="https://github.com/paritytech/bcts/tree/main/packages/dcbor" target="_blank" rel="noopener noreferrer">@bcts/dcbor (deterministic CBOR) by Blockchain Commons - BSD-2-Clause-Patent</a></li>
-          <li><a href="https://github.com/paritytech/bcts/tree/main/packages/uniform-resources" target="_blank" rel="noopener noreferrer">@bcts/uniform-resources (UR) by Blockchain Commons - BSD-2-Clause-Patent</a></li>
           <li><a href="https://github.com/paritytech/bcts/tree/main/packages/shamir" target="_blank" rel="noopener noreferrer">@bcts/shamir by Blockchain Commons - BSD-2-Clause-Patent</a></li>
           <li><a href="https://github.com/paritytech/bcts/tree/main/packages/crypto" target="_blank" rel="noopener noreferrer">@bcts/crypto by Blockchain Commons - BSD-2-Clause-Patent</a></li>
           <li><a href="https://github.com/paritytech/bcts/tree/main/packages/rand" target="_blank" rel="noopener noreferrer">@bcts/rand by Blockchain Commons - BSD-2-Clause-Patent</a></li>
@@ -2783,7 +2798,7 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
 
   <footer class="footer">
     <div class="footer__inner">
-      <span>Seed Tool <span id="versionTag">v2.3.0</span></span>
+      <span>Seed Tool <span id="versionTag">v2.3.1</span></span>
       <span class="footer__sep">·</span>
       <a href="#/about">About</a>
       <span class="footer__sep">·</span>

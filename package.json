@@ -1,20 +1,20 @@
 {
   "name": "seed-tool",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Bitcoin wallet seed tool",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./src/server.js",
     "build": "node ./build.js",
     "git": "npm run build && git pull && git add . && git commit -m \"$MSG\" && git push",
-    "test": "node test/raw-entropy.test.js && node test/entropy-staleness.test.js"
+    "test": "node test/raw-entropy.test.js && node test/entropy-staleness.test.js && node test/seed-safety.test.js",
+    "release:check": "npm test && npm run build && git diff --exit-code -- dist/index.html"
   },
   "author": "SuperPhatArrow",
   "license": "GPLv3",
   "devDependencies": {
     "@bcts/dcbor": "^1.0.0-beta.0",
     "@bcts/sskr": "^1.0.0-beta.0",
-    "@bcts/uniform-resources": "^1.0.0-beta.0",
     "@types/node": "^25.8.0",
     "bip32": "^5.0.0-rc.0",
     "bip322-js": "^3.0.0",

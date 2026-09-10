@@ -267,6 +267,30 @@
     if (clearSeedConfirm) clearSeedConfirm.classList.remove('is-open');
   }
   function performClearSeed() {
+    // Wipe seed material held by the individual tools, including what the
+    // user typed into them (dom.js), then the Shamir and recovery outputs.
+    if (typeof wipeAllSeedMaterial === 'function') wipeAllSeedMaterial();
+    ['slip39SharesList', 'recoverResultsList'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '';
+    });
+    ['slip39GenResults', 'slip39RecoverResult', 'recoverResults'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
+    });
+    [
+      'slip39Passphrase', 'slip39RecoverShares', 'slip39RecoverPassphrase',
+      'slip39RecoverHex', 'slip39RecoverBip39', 'recoverPassphrase',
+      'recoverAddress', 'recoverHex', 'recoverBinary', 'recoverIndexes',
+    ].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if ('value' in el) el.value = '';
+      else el.textContent = '';
+    });
+    document.querySelectorAll('#recoverWords input').forEach((el) => {
+      el.value = '';
+    });
     // Clear all primary seed fields, then trigger dom.js's existing recompute
     // chain via an input event on the BIP39 phrase textarea (empty value =
     // mnemonicToSeedPopulate clears the rest, see dom.js resetEverything()).
@@ -823,9 +847,11 @@
   // Triggers dom.js's existing "generate random seed" flow (no UX detour).
   // The seedbar's polling loop will refresh the walkthrough bindings automatically
   // once the new BIP32 root key value lands.
-  function generateRandomSeedFromLearn() {
+  async function generateRandomSeedFromLearn() {
     const generateBtn = document.querySelector('.btn.generate');
     if (!generateBtn) return;
+    // A new random seed replaces the loaded one, so ask first
+    if (typeof confirmReplaceSeed === 'function' && !(await confirmReplaceSeed())) return;
     // Make sure the seed-input modes are reset: select the Generate Random tab
     // (this is what dom.js triggers on init, so it should already be selected,
     // but force it in case the user navigated through tabs).
@@ -1361,6 +1387,8 @@
           result = foundationLib.generate(masterSecretHex, { groups, groupThreshold });
         }
 
+        const foundationNote = document.getElementById('shamirFoundationGenNote');
+        if (foundationNote) foundationNote.hidden = std !== 'foundation';
         const isAdvanced = result.groups.length > 1;
         const stdLabel = std === 'slip39' ? 'SLIP-39'
                        : std === 'sskr'   ? 'SSKR'
