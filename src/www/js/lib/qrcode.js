@@ -32,8 +32,13 @@ window.QRCode = (function () {
       this._moduleCount = 0;
     }
 
-    addData(data = '') {
-      this._dataList.push(this.#qr8BitByte(data));
+    // mode is 'Byte' (default) or 'Numeric'. Standard SeedQR needs Numeric: it
+    // packs three digits into 10 bits, which is what keeps a 12-word SeedQR
+    // at 25x25 modules.
+    addData(data = '', mode = 'Byte') {
+      this._dataList.push(
+        mode === 'Numeric' ? this.#qrNumeric(data) : this.#qr8BitByte(data)
+      );
       this._dataCache = null;
     }
 
@@ -353,6 +358,25 @@ window.QRCode = (function () {
         bytes.push(c & 0xff);
       }
       return bytes;
+    }
+
+    #qrNumeric(data) {
+      if (!/^\d*$/.test(data)) {
+        throw new Error('Numeric QR data must be digits only');
+      }
+      return {
+        getMode: () => 1 << 0,
+        getLength: () => data.length,
+        write: (buffer) => {
+          let i = 0;
+          for (; i + 3 <= data.length; i += 3) {
+            buffer.put(parseInt(data.substring(i, i + 3), 10), 10);
+          }
+          const rest = data.length - i;
+          if (rest === 2) buffer.put(parseInt(data.substring(i), 10), 7);
+          if (rest === 1) buffer.put(parseInt(data.substring(i), 10), 4);
+        },
+      };
     }
 
     #qr8BitByte(data) {
@@ -919,16 +943,15 @@ window.QRCode = (function () {
       return a;
     };
 
+    // Width of the character count field, by mode and version (ISO 18004).
+    // Byte mode keeps the values this library always used.
     _this.getLengthInBits = function (mode, type) {
-      if (1 <= type && type < 10) {
-        // 1 - 9
-        return 8;
-      } else if (type < 41) {
-        // 10 - 40
-        return 16;
-      } else {
-        throw 'type:' + type;
-      }
+      const widths = { 1: [10, 12, 14], 2: [9, 11, 13], 4: [8, 16, 16], 8: [8, 10, 12] }[mode];
+      if (!widths) throw 'mode:' + mode;
+      if (1 <= type && type < 10) return widths[0];
+      if (type < 27) return widths[1];
+      if (type < 41) return widths[2];
+      throw 'type:' + type;
     };
 
     _this.getLostPoint = function (qrcode) {

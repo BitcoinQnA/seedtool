@@ -58,7 +58,7 @@ node build.js
 sha256sum dist/index.html
 ```
 
-`build.js` needs Node.js only; no packages are installed. The bundled libraries in `src/www/js/lib` are committed build outputs: six are built with esbuild by the `build_*.js` scripts from the pinned versions in `package-lock.json`, the rest are older browserify builds from `libs/`.
+`build.js` needs Node.js only; no packages are installed. The bundled libraries in `src/www/js/lib` are committed build outputs: seven are built with esbuild by the `build_*.js` scripts from the pinned versions in `package-lock.json`, the rest are older browserify builds from `libs/`.
 
 Before tagging a release, `npm run release:check` runs the tests, rebuilds `dist/index.html` and fails if the committed file differs from the source.
 

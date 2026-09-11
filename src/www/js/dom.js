@@ -370,6 +370,18 @@ const setupDom = async () => {
   DOM.generateButton.addEventListener('click', generateNewMnemonic);
   // Add event listener to paste mnemonic
   DOM.mnemonicInputs.forEach(div => div.addEventListener('paste', pasteMnemonic));
+  // Check each word box as it is typed in and when it is left
+  DOM.mnemonicInputs.forEach((div) => {
+    const input = div.querySelector('input');
+    input.addEventListener('input', () => {
+      checkMnemonicWordBox(input);
+      showMnemonicWordHint();
+    });
+    input.addEventListener('blur', () => {
+      checkMnemonicWordBox(input, true);
+      showMnemonicWordHint();
+    });
+  });
   // update pointer to word list
   wordList = bip39.wordlists[Object.keys(bip39.wordlists)[0]];
   // show user when connected to a network for security
@@ -438,9 +450,46 @@ const thisBrowserIsShit = () => {
 };
 
 // Load seed from mnemonic input
+// Mark a word box that cannot hold a BIP39 word. While typing, the start of
+// a real word is fine; once the box is left the word must be complete.
+const checkMnemonicWordBox = (input, leaving = false) => {
+  const word = normalizeString(input.value).toLowerCase();
+  const ok =
+    !word ||
+    wordList.includes(word) ||
+    (!leaving && wordList.some((w) => w.startsWith(word)));
+  input.classList.toggle('word-invalid', !ok);
+  input.setAttribute('aria-invalid', ok ? 'false' : 'true');
+  return ok;
+};
+
+// Explain the first word box that has a problem, with the nearest real word
+const showMnemonicWordHint = () => {
+  const hint = document.getElementById('inputMnemonicHint');
+  const length = parseInt(DOM.mnemonicLengthSelect.value, 10);
+  const boxes = [...DOM.mnemonicInputs]
+    .slice(0, length)
+    .map((div) => div.querySelector('input'));
+  const index = boxes.findIndex((input) => input.classList.contains('word-invalid'));
+  if (index < 0) {
+    hint.textContent = '';
+    hint.classList.add('hidden');
+    return;
+  }
+  const word = normalizeString(boxes[index].value).toLowerCase();
+  hint.textContent = `Word ${index + 1}: "${word}" is not in the BIP39 English word list. Did you mean "${findNearestWord(word)}"?`;
+  hint.classList.remove('hidden');
+};
+
 const mnemonicInputSeedLoad = () => {
   const errorText = document.getElementById('inputMnemonicError');
   errorText.classList.add('hidden');
+  DOM.mnemonicInputs.forEach((div) => {
+    const input = div.querySelector('input');
+    input.classList.remove('word-invalid');
+    input.setAttribute('aria-invalid', 'false');
+  });
+  showMnemonicWordHint();
   try {
     const len = parseInt(DOM.mnemonicLengthSelect.value);
     if (isNaN(len)) {
@@ -449,8 +498,12 @@ const mnemonicInputSeedLoad = () => {
     const mnemonicArray = [];
     DOM.mnemonicInputs.forEach((div, i) => {
       if (i < len) {
-        const word = normalizeString(div.querySelector('input').value);
+        const input = div.querySelector('input');
+        const word = normalizeString(input.value).toLowerCase();
         if (!wordList.includes(word)) {
+          input.classList.add('word-invalid');
+          input.setAttribute('aria-invalid', 'true');
+          input.focus();
           const nearestWord = findNearestWord(word);
           throw new Error(
             word
@@ -464,7 +517,9 @@ const mnemonicInputSeedLoad = () => {
       }
     });
     if (!bip39.validateMnemonic(mnemonicArray.join(' '))) {
-      throw new Error('Invalid Mnemonic Phrase! Unable to load seed.');
+      throw new Error(
+        'All the words are in the word list, but together they fail the BIP39 checksum. A word is probably mistyped, swapped or in the wrong order.'
+      );
     }
     DOM.bip39Phrase.value = mnemonicArray.join(' ');
     DOM.mnemonicLengthSelect.value = mnemonicArray.length;
@@ -473,8 +528,7 @@ const mnemonicInputSeedLoad = () => {
     mnemonicInputLengthAdjust();
     mnemonicToSeedPopulate();
   } catch (e) {
-    console.error(e);
-    errorText.innerText = e;
+    errorText.textContent = e.message;
     errorText.classList.remove('hidden');
   }
   adjustPanelHeight();
@@ -1062,6 +1116,15 @@ const bip39PassphraseTest = async () => {
     default:
       break;
   }
+  const candidates = document
+    .getElementById('bip39PassTestCandidates')
+    .value.split('\n')
+    .map((line) => line.replace(/\r$/, ''))
+    .filter((line) => line !== '');
+  if (candidates.length) {
+    await bip39PassphraseListTest(candidates, knownAddress, userPath, pathBip);
+    return;
+  }
   document.querySelector('#loadingPage>h2').innerText = 'searching...';
   document.getElementById('loadingPage').style.display = '';
   await sleep(50);
@@ -1094,6 +1157,63 @@ const bip39PassphraseTest = async () => {
   msg = /*html*/ `Your address did not match after searching 1000 addresses derived from this path and seed.`;
   bip39PassphraseMessage(msg);
   toast('No Match Found');
+};
+
+let passTestStopped = false;
+
+// Try each listed passphrase against the known address: derive the account
+// at the path and check its first `gap` addresses. One passphrase at a time,
+// so the page stays responsive and the search can be stopped.
+const bip39PassphraseListTest = async (candidates, knownAddress, userPath, pathBip) => {
+  const gapInput = document.getElementById('bip39PassTestGap');
+  const gap = Math.min(1000, Math.max(1, parseInt(gapInput.value, 10) || 20));
+  const stopBtn = document.getElementById('bip39PassTestStop');
+  const mnemonic = getPhrase();
+  passTestStopped = false;
+  stopBtn.hidden = false;
+  stopBtn.onclick = () => {
+    passTestStopped = true;
+  };
+  DOM.bip39PassTestBtn.disabled = true;
+  try {
+    for (let n = 0; n < candidates.length; n++) {
+      if (passTestStopped) {
+        bip39PassphraseMessage(`Stopped after ${n} of ${candidates.length} passphrases, with no match so far.`);
+        return;
+      }
+      bip39PassphraseMessage(`Trying passphrase ${n + 1} of ${candidates.length}…`);
+      await sleep(0);
+      const candidate = candidates[n].normalize('NFKD');
+      const account = bip32
+        .fromSeed(bip39.mnemonicToSeedSync(mnemonic, candidate))
+        .derivePath(userPath);
+      for (let i = 0; i < gap; i++) {
+        if (getAddress(account.derive(i), pathBip) !== knownAddress) continue;
+        const spaces =
+          candidate !== candidate.trim()
+            ? ' It starts or ends with a space, which the Seed Workspace removes, so enter it in your wallet directly.'
+            : '';
+        bip39PassphraseMessage(
+          `<strong>MATCH: </strong>passphrase ${n + 1} (<code>${escapeHtml(candidate)}</code>) gives your address at index ${i}.${spaces} <button type="button" class="btn" id="bip39PassTestUse">Use this passphrase</button>`
+        );
+        document.getElementById('bip39PassTestUse').onclick = () => {
+          DOM.bip39Passphrase.value = candidate;
+          mnemonicToSeedPopulate();
+          toast('Passphrase loaded into the Seed Workspace');
+        };
+        toast('MATCH FOUND!!!');
+        return;
+      }
+    }
+    bip39PassphraseMessage(
+      `None of the ${candidates.length} passphrases gave your address in the first ${gap} addresses of ${escapeHtml(userPath)}.`
+    );
+  } catch (error) {
+    bip39PassphraseMessage('ERROR: ' + escapeHtml(error?.message || String(error)));
+  } finally {
+    stopBtn.hidden = true;
+    DOM.bip39PassTestBtn.disabled = false;
+  }
 };
 
 // Escape text for insertion into HTML
@@ -1362,14 +1482,14 @@ const resizeObserver = new ResizeObserver(() => {
 });
 
 // QR Code icon
-const addQRIcon = (element, data, seedPhrase) => {
+const addQRIcon = (element, data, seedPhrase, mode) => {
   while (element.firstChild) {
     element.removeChild(element.lastChild);
   }
   const template = document.getElementById('qrTemplate');
   const clone = template.content.firstElementChild.cloneNode(true);
   clone.addEventListener('click', () => {
-    openQrModal(data, seedPhrase);
+    openQrModal(data, seedPhrase, mode);
   });
   clone.style.display = hidePrivateData ? 'none' : '';
   element.append(clone);
@@ -1638,6 +1758,9 @@ const calculateBip47Addresses = () => {
 
 // returns addresses for a given node depending on currentBip
 const getAddress = (node, bipToUse = currentBip) => {
+  if (bipToUse === 'bip86') {
+    return bip86.getP2TRAddress(node.publicKey, isTestnet);
+  }
   if (bipToUse === 'bip49') {
     return bitcoin.payments.p2sh({
       redeem: bitcoin.payments.p2wpkh({
@@ -1805,10 +1928,10 @@ document.addEventListener('keydown', (e) => {
   });
 })();
 const clearCompactSeedQR = () => {
-  const el = document.getElementById('compactSeedQR');
-  while (el.firstChild) {
-    el.removeChild(el.firstChild);
-  }
+  ['compactSeedQR', 'standardSeedQR'].forEach((id) => {
+    const el = document.getElementById(id);
+    while (el && el.firstChild) el.removeChild(el.firstChild);
+  });
 };
 const phraseToCompactQrBytes = (phrase) =>
   JSON.stringify(
@@ -1829,6 +1952,14 @@ const makeCompactSeedQR = () => {
     phraseToCompactQrBytes(phrase),
     phrase
   );
+  if (typeof seedKeys !== 'undefined') {
+    addQRIcon(
+      document.getElementById('standardSeedQR'),
+      seedKeys.mnemonicToSeedQrDigits(phrase),
+      phrase,
+      'Numeric'
+    );
+  }
 };
 /**
  * QR dialog / Modal
@@ -1841,12 +1972,17 @@ const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
   DOM.qrModalDiv.innerHTML = '';
 };
-const openQrModal = (dataString, seedPhrase = '') => {
+const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
   clearQRModal();
   const qr = new QRCode(0, 'L');
-  qr.addData(dataString);
+  qr.addData(dataString, mode);
   qr.make();
-  const cellSize = seedPhrase.split(' ').length === 12 ? 17 : 15;
+  // A standard SeedQR has more modules than a compact one, so shrink its
+  // cells to keep it on the card; compact codes keep their usual size
+  const cellSize = Math.min(
+    seedPhrase.split(' ').length === 12 ? 17 : 15,
+    Math.floor(440 / (qr.getModuleCount() + 4))
+  );
   const qrSvg = qr.createSvgTag({
     cellSize,
     scalable: true,
@@ -2130,6 +2266,41 @@ const clearAddresses = () => {
 };
 
 // Populate extended keys for currentBip
+// Output descriptors for the standard account shown (BIP44, 49, 84 or 86).
+// A custom BIP32 path has no standard script type, so none is shown.
+const clearDescriptors = () => {
+  const section = document.getElementById('descriptorSection');
+  if (section) section.classList.add('hidden');
+  ['descriptorCombined', 'descriptorReceive', 'descriptorChange'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  emptyElement(document.getElementById('descriptorCombinedQR'));
+};
+
+const fillDescriptors = () => {
+  const purpose = { bip44: 44, bip49: 49, bip84: 84, bip86: 86 }[currentBip];
+  if (!purpose || !DOM.bip32RootKey.value || typeof seedKeys === 'undefined') {
+    clearDescriptors();
+    return;
+  }
+  try {
+    const d = seedKeys.singleSigDescriptors(DOM.bip32RootKey.value, {
+      purpose,
+      coin: DOM.pathCoin.value,
+      account: DOM.pathAccount.value,
+      testnet: isTestnet,
+    });
+    document.getElementById('descriptorCombined').value = d.combined;
+    document.getElementById('descriptorReceive').value = d.receive;
+    document.getElementById('descriptorChange').value = d.change;
+    addQRIcon(document.getElementById('descriptorCombinedQR'), d.combined);
+    document.getElementById('descriptorSection').classList.remove('hidden');
+  } catch (error) {
+    clearDescriptors();
+  }
+};
+
 const fillBip32Keys = () => {
   if (!bip32RootKey) return;
   if (currentBip === 'bip49' || currentBip === 'bip84') {
@@ -2154,6 +2325,7 @@ const fillBip32Keys = () => {
   const xpub = bip32ExtendedKey.neutered().toBase58();
   DOM.bip32AccountXpub.value = xpub;
   addQRIcon(document.getElementById('bip32AccountXpubQR'), xpub);
+  fillDescriptors();
   if (currentBip !== 'bip32') {
     displayAccountKeys();
   }
@@ -2722,6 +2894,7 @@ const clearSecondaryDerivedOutputs = () => {
   );
   clearBip47Addresses();
   clearRobotImages();
+  clearDescriptors();
 };
 
 /**
@@ -2743,7 +2916,11 @@ const wipeAllSeedMaterial = () => {
       el.value = '';
       if (el.dataset) delete el.dataset.generated;
     });
-  ['otpDecrypted', 'singleSigInput'].forEach((id) => {
+  [
+    'otpDecrypted', 'singleSigInput', 'bip39PassTestCandidates',
+    'nostrNip06Npub', 'nostrNip06Nsec', 'nostrNip06PubHex', 'nostrNip06PrivHex',
+    'nostrBip85Npub', 'nostrBip85Nsec', 'nostrBip85PubHex', 'nostrBip85PrivHex',
+  ].forEach((id) => {
     document.getElementById(id).value = '';
   });
   ['singleSigAddress', 'singleSigPub'].forEach((id) =>
