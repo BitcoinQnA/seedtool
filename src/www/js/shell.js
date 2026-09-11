@@ -52,10 +52,24 @@
     }
   }
 
+  // The home card of a tool that needs a seed, while none is loaded
+  function lockedCardFor(route) {
+    if ((document.getElementById('bip32RootKey') || {}).value) return null;
+    return [...document.querySelectorAll('.view--home .card[data-requires-seed]')]
+      .find((card) => card.dataset.route === route) || null;
+  }
+
   function applyRoute() {
     let route = parseHash();
     // Back-compat: route /slip39 → /shamir (which has the merged SLIP-39 + SSKR tool)
     if (route === 'slip39') route = 'shamir';
+    // A link straight to a tool that needs a seed shows the "needs a seed"
+    // dialog over the home page, rather than an empty tool
+    const lockedCard = lockedCardFor(route);
+    if (lockedCard) {
+      history.replaceState(null, '', '#/');
+      route = 'home';
+    }
     const isHome = route === 'home';
     document.body.dataset.route = route;
 
@@ -82,6 +96,10 @@
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
 
     if (isHome && lastSearchValue) applySearch(lastSearchValue);
+    if (lockedCard) {
+      const title = lockedCard.querySelector('.card__title');
+      openNeedSeedModal(lockedCard.getAttribute('href'), title ? title.textContent.trim() : 'This tool');
+    }
   }
 
   window.addEventListener('hashchange', applyRoute);
@@ -172,10 +190,50 @@
   function refreshLockState() {
     document.querySelectorAll('.card[data-requires-seed]').forEach((card) => {
       card.classList.toggle('card--locked', !seedLoaded);
+      // The lock badge is drawn by CSS and hidden from screen readers, so
+      // each locked card carries its own note
+      let note = card.querySelector('.card__lock-note');
+      if (!note) {
+        note = document.createElement('span');
+        note.className = 'sr-only card__lock-note';
+        note.textContent = ' (load a seed first)';
+        card.appendChild(note);
+      }
+      note.hidden = seedLoaded;
     });
     document.querySelectorAll('[data-seed-empty]').forEach((el) => {
       el.hidden = seedLoaded;
     });
+    document.querySelectorAll('[data-seed-only]').forEach((el) => {
+      el.hidden = !seedLoaded;
+    });
+    // The Seed Workspace keeps its output fields out of the way until there
+    // is something to show, but never hides one while it is being typed in
+    const outputs = [...document.querySelectorAll('[data-seed-output]')];
+    const phrase = ((document.getElementById('bip39Phrase') || {}).value || '').trim();
+    const showOutput = seedLoaded || phrase.length > 0
+      || outputs.some((el) => el.contains(document.activeElement));
+    const wasHidden = outputs.some((el) => el.hidden);
+    outputs.forEach((el) => { el.hidden = !showOutput; });
+    document.querySelectorAll('[data-seed-output-hint]').forEach((el) => {
+      el.hidden = showOutput;
+    });
+    if (showOutput && wasHidden) refreshTextareaSizes();
+  }
+
+  // Confirm dialogs take focus when they open and give it back on close
+  let dialogReturnFocus = null;
+  function openConfirmDialog(modal, focusEl) {
+    dialogReturnFocus = document.activeElement;
+    modal.classList.add('is-open');
+    if (focusEl) focusEl.focus();
+  }
+  function closeConfirmDialog(modal) {
+    if (!modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    const target = dialogReturnFocus;
+    dialogReturnFocus = null;
+    if (target && typeof target.focus === 'function' && document.contains(target)) target.focus();
   }
 
   // ----- "Needs a seed" modal (shown when a locked card is tapped) -----------
@@ -190,10 +248,10 @@
     if (!needSeedModal) { location.hash = '#/seed'; return; }
     pendingLockedRoute = targetHash || null;
     if (needSeedToolName) needSeedToolName.textContent = toolLabel || 'This tool';
-    needSeedModal.classList.add('is-open');
+    openConfirmDialog(needSeedModal, needSeedCancel);
   }
   function closeNeedSeedModal() {
-    if (needSeedModal) needSeedModal.classList.remove('is-open');
+    if (needSeedModal) closeConfirmDialog(needSeedModal);
   }
 
   document.addEventListener('click', (event) => {
@@ -261,15 +319,16 @@
   const clearSeedConfirmBtn = document.getElementById('clearSeedConfirmBtn');
 
   function openClearSeedModal() {
-    if (clearSeedConfirm) clearSeedConfirm.classList.add('is-open');
+    if (clearSeedConfirm) openConfirmDialog(clearSeedConfirm, clearSeedCancel);
   }
   function closeClearSeedModal() {
-    if (clearSeedConfirm) clearSeedConfirm.classList.remove('is-open');
+    if (clearSeedConfirm) closeConfirmDialog(clearSeedConfirm);
   }
   function performClearSeed() {
     // Wipe seed material held by the individual tools, including what the
     // user typed into them (dom.js), then the Shamir and recovery outputs.
     if (typeof wipeAllSeedMaterial === 'function') wipeAllSeedMaterial();
+    if (window.backupSheet) window.backupSheet.remove();
     ['slip39SharesList', 'recoverResultsList'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '';
@@ -371,6 +430,15 @@
       const visible = group.querySelectorAll('.card:not([hidden])').length;
       group.classList.toggle('is-empty', q.length > 0 && visible === 0);
     });
+    const shown = document.querySelectorAll('.view--home .card:not([hidden])').length;
+    const status = document.getElementById('toolSearchStatus');
+    if (status) {
+      status.textContent = !q ? ''
+        : shown ? `${shown} ${shown === 1 ? 'tool' : 'tools'} found`
+        : `No tools match "${value.trim()}".`;
+    }
+    const empty = document.getElementById('toolSearchEmpty');
+    if (empty) empty.hidden = !(q && shown === 0);
   }
 
   if (searchInput) {
@@ -381,6 +449,15 @@
         applySearch('');
         searchInput.blur();
       }
+    });
+  }
+
+  const searchClear = document.getElementById('toolSearchClear');
+  if (searchClear && searchInput) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      applySearch('');
+      searchInput.focus();
     });
   }
 
@@ -1782,14 +1859,13 @@
       bolt11Err.classList.add('hidden');
       bolt11Result.hidden = true;
       try {
-        const invoice = (bolt11Input.value || '').trim();
+        const invoice = lightningText(bolt11Input.value);
         if (!invoice) throw new Error('Paste a BOLT-11 invoice first (starts with "lnbc").');
         const decoded = window.decoders.bolt11.decode(invoice);
         bolt11Result.innerHTML = renderBolt11(decoded);
         bolt11Result.hidden = false;
       } catch (e) {
-        bolt11Err.textContent = e.message || String(e);
-        bolt11Err.classList.remove('hidden');
+        showFriendlyError(bolt11Err, bolt11ErrorText(e, lightningText(bolt11Input.value)), e);
       }
     });
 
@@ -1801,14 +1877,13 @@
       bolt12Err.classList.add('hidden');
       bolt12Result.hidden = true;
       try {
-        const input = (bolt12Input.value || '').trim();
+        const input = lightningText(bolt12Input.value);
         if (!input) throw new Error('Paste a BOLT-12 offer / invoice / invoice request first.');
         const decoded = window.decoders.bolt12.decode(input);
         bolt12Result.innerHTML = renderBolt12(decoded);
         bolt12Result.hidden = false;
       } catch (e) {
-        bolt12Err.textContent = e.message || String(e);
-        bolt12Err.classList.remove('hidden');
+        showFriendlyError(bolt12Err, bolt12ErrorText(e, lightningText(bolt12Input.value)), e);
       }
     });
 
@@ -2267,6 +2342,58 @@
     }
   }
 
+  // ----- Plain-English errors ------------------------------------------------
+  // Say what went wrong in plain words, with the library's own message
+  // folded away underneath for anyone who wants the detail
+  function showFriendlyError(el, plain, error) {
+    el.textContent = plain;
+    const detail = error ? error.message || String(error) : '';
+    if (detail && detail !== plain) {
+      const more = document.createElement('details');
+      more.className = 'error-detail';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Technical detail';
+      const code = document.createElement('code');
+      code.textContent = detail;
+      more.append(summary, code);
+      el.append(more);
+    }
+    el.classList.remove('hidden');
+  }
+
+  function psbtErrorText(error, text) {
+    if (!text) return 'Paste a PSBT first.';
+    if (/^ur:/i.test(text)) {
+      return 'This is a UR code, the form wallets use to pass a PSBT through animated QR codes. Use the scan button to read it with your camera or from an image.';
+    }
+    if (/Not a valid PSBT/.test(error && error.message)) {
+      return 'This is not a PSBT. A PSBT is a long block of text that starts with "cHNidP" (base64) or "70736274" (hex). Check you copied all of it from your wallet.';
+    }
+    return 'This PSBT could not be read. It may be cut short or damaged, so copy it from your wallet again.';
+  }
+
+  // Wallets often share invoices as lightning: links
+  const lightningText = (value) => (value || '').trim().replace(/^lightning:/i, '');
+
+  function bolt11ErrorText(error, text) {
+    const lower = text.toLowerCase();
+    if (!lower) return error.message;
+    if (/^ln[oir]1/.test(lower)) return 'This is a BOLT-12 code, not a BOLT-11 invoice. Decode it on the BOLT-12 tab.';
+    if (lower.startsWith('lnurl')) {
+      return 'This is an LNURL, not an invoice. An LNURL is a web link that your wallet opens online, so this offline tool cannot decode it.';
+    }
+    if (/^ln(bc|tb|sb)/.test(lower)) return 'This invoice could not be decoded. It may be cut short or mistyped, so copy it again.';
+    return 'This is not a Lightning invoice. BOLT-11 invoices start with "lnbc", or "lntb" on testnet.';
+  }
+
+  function bolt12ErrorText(error, text) {
+    const lower = text.toLowerCase();
+    if (!lower) return error.message;
+    if (/^ln(bc|tb|sb)/.test(lower)) return 'This is a BOLT-11 invoice, not a BOLT-12 code. Decode it on the BOLT-11 tab.';
+    if (/^ln[oir]1/.test(lower)) return 'This BOLT-12 code could not be decoded. It may be cut short or damaged, so copy it again.';
+    return 'This is not a BOLT-12 code. Offers start with "lno1", invoice requests with "lnr1" and invoices with "lni1".';
+  }
+
   // ----- PSBT Inspector -----------------------------------------------------
   function initPsbtTool() {
     const view = document.querySelector('[data-tool="psbt"]');
@@ -2425,8 +2552,7 @@
         renderGlobalXpubs(r.globalXpubs);
         resultEl.hidden = false;
       } catch (e) {
-        errEl.textContent = e.message || String(e);
-        errEl.classList.remove('hidden');
+        showFriendlyError(errEl, psbtErrorText(e, (inputEl.value || '').trim()), e);
       }
     }
 
@@ -3190,6 +3316,53 @@
     refresh();
   }
 
+  // ----- Printable backup sheet (backup-sheet.js) ---------------------------
+  function initBackupSheet() {
+    const printBtn = document.getElementById('backupSheetPrint');
+    if (!printBtn || !window.backupSheet) return;
+    const fill = document.getElementById('backupSheetFill');
+    const fillWarn = document.getElementById('backupSheetFillWarn');
+    const wordsOption = document.getElementById('backupSheetWordsOption');
+    const sync = () => {
+      const filling = fill.checked && seedLoaded;
+      fillWarn.classList.toggle('hidden', !filling);
+      wordsOption.hidden = filling;
+    };
+    fill.addEventListener('change', sync);
+    document.addEventListener('seedtool:seed-changed', () => {
+      fill.checked = false;
+      sync();
+    });
+    printBtn.addEventListener('click', () => {
+      const phrase = (document.getElementById('bip39Phrase') || {}).value || '';
+      try {
+        window.backupSheet.print({
+          words: Number(document.getElementById('backupSheetWords').value),
+          format: document.getElementById('backupSheetFormat').value,
+          mnemonic: fill.checked && seedLoaded ? phrase : '',
+        });
+      } catch (e) {
+        if (typeof toast === 'function') toast(e.message);
+      }
+      // Filling in the words is a choice for one print, not a setting
+      fill.checked = false;
+      sync();
+    });
+  }
+
+  // ----- Derived Addresses: private keys hidden until asked for --------------
+  function initAddressPrivateKeys() {
+    const toggle = document.getElementById('showAddressPrivateKeys');
+    const list = document.querySelector('[data-tool="derived"] .address-display');
+    if (!toggle || !list) return;
+    const sync = () => list.classList.toggle('show-private-keys', toggle.checked);
+    toggle.addEventListener('change', sync);
+    document.addEventListener('seedtool:seed-changed', () => {
+      toggle.checked = false;
+      sync();
+    });
+  }
+
   function boot() {
     applyDismissed();
     refreshLockState();
@@ -3203,6 +3376,8 @@
     initMiniscriptTool();
     initPsbtTool();
     initNostrTool();
+    initBackupSheet();
+    initAddressPrivateKeys();
     initSeedScan();
     initBip353Tool();
     initEntropyCollapsible();

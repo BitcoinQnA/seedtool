@@ -127,26 +127,35 @@ test('xor: a blank share, a missing seed or no share is refused', async () => {
 test('xor: an invalid share clears the previous result from the page', async () => {
   const tool = await openTool();
   const { DOM, document } = tool;
-  const share = { value: FF_12 };
-  const shareDiv = {
+  const shares = [{ value: SEVENF_12 }, { value: FF_12 }];
+  const shareDivs = shares.map((share) => ({
     classList: { contains: () => false },
     querySelector: () => share,
-  };
-  document.querySelectorAll = (selector) => (selector === '.xor-seed' ? [shareDiv] : []);
-  DOM.bip39Phrase.value = SEVENF_12;
+  }));
+  document.querySelectorAll = (selector) => (selector === '.xor-seed' ? shareDivs : []);
+  // Combining uses the shares alone, never the loaded seed
+  DOM.bip39Phrase.value = ZERO_24;
   const calculateXor = tool.run('calculateXor');
   const result = document.getElementById('xorResult');
   const errorEl = document.getElementById('xorError');
+  const loadButton = document.getElementById('xorLoadResult');
 
   calculateXor();
   assert.strictEqual(result.value, EIGHTY_12);
   assert.ok(errorEl.classList.contains('hidden'), 'an error showed for valid shares');
+  assert.strictEqual(loadButton.disabled, false);
 
-  share.value = FF_12.replace('wrong', 'wrongx');
+  shares[1].value = FF_12.replace('wrong', 'wrongx');
   calculateXor();
   assert.strictEqual(result.value, '', 'the earlier result was left on screen');
   assert.ok(!errorEl.classList.contains('hidden'), 'no error was shown');
-  assert.match(errorEl.textContent, /wrongx/);
+  assert.match(errorEl.textContent, /^Share 2: .*wrongx/);
+  assert.strictEqual(loadButton.disabled, true);
+
+  shares[1].value = '   ';
+  calculateXor();
+  assert.strictEqual(result.value, '');
+  assert.ok(errorEl.classList.contains('hidden'), 'a share still to be typed was reported as an error');
   tool.cancelPendingTimers();
 });
 
@@ -211,7 +220,7 @@ test('otp: validateKey reports a bad key instead of throwing', async () => {
 
 test('reset: values derived from the old seed do not survive a seed change', async () => {
   const tool = await openTool();
-  const derived = ['bip32AccountXprv', 'bip32AccountXpub', 'bip85PWDPassword', 'myZpub', 'myYpub', 'xorResult'];
+  const derived = ['bip32AccountXprv', 'bip32AccountXpub', 'bip85PWDPassword', 'bip85DiceResult', 'myZpub', 'myYpub'];
   for (const id of derived) tool.document.getElementById(id).value = 'from the old seed';
   tool.run('resetEverything')();
   tool.cancelPendingTimers();

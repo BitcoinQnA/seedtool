@@ -589,6 +589,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 16px); }
 }
 .card--locked::after {
   content: "🔒 Load seed first";
+  content: "🔒 Load seed first" / "";
   position: absolute;
   top: 12px;
   right: 12px;
@@ -3855,6 +3856,179 @@ pre {
   color: var(--q-muted);
 }
 
+/* ----- Polish and features batch ----------------------------------------- */
+
+/* Text for screen readers only */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Parts shown only with a seed (shell.js refreshLockState) */
+[data-seed-only][hidden],
+[data-seed-output][hidden],
+[data-seed-output-hint][hidden] { display: none !important; }
+
+/* The eye button also hides seed words shown outside the private fields */
+body.is-private .seedbar__words { font-size: 0; }
+body.is-private .seedbar__words::after {
+  content: "words hidden";
+  font-size: 0.75rem;
+}
+body.is-private .seed-hero__word-text { visibility: hidden; }
+
+/* A checkbox with its label */
+.check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.check-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--q-accent-hi);
+}
+
+/* Derived Addresses: private keys stay hidden until asked for */
+[data-tool="derived"] .address-display:not(.show-private-keys) .address-prv-row { display: none; }
+
+/* Home search feedback */
+.home__search-status {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--q-muted);
+  margin: 10px 0 0;
+  min-height: 1.25em;
+}
+.home__search-empty {
+  text-align: center;
+  color: var(--q-muted);
+  max-width: 480px;
+  margin: 8px auto 0;
+  font-size: 0.875rem;
+}
+.home__search-empty[hidden] { display: none; }
+
+/* A plain-English error with the technical message folded underneath */
+.error-detail { margin-top: 8px; font-size: 0.8125rem; }
+.error-detail summary { cursor: pointer; color: var(--q-muted); }
+.error-detail code {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--q-muted);
+}
+
+/* Seed XOR split controls */
+.xor-controls { align-items: center; }
+.xor-controls label { font-size: 0.875rem; }
+
+/* Backup sheet options in the Seed Workspace */
+.backup-sheet-tool { margin-top: 8px; }
+.backup-sheet-tool__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 8px 0;
+}
+.backup-sheet-tool__options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+.backup-sheet-tool [hidden] { display: none !important; }
+
+/* Bigger tap targets on touch screens */
+@media (pointer: coarse) {
+  .topbar__home,
+  .topbar__eye { width: 44px; height: 44px; }
+  .online-banner__dismiss,
+  .explainer__dismiss { min-width: 44px; min-height: 44px; flex-basis: 44px; }
+  .view__back { min-height: 44px; }
+  .footer__inner a { display: inline-flex; align-items: center; min-height: 44px; }
+  .seedbar__edit,
+  .seedbar__clear { display: inline-flex; align-items: center; min-height: 44px; }
+  .modal__close,
+  .confirm-modal__close { width: 44px; height: 44px; }
+  .subtabs__tab { min-height: 44px; }
+  select { min-height: 44px; }
+}
+
+/* ----- Printable backup sheet (backup-sheet.js) ----- */
+.backup-sheet { display: none; }
+@media print {
+  @page { margin: 12mm; }
+  body.is-printing-sheet { background: #fff !important; color: #000 !important; }
+  body.is-printing-sheet > :not(#backupSheet) { display: none !important; }
+  body.is-printing-sheet #backupSheet {
+    display: block;
+    color: #000;
+    font: 11pt/1.4 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .backup-sheet__page { break-after: page; }
+  .backup-sheet__page:last-child { break-after: auto; }
+  .backup-sheet__title { font-size: 16pt; margin: 0 0 4mm; color: #000; }
+  .backup-sheet h2 {
+    font-size: 10pt;
+    margin: 7mm 0 2.5mm;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #000;
+  }
+  .backup-sheet p { margin: 0 0 3mm; color: #000; }
+  .backup-sheet__fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6mm;
+  }
+  .backup-sheet__fields > div { display: flex; flex-direction: column; gap: 1mm; font-size: 9pt; }
+  .backup-sheet__line {
+    display: flex;
+    align-items: flex-end;
+    min-height: 8mm;
+    border-bottom: 0.3mm solid #000;
+    font: 11pt ui-monospace, Menlo, Consolas, monospace;
+  }
+  .backup-sheet__words {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: column;
+    gap: 2.5mm 5mm;
+  }
+  .backup-sheet__words li {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    height: 10mm;
+    padding: 0 2mm;
+    border: 0.3mm solid #000;
+    border-radius: 1.5mm;
+  }
+  .backup-sheet__num { min-width: 5mm; font-size: 8pt; color: #444; }
+  .backup-sheet__word { font: 12pt ui-monospace, Menlo, Consolas, monospace; }
+  .backup-sheet__notes { height: 45mm; border: 0.3mm solid #000; border-radius: 1.5mm; }
+  .backup-sheet__foot { font-size: 9pt; margin-top: 4mm; }
+  .backup-sheet__grid { display: block; width: 100%; max-width: 180mm; max-height: 205mm; margin: 4mm auto; }
+}
+
 </style>
   <meta property="og:title" content="Bitcoin Seed Tool">
   <meta property="og:type" content="website" />
@@ -3909,7 +4083,7 @@ pre {
     <div id="networkIndicator" class="topbar__net hidden" role="img" aria-label="Online connection detected - do not use with real bitcoin" title="Online - do not use with real funds">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
     </div>
-    <button type="button" id="showHide" class="topbar__eye" title="Show/Hide private data">
+    <button type="button" id="showHide" class="topbar__eye" title="Show/Hide private data" aria-label="Hide private data" aria-pressed="false">
       <svg id="showIcon" class="hidden" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><g><path d="M499.1,375.6c-0.4,0-0.9,0-1.3,0c-0.7,65.8-53.9,119-119.7,119.8c0,0.4,0,0.9,0,1.3c0,66.9,54.2,121.1,121.1,121.1c66.9,0,121.1-54.2,121.1-121.1C620.2,429.8,566,375.6,499.1,375.6z"/><path d="M500,135.8C229.4,135.8,10,337,10,500c0,159.2,219.4,364.2,490,364.2c270.6,0,490-208.9,490-364.2C990,337,770.6,135.8,500,135.8z M499.4,743.2c-135.9,0-246.1-110.2-246.1-246.1S363.5,251,499.4,251s246.1,110.2,246.1,246.1S635.3,743.2,499.4,743.2z"/></g></svg>
       <svg id="hideIcon" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><g><path d="M816.5,237.8l101.3-101.3c15.3-15.3,15.3-40,0-55.2c-15.3-15.3-40-15.3-55.2,0L746.8,197c-72.5-35.7-156.8-58-246.8-58c-270.6,0-490,201.2-490,364.2c0,87.1,65.6,187.8,169.3,261.3l-98.9,98.9c-15.3,15.3-15.3,40,0,55.2c7.6,7.6,17.6,11.4,27.6,11.4s20-3.8,27.6-11.4l112.5-112.5c73.6,37.6,159.7,61.3,251.8,61.3c270.6,0,490-208.9,490-364.2C990,412.9,922.6,310.9,816.5,237.8z M253.4,500.4c0-135.9,110.2-246.1,246.1-246.1c53.7,0,103.3,17.2,143.8,46.4l-90.7,90.7c-16.1-7.9-34.3-12.4-53.4-12.4c-0.4,0-0.9,0-1.3,0c-0.7,65.8-53.9,119-119.7,119.8c0,0.4,0,0.9,0,1.3c0,19.2,4.5,37.3,12.4,53.4l-90.7,90.7C270.6,603.7,253.4,554.1,253.4,500.4z M499.4,746.5c-54,0-104-17.4-144.6-47l90.8-90.8c16.1,7.9,34.3,12.4,53.4,12.4c66.9,0,121.1-54.2,121.1-121.1c0-19.2-4.5-37.3-12.4-53.4l90.8-90.8c29.5,40.6,47,90.6,47,144.6C745.5,636.3,635.3,746.5,499.4,746.5z"/></g></svg>
     </button>
@@ -3996,6 +4170,11 @@ pre {
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="toolSearch" type="search" placeholder="Find a tool" autocomplete="off" spellcheck="false" aria-label="Find a tool by name or keyword">
         </div>
+        <p class="home__search-status" id="toolSearchStatus" role="status" aria-live="polite"></p>
+        <div class="home__search-empty" id="toolSearchEmpty" hidden>
+          <p>Try a shorter word, or one like "address", "passphrase" or "backup".</p>
+          <button type="button" class="btn" id="toolSearchClear">Clear search</button>
+        </div>
       </div>
 
       <section class="home__group" data-group="start">
@@ -4061,10 +4240,10 @@ pre {
             <span class="card__title">Shamir Secret Sharing</span>
             <span class="card__desc">Split your seed into m-of-n shares. SLIP-39, SSKR, or Foundation Shard - pick the format your other wallet uses.</span>
           </a>
-          <a class="card" href="#/xor" data-route="xor" data-requires-seed data-keywords="seed xor combine split shares">
+          <a class="card" href="#/xor" data-route="xor" data-keywords="seed xor combine split shares coldcard">
             <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></span>
             <span class="card__title">Seed XOR</span>
-            <span class="card__desc">Combine two or more seeds with XOR so each share alone reveals nothing. All shares needed to recover.</span>
+            <span class="card__desc">Split your seed into shares that are all needed to rebuild it, or combine shares back into a seed.</span>
           </a>
         </div>
       </section>
@@ -4266,7 +4445,7 @@ gpg --verify signature.txt</code></pre>
             <div class="inputMnemonic-div"><label data-number="23" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 23" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
             <div class="inputMnemonic-div"><label data-number="24" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 24" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
           </section>
-          <p class="warning"><strong>NOTE:</strong> You can enter your BIP39 Passphrase below.</p>
+          <p class="recover-hint">After loading the words you can add a BIP39 passphrase in the Passphrase box below.</p>
           <p class="warning hidden" id="inputMnemonicHint" role="status" aria-live="polite"></p>
           <div class="button-row">
             <button type="button" class="btn" onclick="mnemonicInputSeedLoad();" title="Click to load the words entered above into the seed tool">Load Seed</button>
@@ -4290,7 +4469,7 @@ gpg --verify signature.txt</code></pre>
           <div class="private-data">
             <div class="entropy-details--flex-container" id="entropyDetailsContainer">
               <div class="entropy-details--flex-item">
-                <label>Time to crack (zxcvbn using Filtered Entropy): </label>
+                <label>Pattern check: </label>
                 <span class="entropy-details--detail--text one-click-copy" title="Click to Copy" id="entropyTimeToCrack"></span>
               </div>
               <div class="entropy-details--flex-item">
@@ -4378,6 +4557,7 @@ gpg --verify signature.txt</code></pre>
           </div>
         </div>
 
+        <div id="seedOutput" data-seed-output hidden>
         <h3 class="section-heading">Output</h3>
         <div>
           <label for="bip32RootKey">BIP32 Root Key</label>
@@ -4430,8 +4610,8 @@ gpg --verify signature.txt</code></pre>
           <div class="copy-wrapper private-data">
             <textarea id="bip39Passphrase" class="passphrase textarea-input" title="Encrypt your Mnemonic with a strong passphrase. Keep it safe and private." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
           </div>
-          <div class="warning">
-            <span id="bip39PassphraseCrackTime">No passphrase entered!</span>
+          <div class="warning hidden" role="status" aria-live="polite">
+            <span id="bip39PassphraseCrackTime"></span>
           </div>
         </div>
         <div>
@@ -4463,6 +4643,31 @@ gpg --verify signature.txt</code></pre>
           <a href="#/otp">OTP</a>,
           <a href="#/single">Single Address</a>.
         </p>
+        </div>
+        <p class="recover-hint" data-seed-output-hint>Your keys, SeedQR codes and a box for a BIP39 passphrase appear here once a seed is loaded.</p>
+        <section class="backup-sheet-tool" aria-labelledby="backupSheetTitle">
+          <h3 class="section-heading" id="backupSheetTitle">Backup sheet</h3>
+          <p class="recover-hint">Print a sheet to write your seed words on by hand, with numbered boxes and a grid for drawing your SeedQR. The parts of the SeedQR that never change, such as its corner squares, are printed for you.</p>
+          <div class="backup-sheet-tool__options">
+            <label id="backupSheetWordsOption">Words
+              <select id="backupSheetWords" title="Number of word boxes on a blank sheet">
+                <option value="12">12</option>
+                <option value="24" selected>24</option>
+              </select>
+            </label>
+            <label>QR format
+              <select id="backupSheetFormat" title="Which SeedQR grid to print">
+                <option value="standard" selected>SeedQR</option>
+                <option value="compact">Compact SeedQR (smaller grid)</option>
+              </select>
+            </label>
+          </div>
+          <label class="check-row" data-seed-only hidden><input type="checkbox" id="backupSheetFill"> Fill in my words and SeedQR</label>
+          <p class="warning hidden" id="backupSheetFillWarn">Printers, print queues and "Save as PDF" can keep a copy of what they print. Only fill in your words on a printer you trust completely, such as one that has never been on a network. A blank sheet filled in by hand is safer.</p>
+          <div class="button-row">
+            <button type="button" class="btn" id="backupSheetPrint">Print backup sheet</button>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -4569,6 +4774,7 @@ gpg --verify signature.txt</code></pre>
         <div>
           <a class="csv-download-link hidden private-data" title="Download a CSV file of your addresses and keys" href="data:text/csv;charset=utf-8,path,address,public key,private key" target="_blank" rel="noopener noreferrer">Download CSV file</a>
         </div>
+        <label class="check-row"><input type="checkbox" id="showAddressPrivateKeys"> Show private keys</label>
         <div class="address-display address-display-content"></div>
         <div class="address-range-row">
           <span>Display addresses from index </span>
@@ -4763,6 +4969,7 @@ gpg --verify signature.txt</code></pre>
       <div class="subtabs" role="tablist">
         <button type="button" class="subtabs__tab" data-subtab="bip85-entropy" role="tab" aria-selected="true">Entropy / child seeds</button>
         <button type="button" class="subtabs__tab" data-subtab="bip85-passwords" role="tab" aria-selected="false">Passwords</button>
+        <button type="button" class="subtabs__tab" data-subtab="bip85-dice" role="tab" aria-selected="false">Dice rolls</button>
       </div>
 
       <!-- Entropy panel -->
@@ -4817,9 +5024,16 @@ gpg --verify signature.txt</code></pre>
       <div class="subtabs__panel" data-subtab-panel="bip85-passwords" hidden>
         <button type="button" class="accordion" hidden>BIP85: Deterministic Passwords</button>
         <div class="panel">
+          <div class="bip85-item bip85">
+            <label for="bip85PWDFormat">Password format</label>
+            <select id="bip85PWDFormat" title="Which characters the password uses">
+              <option value="base64" selected>Base64 (20 to 86 characters)</option>
+              <option value="base85">Base85 (10 to 80 characters, more symbols)</option>
+            </select>
+          </div>
           <div class="bip85-item bip85-bytes-input bip85">
             <label for="bip85PWDLength">Password Length</label>
-            <input id="bip85PWDLength" class="textarea-input" type="number" title="Select the number of bytes to use." min="20" max="86" value="21" step="1" />
+            <input id="bip85PWDLength" class="textarea-input" type="number" title="Number of characters" min="20" max="86" value="21" step="1" />
           </div>
           <div class="bip85-item bip85 bip85-index-input">
             <label for="bip85PWDIndex">BIP85 PWD Index</label>
@@ -4829,6 +5043,32 @@ gpg --verify signature.txt</code></pre>
             <label for="bip85PWDPassword">BIP85 Password</label>
             <div class="copy-wrapper private-data"><textarea id="bip85PWDPassword" title="Private - don't share!" class="bip85Field textarea-input" readonly rows="3"></textarea></div>
           </div>
+          <p class="warning hidden" id="bip85PWDError" role="alert"></p>
+        </div>
+      </div>
+
+      <!-- Dice panel -->
+      <div class="subtabs__panel" data-subtab-panel="bip85-dice" hidden>
+        <button type="button" class="accordion" hidden>BIP85: Dice rolls</button>
+        <div class="panel">
+          <p class="recover-hint">Dice rolls you can recreate from your seed at any time: the same seed, sides, number of rolls and index always give the same rolls. As the BIP85 spec sets out, rolls run from 0 to one less than the number of sides, so add 1 to each for the faces of a real die.</p>
+          <div class="bip85-item bip85">
+            <label for="bip85DiceSides">Sides</label>
+            <input id="bip85DiceSides" class="textarea-input" type="number" title="Sides on each die" min="2" value="6" step="1" />
+          </div>
+          <div class="bip85-item bip85">
+            <label for="bip85DiceCount">Number of rolls</label>
+            <input id="bip85DiceCount" class="textarea-input" type="number" title="How many rolls, up to 1,000" min="1" max="1000" value="10" step="1" />
+          </div>
+          <div class="bip85-item bip85">
+            <label for="bip85DiceIndex">BIP85 Dice Index</label>
+            <input id="bip85DiceIndex" class="textarea-input" type="number" title="Start from Zero and increment" min="0" value="0" step="1" />
+          </div>
+          <div class="bip85-item bip85">
+            <label for="bip85DiceResult">Rolls</label>
+            <div class="copy-wrapper private-data"><textarea id="bip85DiceResult" title="Private - don't share!" class="bip85Field textarea-input" readonly rows="2"></textarea></div>
+          </div>
+          <p class="warning hidden" id="bip85DiceError" role="alert"></p>
         </div>
       </div>
     </section>
@@ -4940,62 +5180,127 @@ gpg --verify signature.txt</code></pre>
       <header class="view__header">
         <a class="view__back" href="#/">← All tools</a>
         <h1 class="view__title">Seed XOR</h1>
-        <p class="view__lede">Combine the loaded seed with one or more additional seeds using XOR. Each share alone reveals nothing - you need every share to recover.</p>
+        <p class="view__lede">Split a seed into shares that are all needed to rebuild it, or combine shares back into a seed. A share on its own reveals nothing.</p>
       </header>
       <div class="explainer" data-explainer="xor">
         <span class="explainer__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></span>
         <div class="explainer__body">
-          <p><strong>All-shares-needed split:</strong> XOR your loaded seed with N additional seeds. Each share looks like a valid 12/24-word seed on its own and reveals nothing useful. You need <em>every</em> share to recover the original. This is different from 2-of-3 splitting (where any 2 suffice) - XOR is N-of-N.</p>
+          <p><strong>All shares needed:</strong> Seed XOR, as on COLDCARD, turns one seed into two or more shares. Each share looks like an ordinary seed of the same length and reveals nothing on its own. You need <em>every</em> share to get the seed back. This is different from 2-of-3 splitting, where any two are enough.</p>
           <div class="explainer__learn-row">
             <button type="button" class="explainer__learn" onclick="openInfoModal(event, 'SEEDXOR')">Learn more: Seed XOR</button>
           </div>
         </div>
         <button type="button" class="explainer__dismiss" data-dismiss-explainer="xor" title="Dismiss" aria-label="Dismiss">&times;</button>
       </div>
+      <div class="subtabs" role="tablist" aria-label="Seed XOR">
+        <button type="button" class="subtabs__tab" data-subtab="xor-split" role="tab" aria-selected="true">Split my seed</button>
+        <button type="button" class="subtabs__tab" data-subtab="xor-combine" role="tab" aria-selected="false">Combine shares</button>
+      </div>
       <button type="button" class="accordion" hidden>Seed XOR</button>
       <div class="panel">
-        <section id="xor" class="bip39ToolSection">
+        <div class="subtabs__panel" data-subtab-panel="xor-split">
+          <section id="xor" class="bip39ToolSection">
+            <p class="recover-hint" data-seed-empty>Load a seed in the <a href="#/seed">Seed Workspace</a> to split it into shares. To rebuild a seed from shares you already have, use <strong>Combine shares</strong>.</p>
+            <div data-seed-only hidden>
+              <div class="xor-controls">
+                <label for="xorShareCount">Number of shares</label>
+                <select id="xorShareCount" title="How many shares to split the seed into">
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+                <button type="button" class="btn" id="xorNewShares" title="Replace these shares with new random ones">Make new shares</button>
+              </div>
+              <p class="recover-hint">Write down every share and keep them in different places. You need all of them to get your seed back: lose one and the seed is gone.</p>
+              <div class="xor-share">
+                <label for="xorShare1">Share 1 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 1 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare1" data-target="xorShare1"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare1" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share">
+                <label for="xorShare2">Share 2 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 2 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare2" data-target="xorShare2"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare2" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare3">Share 3 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 3 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare3" data-target="xorShare3"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare3" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare4">Share 4 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 4 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare4" data-target="xorShare4"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare4" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare5">Share 5 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 5 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare5" data-target="xorShare5"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare5" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare6">Share 6 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 6 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare6" data-target="xorShare6"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare6" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare7">Share 7 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 7 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare7" data-target="xorShare7"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare7" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <div class="xor-share hidden">
+                <label for="xorShare8">Share 8 of <span class="xor-share-total">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 8 as a SeedQR" onclick="showXorQr(this)" id="qrXorShare8" data-target="xorShare8"></span></label>
+                <div class="copy-wrapper private-data"><textarea id="xorShare8" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+              </div>
+              <p class="recover-hint" id="xorSplitCheck" role="status" aria-live="polite"></p>
+            </div>
+          </section>
+        </div>
+        <div class="subtabs__panel" data-subtab-panel="xor-combine" hidden>
+          <p class="recover-hint">Type or paste every share. The seed appears once all of them are filled in.</p>
           <div class="xor-controls">
-            <button type="button" class="btn" id="xorAddSeed" onclick="addXorSeed(event)">+ Add seed</button>
-            <button type="button" disabled class="btn" id="xorRemoveSeed" onclick="removeXorSeed(event)">− Remove</button>
-            <button type="button" class="btn btn--primary" id="xorCalculate" onclick="calculateXor()">Recalculate</button>
+            <button type="button" class="btn" id="xorAddSeed" onclick="addXorSeed(event)">+ Add share</button>
+            <button type="button" disabled class="btn" id="xorRemoveSeed" onclick="removeXorSeed(event)">− Remove share</button>
           </div>
           <div class="xor-seed">
-            <label for="xorSeed2">Seed 2 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor2"></span>&nbsp;&nbsp;<span class="seedQrInfo">&#9432;<span class="seedQrTooltip"><p>Seed QR scans into a hardware signer. It does not include your passphrase.</p></span></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed2" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart1">Share 1 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 1 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart1" data-target="xorPart1"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart1" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          </div>
+          <div class="xor-seed">
+            <label for="xorPart2">Share 2 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 2 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart2" data-target="xorPart2"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart2" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed3">Seed 3 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor3"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed3" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart3">Share 3 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 3 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart3" data-target="xorPart3"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart3" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed4">Seed 4 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor4"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed4" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart4">Share 4 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 4 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart4" data-target="xorPart4"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart4" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed5">Seed 5 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor5"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed5" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart5">Share 5 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 5 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart5" data-target="xorPart5"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart5" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed6">Seed 6 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor6"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed6" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart6">Share 6 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 6 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart6" data-target="xorPart6"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart6" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed7">Seed 7 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor7"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed7" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart7">Share 7 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 7 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart7" data-target="xorPart7"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart7" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <div class="xor-seed hidden">
-            <label for="xorSeed8">Seed 8 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXor8"></span></label>
-            <div class="copy-wrapper private-data"><textarea id="xorSeed8" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="xorPart8">Share 8 of <span class="xor-number-seeds">2</span>&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show share 8 as a SeedQR" onclick="showXorQr(this)" id="qrXorPart8" data-target="xorPart8"></span></label>
+            <div class="copy-wrapper private-data"><textarea id="xorPart8" class="textarea-input" rows="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
           </div>
           <p id="xorError" class="warning hidden" role="alert"></p>
           <div>
-            <label for="xorResult">XOR Result&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show seed QR" onclick="showXorQr(this)" id="qrXorResult"></span></label>
+            <label for="xorResult">Combined seed&nbsp;&nbsp;<span class="xorQrIcon" role="button" tabindex="0" aria-label="Show the combined seed as a SeedQR" onclick="showXorQr(this)" id="qrXorResult" data-target="xorResult"></span></label>
             <div class="copy-wrapper private-data">
               <textarea id="xorResult" class="xor-result textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly></textarea>
             </div>
           </div>
-        </section>
+          <div class="button-row">
+            <button type="button" class="btn btn--primary" id="xorLoadResult" disabled>Load this seed</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -5455,7 +5760,7 @@ gpg --verify signature.txt</code></pre>
             <button type="button" class="btn btn--primary" id="bolt11DecodeBtn">Decode invoice</button>
             <button type="button" class="btn btn--demo" id="bolt11DemoBtn">Load demo invoice</button>
           </div>
-          <p class="warning hidden" id="bolt11Error"></p>
+          <div class="warning hidden" id="bolt11Error" role="alert"></div>
           <div class="ln-result" id="bolt11Result" hidden></div>
         </div>
       </div>
@@ -5475,7 +5780,7 @@ gpg --verify signature.txt</code></pre>
             <button type="button" class="btn btn--primary" id="bolt12DecodeBtn">Decode</button>
             <button type="button" class="btn btn--demo" id="bolt12DemoBtn">Load demo offer</button>
           </div>
-          <p class="warning hidden" id="bolt12Error"></p>
+          <div class="warning hidden" id="bolt12Error" role="alert"></div>
           <div class="ln-result" id="bolt12Result" hidden></div>
         </div>
       </div>
@@ -5653,7 +5958,7 @@ gpg --verify signature.txt</code></pre>
           <button type="button" class="btn" id="psbtScanBtn" title="Read a PSBT QR code, animated ones included, with your camera or from images">Scan QR</button>
           <button type="button" class="btn btn--demo" id="psbtDemoBtn">Load demo PSBT</button>
         </div>
-        <p class="warning hidden" id="psbtError"></p>
+        <div class="warning hidden" id="psbtError" role="alert"></div>
       </div>
 
       <div class="psbt-result" id="psbtResult" hidden>
@@ -6761,7 +7066,7 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
   </footer>
 
   <!-- Modals & templates (unchanged from upstream) -->
-  <div id="infoModal" class="modal">
+  <div id="infoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="infoModalChip">
     <div class="modal-content">
       <button type="button" class="modal__close" title="Close" onclick="clearInfoModal();" aria-label="Close">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -6772,7 +7077,7 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
       <div id="infoModalText"></div>
     </div>
   </div>
-  <div id="qrModal" class="modal">
+  <div id="qrModal" class="modal" role="dialog" aria-modal="true" aria-label="QR code">
     <div class="modal-content">
       <button type="button" class="modal__close" title="Close" onclick="clearQRModal();" aria-label="Close">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -6781,7 +7086,7 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
     </div>
   </div>
   <div id="toast-background">
-    <div id="toast"></div>
+    <div id="toast" role="status" aria-live="polite"></div>
   </div>
   <template id="addressTemplate">
     <div class="address-block">
@@ -6792,7 +7097,7 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
         Public Key: <wbr>
         <span class="address-details-text address-details--pubKey address-copy" role="button" tabindex="0" onclick="copyEventHandler(event)" title="Click to copy">02d495d2ff0d2fb6a34b34574a5bb183ec114d8d779a150fb162e4c86354b0c067</span><br>
       </span>
-      <span>
+      <span class="address-prv-row">
         Private Key: <wbr>
         <span class="address-details-text address-details--prvKey address-copy private-data" role="button" tabindex="0" onclick="copyEventHandler(event)" title="Click to copy">L3WoSen5k7GLiC1jYKhcYSgeABxJFkdvAusf9sXqUYn1z7zYY7E1</span>
       </span>
@@ -197821,6 +198126,17 @@ const setupDom = async () => {
   DOM.bip85Index.oninput = calcBip85;
   DOM.bip85LoadParent.onclick = bip85LoadParent;
   DOM.bip85LoadChild.onclick = bip85LoadChild;
+  document.getElementById('bip85PWDFormat').oninput = bip85PasswordFormatChanged;
+  ['bip85DiceSides', 'bip85DiceCount', 'bip85DiceIndex'].forEach((id) => {
+    document.getElementById(id).oninput = calcBip85Dice;
+  });
+  // Seed XOR: combine as shares are typed, split when asked
+  document
+    .querySelectorAll('.xor-seed textarea')
+    .forEach((el) => el.addEventListener('input', calculateXor));
+  document.getElementById('xorShareCount').oninput = () => makeXorShares();
+  document.getElementById('xorNewShares').onclick = () => makeXorShares(true);
+  document.getElementById('xorLoadResult').onclick = loadXorResult;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -198047,6 +198363,9 @@ const toggleHideAllPrivateData = () => {
   hidePrivateData = !hidePrivateData;
   document.getElementById('hideIcon').classList.toggle('hidden');
   document.getElementById('showIcon').classList.toggle('hidden');
+  DOM.showHide.setAttribute('aria-pressed', String(hidePrivateData));
+  // Seed words shown outside the private fields: the top bar and seed cards
+  document.body.classList.toggle('is-private', hidePrivateData);
   document.querySelectorAll('.private-data').forEach((el) => {
     el.style.display = hidePrivateData ? 'none' : '';
   });
@@ -198727,52 +199046,34 @@ const bip39PassphraseMessage = (msg) => {
   adjustPanelHeight();
 };
 
-// Remove XOR seed
-const removeXorSeed = async (event) => {
-  event.preventDefault();
-  document.getElementById('xorAddSeed').disabled = false;
-  const seeds = [...document.querySelectorAll('.xor-seed')];
-  let visibleSeeds = 0;
-  for (let i = seeds.length - 1; i > 0; i--) {
-    visibleSeeds = i;
-    const seed = seeds[i];
-    if (!seed.classList.contains('hidden')) {
-      seed.classList.add('hidden');
-      break;
-    }
-  }
-  visibleSeeds++;
+// Seed XOR "Combine shares": the share boxes in use
+const xorVisibleParts = () =>
+  [...document.querySelectorAll('.xor-seed')].filter(
+    (div) => !div.classList.contains('hidden')
+  );
+
+// Show 2 to 8 share boxes. A box that is taken away keeps what was typed
+// in it until "Clear seed", in case it was removed by mistake.
+const setXorPartCount = (count) => {
+  const rows = [...document.querySelectorAll('.xor-seed')];
+  const shown = Math.max(2, Math.min(rows.length, count));
+  rows.forEach((row, i) => row.classList.toggle('hidden', i >= shown));
   document
     .querySelectorAll('.xor-number-seeds')
-    .forEach((span) => (span.innerText = visibleSeeds));
-  document.getElementById('xorRemoveSeed').disabled =
-    visibleSeeds === 2 ? true : false;
-  await calculateXor();
-  adjustPanelHeight();
+    .forEach((span) => (span.textContent = shown));
+  document.getElementById('xorAddSeed').disabled = shown >= rows.length;
+  document.getElementById('xorRemoveSeed').disabled = shown <= 2;
+  calculateXor();
 };
 
-// Add an xor seed
-const addXorSeed = async (event) => {
+const removeXorSeed = (event) => {
   event.preventDefault();
-  document.getElementById('xorRemoveSeed').disabled = false;
-  const seeds = [...document.querySelectorAll('.xor-seed')];
-  let visibleSeeds = 0;
-  for (let i = 0; i < seeds.length; i++) {
-    visibleSeeds = i;
-    const seed = seeds[i];
-    if (seed.classList.contains('hidden')) {
-      seed.classList.remove('hidden');
-      break;
-    }
-  }
-  visibleSeeds += 2;
-  document
-    .querySelectorAll('.xor-number-seeds')
-    .forEach((span) => (span.innerText = visibleSeeds));
-  document.getElementById('xorAddSeed').disabled =
-    visibleSeeds === 8 ? true : false;
-  await calculateXor();
-  adjustPanelHeight();
+  setXorPartCount(xorVisibleParts().length - 1);
+};
+
+const addXorSeed = (event) => {
+  event.preventDefault();
+  setXorPartCount(xorVisibleParts().length + 1);
 };
 
 /**
@@ -198790,16 +199091,11 @@ const deriveChecksumBits = async (entropyBuffer) => {
   return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
 };
 
-const showXorQr = (ev) => {
-  let phrase = '';
-  if (ev.id === 'qrXorResult') {
-    phrase = document.getElementById('xorResult').value;
-  } else {
-    //qrXor
-    phrase = document.getElementById(
-      `xorSeed${ev.id.replace('qrXor', '')}`
-    ).value;
-  }
+// Show a Seed XOR share or result as a Compact SeedQR. The icon's
+// data-target names the box it belongs to.
+const showXorQr = (icon) => {
+  const field = document.getElementById(icon.dataset.target);
+  const phrase = normalizeString(field ? field.value : '');
   if (!bip39.validateMnemonic(phrase)) return;
   openQrModal(phraseToCompactQrBytes(phrase), phrase);
 };
@@ -198819,25 +199115,29 @@ const describePhraseError = (errorText) => {
  * Every phrase must be a valid mnemonic and all must be the same length. A
  * bad word or a short share would otherwise still produce a checksummed,
  * valid looking, wrong mnemonic, so they are refused instead.
- * @param {string[]} phrases The loaded seed followed by each share
+ * @param {string[]} phrases The seeds to combine
+ * @param {function(number): string} labelFor Names phrase i in errors
  * @returns {{phrase: string}|{error: string}}
  */
-const xorMnemonics = (phrases) => {
+const loadedSeedLabel = (i) => (i === 0 ? 'The loaded seed' : `Seed ${i + 1}`);
+const shareLabel = (i) => `Share ${i + 1}`;
+const xorMnemonics = (phrases, labelFor = loadedSeedLabel) => {
   if (phrases.length < 2) {
-    return { error: 'Seed XOR needs the loaded seed and at least one share.' };
+    return { error: 'Seed XOR needs at least two seeds.' };
   }
   const wordArrays = phrases.map((phrase) =>
     phraseToWordArray(normalizeString(phrase))
   );
+  const first = labelFor(0).replace(/^The /, 'the ');
   for (let i = 0; i < phrases.length; i++) {
-    const label = i === 0 ? 'The loaded seed' : `Seed ${i + 1}`;
+    const label = labelFor(i);
     const errorText = findPhraseErrors(phrases[i]);
     if (errorText) {
       return { error: `${label}: ${describePhraseError(errorText)}.` };
     }
     if (wordArrays[i].length !== wordArrays[0].length) {
       return {
-        error: `${label} has ${wordArrays[i].length} words but the loaded seed has ${wordArrays[0].length}. Every share must be the same length.`,
+        error: `${label} has ${wordArrays[i].length} words but ${first} has ${wordArrays[0].length}. Every share must be the same length.`,
       };
     }
   }
@@ -198855,29 +199155,82 @@ const xorMnemonics = (phrases) => {
   return { phrase: window.bip39.entropyToMnemonic(xored) };
 };
 
-// Calculate XOR from the loaded seed and every visible share
+// "Combine shares": XOR every share box in use. Nothing shows until each
+// box has words in it, so a share still being typed is not an error.
 const calculateXor = () => {
-  const shares = [...document.querySelectorAll('.xor-seed')]
-    .filter((div) => !div.classList.contains('hidden'))
-    .map((div) => div.querySelector('textarea').value);
-  const { phrase, error } = xorMnemonics([getPhrase(), ...shares]);
+  const parts = xorVisibleParts().map((div) => div.querySelector('textarea').value);
+  const complete = parts.length >= 2 && parts.every((part) => normalizeString(part));
+  const { phrase, error } = complete ? xorMnemonics(parts, shareLabel) : {};
   // Never leave an earlier result on screen beside an error
   document.getElementById('xorResult').value = phrase || '';
   const errorEl = document.getElementById('xorError');
   errorEl.textContent = error || '';
   errorEl.classList.toggle('hidden', !error);
+  document.getElementById('xorLoadResult').disabled = !phrase;
   adjustPanelHeight();
 };
 
-// Offer random shares for splitting the loaded seed. A share the user typed
-// is never replaced; one this tool generated is refreshed for the new seed.
-const fillRandomXorSeeds = () => {
-  document.querySelectorAll('.xor-seed textarea').forEach((textarea) => {
-    const current = normalizeString(textarea.value);
-    if (current && current !== textarea.dataset.generated) return;
-    textarea.value = createMnemonic();
-    textarea.dataset.generated = textarea.value;
-  });
+// Load the combined seed, asking first if a seed is already loaded
+const loadXorResult = async () => {
+  const phrase = normalizeString(document.getElementById('xorResult').value);
+  if (!phrase || findPhraseErrors(phrase)) return;
+  if (!(await confirmReplaceSeed())) return;
+  DOM.bip39Phrase.value = phrase;
+  toast('Loading the combined seed...');
+  mnemonicToSeedPopulate();
+  location.hash = '#/seed';
+};
+
+// "Split my seed": random shares, plus a last share that XORs with them
+// back to the loaded seed. The shares only change with the seed, the
+// number of shares, or "Make new shares", so typing a passphrase never
+// replaces shares that may already be written down.
+let xorSplitKey = '';
+const makeXorShares = (fresh = false) => {
+  const rows = [...document.querySelectorAll('.xor-share')];
+  if (!rows.length) return;
+  const countEl = document.getElementById('xorShareCount');
+  const count = Math.max(2, Math.min(rows.length, parseInt(countEl.value, 10) || 2));
+  const checkEl = document.getElementById('xorSplitCheck');
+  const show = (shares, check) => {
+    rows.forEach((row, i) => {
+      row.classList.toggle('hidden', i >= count);
+      row.querySelector('textarea').value = shares[i] || '';
+    });
+    document
+      .querySelectorAll('.xor-share-total')
+      .forEach((span) => (span.textContent = count));
+    checkEl.textContent = check;
+    adjustPanelHeight();
+  };
+  const phrase = getPhrase();
+  if (!phrase || findPhraseErrors(phrase)) {
+    xorSplitKey = '';
+    show([], '');
+    return;
+  }
+  const key = `${count} ${phrase}`;
+  if (!fresh && key === xorSplitKey) return;
+  const words = phraseToWordArray(phrase);
+  const random = Array.from({ length: count - 1 }, () =>
+    bip39.generateMnemonic((words.length / 3) * 32)
+  );
+  const last = xorMnemonics([phrase, ...random]);
+  if (last.error) {
+    xorSplitKey = '';
+    show([], last.error);
+    return;
+  }
+  const shares = [...random, last.phrase];
+  xorSplitKey = key;
+  // Prove the shares rebuild the seed before anyone writes them down
+  const rebuilt = xorMnemonics(shares, shareLabel).phrase;
+  show(
+    shares,
+    rebuilt === wordArrayToPhrase(words)
+      ? `Checked: these ${count} shares combine back to the loaded seed.`
+      : 'These shares do not combine back to the loaded seed. Do not use them.'
+  );
 };
 
 // Show a result or a problem beside the One Time Pad output
@@ -199358,9 +199711,24 @@ const derivedPathSelectChanged = (event) => {
 /**
  * Hide the modal and clear it's text
  */
+// Dialogs take keyboard focus when they open and hand it back when they
+// close, so keyboard and screen reader users are not left behind them
+const dialogReturnFocus = new Map();
+const focusDialog = (modal) => {
+  if (!dialogReturnFocus.has(modal)) dialogReturnFocus.set(modal, document.activeElement);
+  const close = modal.querySelector('.modal__close');
+  if (close) close.focus();
+};
+const restoreDialogFocus = (modal) => {
+  const target = dialogReturnFocus.get(modal);
+  dialogReturnFocus.delete(modal);
+  if (target && typeof target.focus === 'function') target.focus();
+};
+
 const clearInfoModal = () => {
   DOM.infoModal.style.display = 'none';
   DOM.infoModalText.innerHTML = '';
+  restoreDialogFocus(DOM.infoModal);
 };
 /**
  * Open the QnA Explains dialog
@@ -199385,6 +199753,7 @@ window.openInfoModal = (_event, section) => {
   }
   DOM.infoModalText.innerHTML = window.infoHtml[section];
   DOM.infoModal.style.display = 'block';
+  focusDialog(DOM.infoModal);
 };
 /**
  * Function to close the dialog when user clicks on the outside
@@ -199467,6 +199836,7 @@ const makeCompactSeedQR = () => {
 const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
   DOM.qrModalDiv.innerHTML = '';
+  restoreDialogFocus(DOM.qrModal);
 };
 const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
   clearQRModal();
@@ -199524,6 +199894,7 @@ const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
   }
   DOM.qrModal.style.display = 'block';
   DOM.qrModalDiv.style.display = 'block';
+  focusDialog(DOM.qrModal);
 };
 /**
  * Function to close the dialog when user clicks on the outside
@@ -199861,27 +200232,73 @@ const displayAccountKeys = () => {
   addQRIcon(document.getElementById('pathAccountXpubQR'), xpub);
 };
 
-// Calculate BIP85 Password
+// Show a problem beside a BIP85 output, or hide it
+const showBip85Error = (id, message) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = message || '';
+  el.classList.toggle('hidden', !message);
+};
+
+// Calculate BIP85 Password, in base64 or base85
 const calcBip85Password = async () => {
-  const index = DOM.bip85PWDIndex.value;
-  const length = parseInt(DOM.bip85PWDLength.value);
-  const path = `m/83696968'/707764'/${length}'/${index}'`
+  DOM.bip85PWDPassword.value = '';
+  showBip85Error('bip85PWDError', '');
   const rootKeyBase58 = DOM.bip32RootKey.value;
-  if (!rootKeyBase58) {
+  if (!rootKeyBase58 || typeof seedKeys === 'undefined') return;
+  const formatEl = document.getElementById('bip85PWDFormat');
+  try {
+    DOM.bip85PWDPassword.value = seedKeys.bip85Password(rootKeyBase58, {
+      format: (formatEl && formatEl.value) || 'base64',
+      length: Number(DOM.bip85PWDLength.value),
+      index: Number(DOM.bip85PWDIndex.value),
+    }).password;
+  } catch (e) {
+    showBip85Error('bip85PWDError', e.message);
+  }
+  adjustPanelHeight();
+};
+
+// Each password format has its own length limits
+const bip85PasswordFormatChanged = () => {
+  const base85 = document.getElementById('bip85PWDFormat').value === 'base85';
+  const [min, max] = base85 ? [10, 80] : [20, 86];
+  DOM.bip85PWDLength.min = min;
+  DOM.bip85PWDLength.max = max;
+  const length = Number(DOM.bip85PWDLength.value);
+  if (!(length >= min && length <= max)) {
+    DOM.bip85PWDLength.value = Math.min(max, Math.max(min, Math.round(length) || min));
+  }
+  calcBip85Password();
+};
+
+// BIP85 dice rolls, comma separated
+const calcBip85Dice = () => {
+  const out = document.getElementById('bip85DiceResult');
+  if (!out) return;
+  out.value = '';
+  showBip85Error('bip85DiceError', '');
+  const rootKeyBase58 = DOM.bip32RootKey.value;
+  if (!rootKeyBase58 || typeof seedKeys === 'undefined') return;
+  const value = (id) => Number(document.getElementById(id).value);
+  const rolls = value('bip85DiceCount');
+  if (rolls > 1000) {
+    showBip85Error('bip85DiceError', 'Up to 1,000 rolls at a time.');
     return;
   }
   try {
-    const master = bip85.BIP85.fromBase58(rootKeyBase58);
-    const child = master.derive(path); // hex string
-    // one liner to convert hex to base64, remove whitespace and new lines, then slice to desired length removing padding
-    const pwd = btoa(child.match(/\w{2}/g).map(a=>String.fromCharCode(parseInt(a, 16))).join("")).replaceAll(/\s/g, '').slice(0, length);
-    DOM.bip85PWDPassword.value = pwd;
+    out.value = seedKeys
+      .bip85Dice(rootKeyBase58, {
+        sides: value('bip85DiceSides'),
+        rolls,
+        index: value('bip85DiceIndex'),
+      })
+      .rolls.join(', ');
   } catch (e) {
-    toast('BIP85: ' + e.message);
-    console.error('BIP85: ' + e.message);
-    DOM.bip85PWDPassword.value = '';
+    showBip85Error('bip85DiceError', e.message);
   }
-}
+  adjustPanelHeight();
+};
 
 // Calculate and populate the BIP85 section
 const calcBip85 = async () => {
@@ -200189,6 +200606,34 @@ const entropyTypeChanged = () => {
 };
 
 // Calculate and display entropy
+// zxcvbn's crack times assume a password a person made up, so they mean
+// nothing for dice, coin or card rolls. Only its warning about patterns,
+// such as a long run of one number, is shown for entropy.
+const entropyPatternCheck = (events) => {
+  try {
+    const { warning } = window.zxcvbn(events).feedback;
+    return warning ? `Warning: ${warning}` : 'No obvious patterns';
+  } catch (e) {
+    console.error('Error checking the entropy for patterns:');
+    console.error(e);
+    return '';
+  }
+};
+
+// How long the passphrase would take to crack. Hidden until one is typed.
+const showPassphraseStrength = (passphrase) => {
+  const text = DOM.bip39PassphraseCrackTime;
+  const box = text.parentElement;
+  const crackText = passphrase
+    ? window.zxcvbn(passphrase)?.crack_times_display?.offline_fast_hashing_1e10_per_second
+    : '';
+  const strong = crackText === 'centuries';
+  text.textContent = crackText ? `Time to crack with a fast offline attack: ${crackText}` : '';
+  box.classList.toggle('hidden', !crackText);
+  box.classList.toggle('warning', !strong);
+  box.classList.toggle('recover-hint', strong);
+};
+
 const calculateEntropy = async () => {
   const input = getEntropy();
   // A seed that did not come from this box has no entropy events to show
@@ -200214,22 +200659,12 @@ const calculateEntropy = async () => {
   const spacedBinaryStr = entropy.binaryStr
     ? addSpacesEveryElevenBits(entropy.binaryStr)
     : '';
-  let timeToCrack = '';
-  try {
-    const z = window.zxcvbn(entropy.base.events.join(''));
-    timeToCrack = z.crack_times_display.offline_fast_hashing_1e10_per_second;
-    if (z.feedback.warning != '') {
-      timeToCrack = timeToCrack + ' - ' + z.feedback.warning;
-    }
-  } catch (e) {
-    console.error('Error detecting entropy strength with zxcvbn:');
-    console.error(e);
-  }
+  const patternCheck = entropyPatternCheck(entropy.base.events.join(''));
   const reqWords = !!parseInt(DOM.entropyMnemonicLengthSelect.value)
     ? parseInt(DOM.entropyMnemonicLengthSelect.value)
     : wordCount;
   //
-  DOM.entropyTimeToCrack.innerText = timeToCrack;
+  DOM.entropyTimeToCrack.innerText = patternCheck;
   DOM.entropyEventCount.innerText = eventCount;
   DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
   DOM.entropyMethod.value = entropy.base.str;
@@ -200376,13 +200811,13 @@ const emptyElement = (el) => {
 
 // Blank values derived from the seed that are only rebuilt when their own
 // tool recalculates: account keys, multisig Ypub and Zpub, the BIP85
-// password, BIP47 addresses and the Seed XOR result. Left alone they would
+// password and dice rolls, and BIP47 addresses. Left alone they would
 // sit beside a new or cleared seed as if they belonged to it.
 const clearSecondaryDerivedOutputs = () => {
   DOM.bip32AccountXprv.value = '';
   DOM.bip32AccountXpub.value = '';
   DOM.bip85PWDPassword.value = '';
-  ['myZpub', 'myYpub', 'xorResult'].forEach((id) => {
+  ['myZpub', 'myYpub', 'bip85DiceResult'].forEach((id) => {
     document.getElementById(id).value = '';
   });
   ['bip32AccountXpubQR', 'myZpubQR', 'myYpubQR'].forEach((id) =>
@@ -200406,14 +200841,14 @@ const wipeAllSeedMaterial = () => {
   bip85Lineage.length = 0;
   DOM.bip85LoadParent.disabled = true;
   DOM.bip85LoadParent.title = 'No parent key to load';
+  xorSplitKey = '';
   document
-    .querySelectorAll('.xor-seed textarea, .inputMnemonic-word, .lastWord-word')
+    .querySelectorAll('.xor-seed textarea, .xor-share textarea, .inputMnemonic-word, .lastWord-word')
     .forEach((el) => {
       el.value = '';
-      if (el.dataset) delete el.dataset.generated;
     });
   [
-    'otpDecrypted', 'singleSigInput', 'bip39PassTestCandidates',
+    'otpDecrypted', 'singleSigInput', 'bip39PassTestCandidates', 'xorResult',
     'nostrNip06Npub', 'nostrNip06Nsec', 'nostrNip06PubHex', 'nostrNip06PrivHex',
     'nostrBip85Npub', 'nostrBip85Nsec', 'nostrBip85PubHex', 'nostrBip85PrivHex',
   ].forEach((id) => {
@@ -200729,27 +201164,14 @@ const diceToPassphrase = () => {
 const mnemonicToSeedPopulate = debounce(async () => {
   const mnemonic = getPhrase();
   const passphrase = getPassphrase();
-  if (!passphrase) {
-    DOM.bip39PassphraseCrackTime.innerText = 'No passphrase entered!';
-  } else {
-    const crackTime = zxcvbn(passphrase);
-    const crackText =
-      crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
-    if (crackText) {
-      DOM.bip39PassphraseCrackTime.innerText = 'Time to crack: ' + crackText;
-      if (crackText !== 'centuries') {
-        DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
-      } else {
-        DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
-      }
-    }
-  }
+  showPassphraseStrength(passphrase);
   let seedHex = '';
   resetEverything();
   seed = null;
   // Test if valid
   const errorText = findPhraseErrors(mnemonic);
   showValidationError(errorText);
+  makeXorShares();
   if (!errorText) {
     seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
     seedHex = seed.toString('hex');
@@ -200778,10 +201200,9 @@ const mnemonicToSeedPopulate = debounce(async () => {
     fillBip32Keys();
     calcBip85();
     calcBip85Password();
+    calcBip85Dice();
     calcBip47();
   }
-  fillRandomXorSeeds();
-  calculateXor();
   await generateOneTimePad();
   makeCompactSeedQR();
   adjustPanelHeight();
@@ -201705,7 +202126,170 @@ function swap(bytes, offset, index) {
     throw new Error('This QR code does not hold a seed (SeedQR, Compact SeedQR or seed words).');
   };
 
+  // ---------------------------------------------------------------------
+  // SHAKE256 (FIPS 202), the BIP85-DRNG. Lanes are 64-bit BigInts.
+  // ---------------------------------------------------------------------
+  const MASK64 = (1n << 64n) - 1n;
+  const KECCAK_ROUND_CONSTANTS = [
+    0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
+    0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
+    0x000000000000008an, 0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
+    0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n,
+    0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
+    0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n,
+  ];
+  // Rotation offset for the lane at x + 5y
+  const KECCAK_ROTATIONS = [
+    0, 1, 62, 28, 27,
+    36, 44, 6, 55, 20,
+    3, 10, 43, 25, 39,
+    41, 45, 15, 21, 8,
+    18, 2, 61, 56, 14,
+  ];
+  const SHAKE256_RATE = 136;
+
+  const rotl64 = (value, n) =>
+    n === 0 ? value : ((value << BigInt(n)) | (value >> BigInt(64 - n))) & MASK64;
+
+  const keccakF = (A) => {
+    const C = new Array(5);
+    const B = new Array(25);
+    for (let round = 0; round < 24; round++) {
+      for (let x = 0; x < 5; x++) C[x] = A[x] ^ A[x + 5] ^ A[x + 10] ^ A[x + 15] ^ A[x + 20];
+      for (let x = 0; x < 5; x++) {
+        const D = C[(x + 4) % 5] ^ rotl64(C[(x + 1) % 5], 1);
+        for (let y = 0; y < 25; y += 5) A[x + y] ^= D;
+      }
+      for (let x = 0; x < 5; x++) {
+        for (let y = 0; y < 5; y++) {
+          B[y + 5 * ((2 * x + 3 * y) % 5)] = rotl64(A[x + 5 * y], KECCAK_ROTATIONS[x + 5 * y]);
+        }
+      }
+      for (let y = 0; y < 25; y += 5) {
+        for (let x = 0; x < 5; x++) {
+          A[x + y] = B[x + y] ^ (~B[((x + 1) % 5) + y] & MASK64 & B[((x + 2) % 5) + y]);
+        }
+      }
+      A[0] ^= KECCAK_ROUND_CONSTANTS[round];
+    }
+  };
+
+  // A SHAKE256 output stream: read(n) returns the next n bytes
+  const shake256Reader = (input) => {
+    const state = new Array(25).fill(0n);
+    const padded = new Uint8Array(Math.floor(input.length / SHAKE256_RATE) * SHAKE256_RATE + SHAKE256_RATE);
+    padded.set(input);
+    padded[input.length] ^= 0x1f;
+    padded[padded.length - 1] ^= 0x80;
+    for (let offset = 0; offset < padded.length; offset += SHAKE256_RATE) {
+      for (let i = 0; i < SHAKE256_RATE / 8; i++) {
+        let lane = 0n;
+        for (let b = 7; b >= 0; b--) lane = (lane << 8n) | BigInt(padded[offset + i * 8 + b]);
+        state[i] ^= lane;
+      }
+      keccakF(state);
+    }
+    const squeeze = () => {
+      const block = [];
+      for (let i = 0; i < SHAKE256_RATE / 8; i++) {
+        let lane = state[i];
+        for (let b = 0; b < 8; b++) {
+          block.push(Number(lane & 0xffn));
+          lane >>= 8n;
+        }
+      }
+      keccakF(state);
+      return block;
+    };
+    let block = squeeze();
+    let position = 0;
+    return {
+      read(n) {
+        const out = new Uint8Array(n);
+        for (let i = 0; i < n; i++) {
+          if (position === block.length) {
+            block = squeeze();
+            position = 0;
+          }
+          out[i] = block[position++];
+        }
+        return out;
+      },
+    };
+  };
+
+  const shake256 = (input, length) => shake256Reader(input).read(length);
+
+  // ---------------------------------------------------------------------
+  // BIP-85 passwords (base64 and base85) and dice rolls
+  // ---------------------------------------------------------------------
+  const bip85Entropy = (rootKey, path) =>
+    fromHex(bip85.BIP85.fromBase58(parseRoot(rootKey).toBase58()).derive(path));
+
+  // RFC 1924 alphabet, as Python's base64.b85encode and BIP-85 use
+  const BASE85_ALPHABET =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~';
+
+  // Every 4 bytes become 5 characters, most significant first. BIP-85
+  // always encodes 64 bytes, so there is never a short last group.
+  const base85Encode = (bytes) => {
+    if (bytes.length % 4 !== 0) throw new Error('base85 input must be a multiple of 4 bytes');
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 4) {
+      let value = ((bytes[i] << 24) | (bytes[i + 1] << 16) | (bytes[i + 2] << 8) | bytes[i + 3]) >>> 0;
+      let group = '';
+      for (let j = 0; j < 5; j++) {
+        group = BASE85_ALPHABET[value % 85] + group;
+        value = Math.floor(value / 85);
+      }
+      out += group;
+    }
+    return out;
+  };
+
+  const PASSWORD_FORMATS = {
+    base64: { app: 707764, min: 20, max: 86, encode: (bytes) => Buffer.Buffer.from(bytes).toString('base64') },
+    base85: { app: 707785, min: 10, max: 80, encode: base85Encode },
+  };
+
+  const bip85Password = (rootKey, { format = 'base64', length, index = 0 }) => {
+    const spec = PASSWORD_FORMATS[format];
+    if (!spec) throw new Error(`Unknown password format: ${format}`);
+    const len = Number(length);
+    if (!Number.isInteger(len) || len < spec.min || len > spec.max) {
+      throw new Error(`A ${format} password is ${spec.min} to ${spec.max} characters long`);
+    }
+    const idx = wholeNumber(index, 0, 'Index');
+    const path = `m/83696968'/${spec.app}'/${len}'/${idx}'`;
+    return { path, password: spec.encode(bip85Entropy(rootKey, path)).slice(0, len) };
+  };
+
+  // BIP-85 DICE: the derived entropy seeds the DRNG; each roll takes just
+  // enough bits for the number of sides and throws away values that are
+  // too big, so every side is equally likely. Rolls run from 0 to sides - 1.
+  const bip85Dice = (rootKey, { sides = 6, rolls = 10, index = 0 }) => {
+    const s = wholeNumber(sides, 2, 'Sides');
+    const r = wholeNumber(rolls, 1, 'Rolls');
+    const idx = wholeNumber(index, 0, 'Index');
+    const path = `m/83696968'/89101'/${s}'/${r}'/${idx}'`;
+    const drng = shake256Reader(bip85Entropy(rootKey, path));
+    const bitsPerRoll = Math.ceil(Math.log2(s));
+    const bytesPerRoll = Math.ceil(bitsPerRoll / 8);
+    const results = [];
+    while (results.length < r) {
+      let trial = 0;
+      for (const byte of drng.read(bytesPerRoll)) trial = trial * 256 + byte;
+      trial = Math.floor(trial / 2 ** (bytesPerRoll * 8 - bitsPerRoll));
+      if (trial < s) results.push(trial);
+    }
+    return { path, rolls: results };
+  };
+
   window.seedKeys = {
+    shake256,
+    base85Encode,
+    bip85Password,
+    bip85Dice,
     bech32Encode,
     nostrKeys,
     nip06,
@@ -201718,6 +202302,176 @@ function swap(bytes, offset, index) {
     compactSeedQrToMnemonic,
     mnemonicFromQr,
   };
+})();
+
+</script>
+  <script>
+/*
+ * Printable seed backup sheet. By default it is a blank worksheet: numbered
+ * boxes for the words and an empty SeedQR grid to fill in by hand, with the
+ * parts that are the same on every SeedQR of that size already drawn.
+ * Printing the words and SeedQR themselves is opt-in, because printers can
+ * keep a copy of what they print.
+ *
+ * The sheet is built when asked for, printed, and removed from the page
+ * again. Exposed as window.backupSheet.
+ */
+(function () {
+  'use strict';
+
+  // SeedQR grid sizes by word count, as on SeedSigner's templates
+  const SIZES = {
+    12: { standard: 25, compact: 21 },
+    24: { standard: 29, compact: 25 },
+  };
+
+  const escapeHtml = (text) =>
+    String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // The squares that are the same on every QR code of this size: the three
+  // corner finder squares with their light borders, the timing lines that
+  // join them, the alignment square (sizes 25 and up) and the dark square
+  // beside the bottom-left finder. Returns a Map of "row,col" to true for
+  // dark and false for light.
+  const fixedModules = (size) => {
+    const cells = new Map();
+    const set = (row, col, dark) => {
+      if (row >= 0 && col >= 0 && row < size && col < size) cells.set(`${row},${col}`, dark);
+    };
+    const finder = (top, left) => {
+      for (let r = -1; r <= 7; r++) {
+        for (let c = -1; c <= 7; c++) {
+          const ring = Math.max(Math.abs(r - 3), Math.abs(c - 3));
+          set(top + r, left + c, ring !== 2 && ring !== 4);
+        }
+      }
+    };
+    finder(0, 0);
+    finder(0, size - 7);
+    finder(size - 7, 0);
+    for (let i = 8; i < size - 8; i++) {
+      set(6, i, i % 2 === 0);
+      set(i, 6, i % 2 === 0);
+    }
+    if (size >= 25) {
+      const centre = size - 7;
+      for (let r = -2; r <= 2; r++) {
+        for (let c = -2; c <= 2; c++) {
+          set(centre + r, centre + c, Math.max(Math.abs(r), Math.abs(c)) !== 1);
+        }
+      }
+    }
+    set(size - 8, 8, true);
+    return cells;
+  };
+
+  // A size x size grid with numbered edges. `isDark(row, col)` says which
+  // squares are filled in. Every fifth line is heavier to help counting.
+  const gridSvg = (size, isDark, label) => {
+    const cell = 10;
+    const margin = 12;
+    const end = margin + size * cell;
+    const squares = [];
+    const lines = [];
+    const numbers = [];
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (isDark(r, c)) squares.push(`<rect x="${margin + c * cell}" y="${margin + r * cell}" width="${cell}" height="${cell}"/>`);
+      }
+    }
+    for (let i = 0; i <= size; i++) {
+      const at = margin + i * cell;
+      const width = i % 5 === 0 || i === size ? 0.9 : 0.35;
+      lines.push(`<line x1="${margin}" y1="${at}" x2="${end}" y2="${at}" stroke-width="${width}"/>`);
+      lines.push(`<line x1="${at}" y1="${margin}" x2="${at}" y2="${end}" stroke-width="${width}"/>`);
+    }
+    for (let i = 0; i < size; i++) {
+      const mid = margin + i * cell + cell / 2;
+      numbers.push(`<text x="${mid}" y="${margin - 3}">${i + 1}</text>`);
+      numbers.push(`<text x="${margin - 6}" y="${mid + 2}">${i + 1}</text>`);
+    }
+    return `<svg class="backup-sheet__grid" viewBox="0 0 ${end + 2} ${end + 2}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(label)}">`
+      + `<g fill="#000">${squares.join('')}</g>`
+      + `<g stroke="#666">${lines.join('')}</g>`
+      + `<g fill="#444" font-size="5" text-anchor="middle" font-family="Helvetica, Arial, sans-serif">${numbers.join('')}</g>`
+      + '</svg>';
+  };
+
+  const makeSeedQr = (mnemonic, format) => {
+    const qr = new QRCode(0, 'L');
+    if (format === 'compact') qr.addData(phraseToCompactQrBytes(mnemonic));
+    else qr.addData(seedKeys.mnemonicToSeedQrDigits(mnemonic), 'Numeric');
+    qr.make();
+    return qr;
+  };
+
+  // The sheet's HTML. With no mnemonic it is a blank worksheet for `words`
+  // words; with one, the words, fingerprint and SeedQR are filled in.
+  const build = ({ words = 24, format = 'standard', mnemonic = '' } = {}) => {
+    const kind = format === 'compact' ? 'compact' : 'standard';
+    const qrName = kind === 'compact' ? 'Compact SeedQR' : 'SeedQR';
+    const phrase = mnemonic.trim().split(/\s+/).filter(Boolean).join(' ');
+    const filled = phrase.length > 0;
+    if (filled && !bip39.validateMnemonic(phrase)) {
+      throw new Error('The loaded seed is not a valid BIP39 mnemonic.');
+    }
+    const list = filled ? phrase.split(' ') : [];
+    const count = filled ? list.length : SIZES[words] ? Number(words) : 24;
+    const qr = filled ? makeSeedQr(phrase, kind) : null;
+    const size = qr ? qr.getModuleCount() : SIZES[count][kind];
+    const fixed = fixedModules(size);
+    const isDark = qr ? (r, c) => qr.isDark(r, c) : (r, c) => fixed.get(`${r},${c}`) === true;
+    const fingerprint = filled
+      ? bip32.fromSeed(bip39.mnemonicToSeedSync(phrase)).fingerprint.toString('hex')
+      : '';
+    const boxes = Array.from({ length: count }, (_, i) =>
+      `<li><span class="backup-sheet__num">${i + 1}</span><span class="backup-sheet__word">${escapeHtml(list[i] || '')}</span></li>`
+    ).join('');
+    const qrHelp = filled
+      ? `This is the ${qrName} for the words on the first page. Anyone who scans it has your seed, so keep it as safe as the words.`
+      : `The corner squares and the other parts that are the same on every ${qrName} of this size are printed for you. Copy the rest from the ${qrName} in the Seed Tool one square at a time, using the numbers along the edges.`;
+    return `
+<section class="backup-sheet__page">
+  <h1 class="backup-sheet__title">Bitcoin seed backup</h1>
+  <div class="backup-sheet__fields">
+    <div><span>Wallet</span><span class="backup-sheet__line"></span></div>
+    <div><span>Date</span><span class="backup-sheet__line"></span></div>
+    <div><span>Fingerprint</span><span class="backup-sheet__line">${escapeHtml(fingerprint)}</span></div>
+  </div>
+  <h2>Seed words</h2>
+  <ol class="backup-sheet__words" style="grid-template-rows: repeat(${Math.ceil(count / 3)}, auto)">${boxes}</ol>
+  <h2>Notes</h2>
+  <div class="backup-sheet__notes"></div>
+  <p class="backup-sheet__foot">Never write your passphrase on this sheet. Keep it somewhere safe and private.${filled ? ' The fingerprint is for the words alone, without a passphrase.' : ''}</p>
+</section>
+<section class="backup-sheet__page">
+  <h1 class="backup-sheet__title">${qrName}, ${size} by ${size} squares</h1>
+  <p>${qrHelp}</p>
+  ${gridSvg(size, isDark, `${qrName} grid, ${size} by ${size}`)}
+  <p class="backup-sheet__foot">Signers such as SeedSigner can scan a hand-drawn ${qrName}. Scan it once to check it gives the right fingerprint before you rely on it.</p>
+</section>`;
+  };
+
+  const remove = () => {
+    const sheet = document.getElementById('backupSheet');
+    if (sheet) sheet.remove();
+    document.body.classList.remove('is-printing-sheet');
+  };
+
+  // Add the sheet, print it, and take it off the page once printing is done
+  const print = (options) => {
+    remove();
+    const sheet = document.createElement('div');
+    sheet.id = 'backupSheet';
+    sheet.className = 'backup-sheet';
+    sheet.innerHTML = build(options);
+    document.body.appendChild(sheet);
+    document.body.classList.add('is-printing-sheet');
+    window.addEventListener('afterprint', remove, { once: true });
+    window.print();
+  };
+
+  window.backupSheet = { SIZES, fixedModules, build, print, remove };
 })();
 
 </script>
@@ -201776,10 +202530,24 @@ function swap(bytes, offset, index) {
     }
   }
 
+  // The home card of a tool that needs a seed, while none is loaded
+  function lockedCardFor(route) {
+    if ((document.getElementById('bip32RootKey') || {}).value) return null;
+    return [...document.querySelectorAll('.view--home .card[data-requires-seed]')]
+      .find((card) => card.dataset.route === route) || null;
+  }
+
   function applyRoute() {
     let route = parseHash();
     // Back-compat: route /slip39 → /shamir (which has the merged SLIP-39 + SSKR tool)
     if (route === 'slip39') route = 'shamir';
+    // A link straight to a tool that needs a seed shows the "needs a seed"
+    // dialog over the home page, rather than an empty tool
+    const lockedCard = lockedCardFor(route);
+    if (lockedCard) {
+      history.replaceState(null, '', '#/');
+      route = 'home';
+    }
     const isHome = route === 'home';
     document.body.dataset.route = route;
 
@@ -201806,6 +202574,10 @@ function swap(bytes, offset, index) {
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
 
     if (isHome && lastSearchValue) applySearch(lastSearchValue);
+    if (lockedCard) {
+      const title = lockedCard.querySelector('.card__title');
+      openNeedSeedModal(lockedCard.getAttribute('href'), title ? title.textContent.trim() : 'This tool');
+    }
   }
 
   window.addEventListener('hashchange', applyRoute);
@@ -201896,10 +202668,50 @@ function swap(bytes, offset, index) {
   function refreshLockState() {
     document.querySelectorAll('.card[data-requires-seed]').forEach((card) => {
       card.classList.toggle('card--locked', !seedLoaded);
+      // The lock badge is drawn by CSS and hidden from screen readers, so
+      // each locked card carries its own note
+      let note = card.querySelector('.card__lock-note');
+      if (!note) {
+        note = document.createElement('span');
+        note.className = 'sr-only card__lock-note';
+        note.textContent = ' (load a seed first)';
+        card.appendChild(note);
+      }
+      note.hidden = seedLoaded;
     });
     document.querySelectorAll('[data-seed-empty]').forEach((el) => {
       el.hidden = seedLoaded;
     });
+    document.querySelectorAll('[data-seed-only]').forEach((el) => {
+      el.hidden = !seedLoaded;
+    });
+    // The Seed Workspace keeps its output fields out of the way until there
+    // is something to show, but never hides one while it is being typed in
+    const outputs = [...document.querySelectorAll('[data-seed-output]')];
+    const phrase = ((document.getElementById('bip39Phrase') || {}).value || '').trim();
+    const showOutput = seedLoaded || phrase.length > 0
+      || outputs.some((el) => el.contains(document.activeElement));
+    const wasHidden = outputs.some((el) => el.hidden);
+    outputs.forEach((el) => { el.hidden = !showOutput; });
+    document.querySelectorAll('[data-seed-output-hint]').forEach((el) => {
+      el.hidden = showOutput;
+    });
+    if (showOutput && wasHidden) refreshTextareaSizes();
+  }
+
+  // Confirm dialogs take focus when they open and give it back on close
+  let dialogReturnFocus = null;
+  function openConfirmDialog(modal, focusEl) {
+    dialogReturnFocus = document.activeElement;
+    modal.classList.add('is-open');
+    if (focusEl) focusEl.focus();
+  }
+  function closeConfirmDialog(modal) {
+    if (!modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    const target = dialogReturnFocus;
+    dialogReturnFocus = null;
+    if (target && typeof target.focus === 'function' && document.contains(target)) target.focus();
   }
 
   // ----- "Needs a seed" modal (shown when a locked card is tapped) -----------
@@ -201914,10 +202726,10 @@ function swap(bytes, offset, index) {
     if (!needSeedModal) { location.hash = '#/seed'; return; }
     pendingLockedRoute = targetHash || null;
     if (needSeedToolName) needSeedToolName.textContent = toolLabel || 'This tool';
-    needSeedModal.classList.add('is-open');
+    openConfirmDialog(needSeedModal, needSeedCancel);
   }
   function closeNeedSeedModal() {
-    if (needSeedModal) needSeedModal.classList.remove('is-open');
+    if (needSeedModal) closeConfirmDialog(needSeedModal);
   }
 
   document.addEventListener('click', (event) => {
@@ -201985,15 +202797,16 @@ function swap(bytes, offset, index) {
   const clearSeedConfirmBtn = document.getElementById('clearSeedConfirmBtn');
 
   function openClearSeedModal() {
-    if (clearSeedConfirm) clearSeedConfirm.classList.add('is-open');
+    if (clearSeedConfirm) openConfirmDialog(clearSeedConfirm, clearSeedCancel);
   }
   function closeClearSeedModal() {
-    if (clearSeedConfirm) clearSeedConfirm.classList.remove('is-open');
+    if (clearSeedConfirm) closeConfirmDialog(clearSeedConfirm);
   }
   function performClearSeed() {
     // Wipe seed material held by the individual tools, including what the
     // user typed into them (dom.js), then the Shamir and recovery outputs.
     if (typeof wipeAllSeedMaterial === 'function') wipeAllSeedMaterial();
+    if (window.backupSheet) window.backupSheet.remove();
     ['slip39SharesList', 'recoverResultsList'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '';
@@ -202095,6 +202908,15 @@ function swap(bytes, offset, index) {
       const visible = group.querySelectorAll('.card:not([hidden])').length;
       group.classList.toggle('is-empty', q.length > 0 && visible === 0);
     });
+    const shown = document.querySelectorAll('.view--home .card:not([hidden])').length;
+    const status = document.getElementById('toolSearchStatus');
+    if (status) {
+      status.textContent = !q ? ''
+        : shown ? `${shown} ${shown === 1 ? 'tool' : 'tools'} found`
+        : `No tools match "${value.trim()}".`;
+    }
+    const empty = document.getElementById('toolSearchEmpty');
+    if (empty) empty.hidden = !(q && shown === 0);
   }
 
   if (searchInput) {
@@ -202105,6 +202927,15 @@ function swap(bytes, offset, index) {
         applySearch('');
         searchInput.blur();
       }
+    });
+  }
+
+  const searchClear = document.getElementById('toolSearchClear');
+  if (searchClear && searchInput) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      applySearch('');
+      searchInput.focus();
     });
   }
 
@@ -203506,14 +204337,13 @@ function swap(bytes, offset, index) {
       bolt11Err.classList.add('hidden');
       bolt11Result.hidden = true;
       try {
-        const invoice = (bolt11Input.value || '').trim();
+        const invoice = lightningText(bolt11Input.value);
         if (!invoice) throw new Error('Paste a BOLT-11 invoice first (starts with "lnbc").');
         const decoded = window.decoders.bolt11.decode(invoice);
         bolt11Result.innerHTML = renderBolt11(decoded);
         bolt11Result.hidden = false;
       } catch (e) {
-        bolt11Err.textContent = e.message || String(e);
-        bolt11Err.classList.remove('hidden');
+        showFriendlyError(bolt11Err, bolt11ErrorText(e, lightningText(bolt11Input.value)), e);
       }
     });
 
@@ -203525,14 +204355,13 @@ function swap(bytes, offset, index) {
       bolt12Err.classList.add('hidden');
       bolt12Result.hidden = true;
       try {
-        const input = (bolt12Input.value || '').trim();
+        const input = lightningText(bolt12Input.value);
         if (!input) throw new Error('Paste a BOLT-12 offer / invoice / invoice request first.');
         const decoded = window.decoders.bolt12.decode(input);
         bolt12Result.innerHTML = renderBolt12(decoded);
         bolt12Result.hidden = false;
       } catch (e) {
-        bolt12Err.textContent = e.message || String(e);
-        bolt12Err.classList.remove('hidden');
+        showFriendlyError(bolt12Err, bolt12ErrorText(e, lightningText(bolt12Input.value)), e);
       }
     });
 
@@ -203991,6 +204820,58 @@ function swap(bytes, offset, index) {
     }
   }
 
+  // ----- Plain-English errors ------------------------------------------------
+  // Say what went wrong in plain words, with the library's own message
+  // folded away underneath for anyone who wants the detail
+  function showFriendlyError(el, plain, error) {
+    el.textContent = plain;
+    const detail = error ? error.message || String(error) : '';
+    if (detail && detail !== plain) {
+      const more = document.createElement('details');
+      more.className = 'error-detail';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Technical detail';
+      const code = document.createElement('code');
+      code.textContent = detail;
+      more.append(summary, code);
+      el.append(more);
+    }
+    el.classList.remove('hidden');
+  }
+
+  function psbtErrorText(error, text) {
+    if (!text) return 'Paste a PSBT first.';
+    if (/^ur:/i.test(text)) {
+      return 'This is a UR code, the form wallets use to pass a PSBT through animated QR codes. Use the scan button to read it with your camera or from an image.';
+    }
+    if (/Not a valid PSBT/.test(error && error.message)) {
+      return 'This is not a PSBT. A PSBT is a long block of text that starts with "cHNidP" (base64) or "70736274" (hex). Check you copied all of it from your wallet.';
+    }
+    return 'This PSBT could not be read. It may be cut short or damaged, so copy it from your wallet again.';
+  }
+
+  // Wallets often share invoices as lightning: links
+  const lightningText = (value) => (value || '').trim().replace(/^lightning:/i, '');
+
+  function bolt11ErrorText(error, text) {
+    const lower = text.toLowerCase();
+    if (!lower) return error.message;
+    if (/^ln[oir]1/.test(lower)) return 'This is a BOLT-12 code, not a BOLT-11 invoice. Decode it on the BOLT-12 tab.';
+    if (lower.startsWith('lnurl')) {
+      return 'This is an LNURL, not an invoice. An LNURL is a web link that your wallet opens online, so this offline tool cannot decode it.';
+    }
+    if (/^ln(bc|tb|sb)/.test(lower)) return 'This invoice could not be decoded. It may be cut short or mistyped, so copy it again.';
+    return 'This is not a Lightning invoice. BOLT-11 invoices start with "lnbc", or "lntb" on testnet.';
+  }
+
+  function bolt12ErrorText(error, text) {
+    const lower = text.toLowerCase();
+    if (!lower) return error.message;
+    if (/^ln(bc|tb|sb)/.test(lower)) return 'This is a BOLT-11 invoice, not a BOLT-12 code. Decode it on the BOLT-11 tab.';
+    if (/^ln[oir]1/.test(lower)) return 'This BOLT-12 code could not be decoded. It may be cut short or damaged, so copy it again.';
+    return 'This is not a BOLT-12 code. Offers start with "lno1", invoice requests with "lnr1" and invoices with "lni1".';
+  }
+
   // ----- PSBT Inspector -----------------------------------------------------
   function initPsbtTool() {
     const view = document.querySelector('[data-tool="psbt"]');
@@ -204149,8 +205030,7 @@ function swap(bytes, offset, index) {
         renderGlobalXpubs(r.globalXpubs);
         resultEl.hidden = false;
       } catch (e) {
-        errEl.textContent = e.message || String(e);
-        errEl.classList.remove('hidden');
+        showFriendlyError(errEl, psbtErrorText(e, (inputEl.value || '').trim()), e);
       }
     }
 
@@ -204914,6 +205794,53 @@ function swap(bytes, offset, index) {
     refresh();
   }
 
+  // ----- Printable backup sheet (backup-sheet.js) ---------------------------
+  function initBackupSheet() {
+    const printBtn = document.getElementById('backupSheetPrint');
+    if (!printBtn || !window.backupSheet) return;
+    const fill = document.getElementById('backupSheetFill');
+    const fillWarn = document.getElementById('backupSheetFillWarn');
+    const wordsOption = document.getElementById('backupSheetWordsOption');
+    const sync = () => {
+      const filling = fill.checked && seedLoaded;
+      fillWarn.classList.toggle('hidden', !filling);
+      wordsOption.hidden = filling;
+    };
+    fill.addEventListener('change', sync);
+    document.addEventListener('seedtool:seed-changed', () => {
+      fill.checked = false;
+      sync();
+    });
+    printBtn.addEventListener('click', () => {
+      const phrase = (document.getElementById('bip39Phrase') || {}).value || '';
+      try {
+        window.backupSheet.print({
+          words: Number(document.getElementById('backupSheetWords').value),
+          format: document.getElementById('backupSheetFormat').value,
+          mnemonic: fill.checked && seedLoaded ? phrase : '',
+        });
+      } catch (e) {
+        if (typeof toast === 'function') toast(e.message);
+      }
+      // Filling in the words is a choice for one print, not a setting
+      fill.checked = false;
+      sync();
+    });
+  }
+
+  // ----- Derived Addresses: private keys hidden until asked for --------------
+  function initAddressPrivateKeys() {
+    const toggle = document.getElementById('showAddressPrivateKeys');
+    const list = document.querySelector('[data-tool="derived"] .address-display');
+    if (!toggle || !list) return;
+    const sync = () => list.classList.toggle('show-private-keys', toggle.checked);
+    toggle.addEventListener('change', sync);
+    document.addEventListener('seedtool:seed-changed', () => {
+      toggle.checked = false;
+      sync();
+    });
+  }
+
   function boot() {
     applyDismissed();
     refreshLockState();
@@ -204927,6 +205854,8 @@ function swap(bytes, offset, index) {
     initMiniscriptTool();
     initPsbtTool();
     initNostrTool();
+    initBackupSheet();
+    initAddressPrivateKeys();
     initSeedScan();
     initBip353Tool();
     initEntropyCollapsible();

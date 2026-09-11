@@ -256,7 +256,170 @@
     throw new Error('This QR code does not hold a seed (SeedQR, Compact SeedQR or seed words).');
   };
 
+  // ---------------------------------------------------------------------
+  // SHAKE256 (FIPS 202), the BIP85-DRNG. Lanes are 64-bit BigInts.
+  // ---------------------------------------------------------------------
+  const MASK64 = (1n << 64n) - 1n;
+  const KECCAK_ROUND_CONSTANTS = [
+    0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
+    0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
+    0x000000000000008an, 0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
+    0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n,
+    0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
+    0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n,
+  ];
+  // Rotation offset for the lane at x + 5y
+  const KECCAK_ROTATIONS = [
+    0, 1, 62, 28, 27,
+    36, 44, 6, 55, 20,
+    3, 10, 43, 25, 39,
+    41, 45, 15, 21, 8,
+    18, 2, 61, 56, 14,
+  ];
+  const SHAKE256_RATE = 136;
+
+  const rotl64 = (value, n) =>
+    n === 0 ? value : ((value << BigInt(n)) | (value >> BigInt(64 - n))) & MASK64;
+
+  const keccakF = (A) => {
+    const C = new Array(5);
+    const B = new Array(25);
+    for (let round = 0; round < 24; round++) {
+      for (let x = 0; x < 5; x++) C[x] = A[x] ^ A[x + 5] ^ A[x + 10] ^ A[x + 15] ^ A[x + 20];
+      for (let x = 0; x < 5; x++) {
+        const D = C[(x + 4) % 5] ^ rotl64(C[(x + 1) % 5], 1);
+        for (let y = 0; y < 25; y += 5) A[x + y] ^= D;
+      }
+      for (let x = 0; x < 5; x++) {
+        for (let y = 0; y < 5; y++) {
+          B[y + 5 * ((2 * x + 3 * y) % 5)] = rotl64(A[x + 5 * y], KECCAK_ROTATIONS[x + 5 * y]);
+        }
+      }
+      for (let y = 0; y < 25; y += 5) {
+        for (let x = 0; x < 5; x++) {
+          A[x + y] = B[x + y] ^ (~B[((x + 1) % 5) + y] & MASK64 & B[((x + 2) % 5) + y]);
+        }
+      }
+      A[0] ^= KECCAK_ROUND_CONSTANTS[round];
+    }
+  };
+
+  // A SHAKE256 output stream: read(n) returns the next n bytes
+  const shake256Reader = (input) => {
+    const state = new Array(25).fill(0n);
+    const padded = new Uint8Array(Math.floor(input.length / SHAKE256_RATE) * SHAKE256_RATE + SHAKE256_RATE);
+    padded.set(input);
+    padded[input.length] ^= 0x1f;
+    padded[padded.length - 1] ^= 0x80;
+    for (let offset = 0; offset < padded.length; offset += SHAKE256_RATE) {
+      for (let i = 0; i < SHAKE256_RATE / 8; i++) {
+        let lane = 0n;
+        for (let b = 7; b >= 0; b--) lane = (lane << 8n) | BigInt(padded[offset + i * 8 + b]);
+        state[i] ^= lane;
+      }
+      keccakF(state);
+    }
+    const squeeze = () => {
+      const block = [];
+      for (let i = 0; i < SHAKE256_RATE / 8; i++) {
+        let lane = state[i];
+        for (let b = 0; b < 8; b++) {
+          block.push(Number(lane & 0xffn));
+          lane >>= 8n;
+        }
+      }
+      keccakF(state);
+      return block;
+    };
+    let block = squeeze();
+    let position = 0;
+    return {
+      read(n) {
+        const out = new Uint8Array(n);
+        for (let i = 0; i < n; i++) {
+          if (position === block.length) {
+            block = squeeze();
+            position = 0;
+          }
+          out[i] = block[position++];
+        }
+        return out;
+      },
+    };
+  };
+
+  const shake256 = (input, length) => shake256Reader(input).read(length);
+
+  // ---------------------------------------------------------------------
+  // BIP-85 passwords (base64 and base85) and dice rolls
+  // ---------------------------------------------------------------------
+  const bip85Entropy = (rootKey, path) =>
+    fromHex(bip85.BIP85.fromBase58(parseRoot(rootKey).toBase58()).derive(path));
+
+  // RFC 1924 alphabet, as Python's base64.b85encode and BIP-85 use
+  const BASE85_ALPHABET =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~';
+
+  // Every 4 bytes become 5 characters, most significant first. BIP-85
+  // always encodes 64 bytes, so there is never a short last group.
+  const base85Encode = (bytes) => {
+    if (bytes.length % 4 !== 0) throw new Error('base85 input must be a multiple of 4 bytes');
+    let out = '';
+    for (let i = 0; i < bytes.length; i += 4) {
+      let value = ((bytes[i] << 24) | (bytes[i + 1] << 16) | (bytes[i + 2] << 8) | bytes[i + 3]) >>> 0;
+      let group = '';
+      for (let j = 0; j < 5; j++) {
+        group = BASE85_ALPHABET[value % 85] + group;
+        value = Math.floor(value / 85);
+      }
+      out += group;
+    }
+    return out;
+  };
+
+  const PASSWORD_FORMATS = {
+    base64: { app: 707764, min: 20, max: 86, encode: (bytes) => Buffer.Buffer.from(bytes).toString('base64') },
+    base85: { app: 707785, min: 10, max: 80, encode: base85Encode },
+  };
+
+  const bip85Password = (rootKey, { format = 'base64', length, index = 0 }) => {
+    const spec = PASSWORD_FORMATS[format];
+    if (!spec) throw new Error(`Unknown password format: ${format}`);
+    const len = Number(length);
+    if (!Number.isInteger(len) || len < spec.min || len > spec.max) {
+      throw new Error(`A ${format} password is ${spec.min} to ${spec.max} characters long`);
+    }
+    const idx = wholeNumber(index, 0, 'Index');
+    const path = `m/83696968'/${spec.app}'/${len}'/${idx}'`;
+    return { path, password: spec.encode(bip85Entropy(rootKey, path)).slice(0, len) };
+  };
+
+  // BIP-85 DICE: the derived entropy seeds the DRNG; each roll takes just
+  // enough bits for the number of sides and throws away values that are
+  // too big, so every side is equally likely. Rolls run from 0 to sides - 1.
+  const bip85Dice = (rootKey, { sides = 6, rolls = 10, index = 0 }) => {
+    const s = wholeNumber(sides, 2, 'Sides');
+    const r = wholeNumber(rolls, 1, 'Rolls');
+    const idx = wholeNumber(index, 0, 'Index');
+    const path = `m/83696968'/89101'/${s}'/${r}'/${idx}'`;
+    const drng = shake256Reader(bip85Entropy(rootKey, path));
+    const bitsPerRoll = Math.ceil(Math.log2(s));
+    const bytesPerRoll = Math.ceil(bitsPerRoll / 8);
+    const results = [];
+    while (results.length < r) {
+      let trial = 0;
+      for (const byte of drng.read(bytesPerRoll)) trial = trial * 256 + byte;
+      trial = Math.floor(trial / 2 ** (bytesPerRoll * 8 - bitsPerRoll));
+      if (trial < s) results.push(trial);
+    }
+    return { path, rolls: results };
+  };
+
   window.seedKeys = {
+    shake256,
+    base85Encode,
+    bip85Password,
+    bip85Dice,
     bech32Encode,
     nostrKeys,
     nip06,
