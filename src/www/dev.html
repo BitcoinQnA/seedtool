@@ -2894,27 +2894,13 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
   <script class="dev-script" src="js/recover.js"></script>
   <script class="dev-script" src="js/shell.js"></script>
 
-  <script id="websocket">// NOTE: This script tag MUST be the last on the page!
-    let timer;
-    const setTimer = () => {
-      timer = setInterval(() => {
-        if (ws.OPEN) { clearInterval(timer) }
-        document.location.reload(true)
-      }, 1000)
-    }
-    const ws = new WebSocket('ws://localhost:8080');
-    ws.onopen = () => {
-      clearInterval(timer)
-    }
-    ws.onerror = error => {
-      console.error(`WebSocket error: ${error}`)
-    }
-    ws.onmessage = event => {
-      if (event.data === 'reload') document.location.reload(true);
-    }
-    ws.onclose = () => {
-      setTimer();
-    }
+  <script id="dev-reload">// Dev server only: reload when a file changes or the server restarts.
+    // build.js removes this tag from the built page.
+    const devReload = new EventSource("/__reload");
+    let devReloadLost = false;
+    devReload.onerror = () => { devReloadLost = true; };
+    devReload.onopen = () => { if (devReloadLost) document.location.reload(); };
+    devReload.onmessage = (event) => { if (event.data === "reload") document.location.reload(); };
   </script>
 </body>
 

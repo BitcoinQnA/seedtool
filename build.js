@@ -11,8 +11,9 @@ console.log('Building HTML file...');
       path.join(__dirname, '/src/www/dev.html'),
       'utf8'
     );
-    result = result.replace(/<script id="websocket">[^]*<\/script>/, '');
-    console.log('Hot reload Web Socket script tags removed...');
+    result = result.replace(/<script id="dev-reload">[^]*?<\/script>/, '');
+    if (result.includes('/__reload')) throw new Error('Dev reload script was not removed');
+    console.log('Dev reload script removed...');
     // Content Security Policy for the built page. Scripts and styles are
     // all inline, so inline is allowed. Nothing else may load, and the only
     // requests allowed are the two opt-in online features: PayNym avatars

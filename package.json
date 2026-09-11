@@ -4,7 +4,7 @@
   "description": "Bitcoin wallet seed tool",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/server.js",
+    "dev": "node --watch src/server.js",
     "build": "node ./build.js",
     "git": "npm run build && git pull && git add . && git commit -m \"$MSG\" && git push",
     "test": "node test/raw-entropy.test.js && node test/entropy-staleness.test.js && node test/seed-safety.test.js",
@@ -23,15 +23,11 @@
     "bolt12-utils": "^0.1.1",
     "browserify": "^17.0.0",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "fastify": "^3.27.2",
-    "fastify-static": "^4.5.0",
     "light-bolt11-decoder": "^3.2.0",
-    "nodemon": "^2.0.15",
     "silent-payments": "^2.1.0",
     "slip39-ts": "^0.1.13",
     "tsify": "^5.0.4",
-    "typescript": "^6.0.3",
-    "ws": "^8.5.0"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@bitcoinerlab/descriptors": "^3.1.7",

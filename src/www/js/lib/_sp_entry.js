@@ -1,5 +1,5 @@
-// Browser entry for the silent-payments toolkit. Bundled via browserify into
-// js/lib/sp.js (and then minified). Exposes window.silentPayments.
+// Browser entry for the silent-payments toolkit. Bundled with esbuild into
+// js/lib/sp.js by build_sp.js. Exposes window.silentPayments.
 
 const { SilentPayment } = require('../../../sp_build/index.js');
 const bitcoin = require('bitcoinjs-lib');
