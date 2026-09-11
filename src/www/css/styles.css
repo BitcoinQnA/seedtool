@@ -1341,8 +1341,10 @@ select option {
   border: none;
   outline: none;
   cursor: pointer;
-  padding: 10px 16px;
-  font-size: 1.125rem;
+  padding: 10px 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
   transition: background-color 120ms, color 120ms;
   border-radius: 7px;
 }
@@ -3780,4 +3782,67 @@ pre {
 }
 @media (max-width: 420px) {
   .cards { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Load tabs, word boxes, button rows, QR scanner, Nostr keys
+   ============================================================ */
+.tab button span[aria-hidden="true"] {
+  font-size: 1.125rem;
+  margin-right: 4px;
+}
+.tab button:focus-visible {
+  outline: 2px solid var(--q-accent-hi);
+  outline-offset: 2px;
+}
+.inputMnemonic-word.word-invalid {
+  border-color: var(--q-danger);
+  box-shadow: 0 0 0 1px var(--q-danger);
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.qr-scan__video {
+  display: block;
+  width: 100%;
+  max-height: 50vh;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #000;
+  margin: 8px 0;
+}
+.qr-scan__progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--q-border-soft);
+  overflow: hidden;
+  margin: 8px 0;
+}
+.qr-scan__bar {
+  height: 100%;
+  width: 0;
+  background: var(--q-accent-hi);
+  transition: width 150ms;
+}
+.qr-scan__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+.qr-scan__file:focus-visible + label {
+  outline: 2px solid var(--q-accent-hi);
+  outline-offset: 2px;
+}
+.nostr-keys details {
+  margin: 8px 0 16px;
+}
+.nostr-keys summary {
+  cursor: pointer;
+  color: var(--q-muted);
 }

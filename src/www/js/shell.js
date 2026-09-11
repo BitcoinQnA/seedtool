@@ -23,7 +23,7 @@
     'passgen', 'passtest', 'split', 'xor', 'otp', 'lastword',
     'single', 'message', 'learn', 'tour', 'recover', 'silent',
     'shamir', 'slip39', // slip39 kept as alias for back-compat
-    'labels', 'lightning', 'miniscript', 'psbt', 'bip353',
+    'labels', 'lightning', 'miniscript', 'psbt', 'bip353', 'nostr',
     'about', 'credits',
   ]);
 
@@ -2282,6 +2282,8 @@
     const inCount   = document.getElementById('psbtInputsCount');
     const outCount  = document.getElementById('psbtOutputsCount');
     const globalEl  = document.getElementById('psbtGlobalXpubs');
+    const scanBtn   = document.getElementById('psbtScanBtn');
+    if (scanBtn) scanBtn.addEventListener('click', () => scanPsbtInto(inputEl, inspectBtn));
 
     function esc(s) {
       return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -2928,6 +2930,266 @@
   }
 
   // ----- Boot ----------------------------------------------------------------
+  // ----- QR scanner, shared by the tools ------------------------------------
+  // Opens the scanner dialog with the camera, or an image the user picks.
+  // onScan(result) gets each decoded { text, bytes } and returns
+  // { done: true, value } to finish, { progress, message } to keep going, or
+  // { error } to show a problem and keep going. Resolves with the value, or
+  // null when cancelled. Frames are decoded in the page; nothing is sent.
+  function openQrScanner({ title, help, onScan }) {
+    const $ = (id) => document.getElementById(id);
+    const modal = $('qrScanModal');
+    const video = $('qrScanVideo');
+    const status = $('qrScanStatus');
+    const progress = $('qrScanProgress');
+    const bar = $('qrScanBar');
+    const file = $('qrScanFile');
+    const cancel = $('qrScanCancel');
+    $('qrScanTitle').textContent = title;
+    $('qrScanHelp').textContent = help;
+    status.textContent = '';
+    progress.hidden = true;
+    bar.style.width = '0%';
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let stream = null;
+    let timer = null;
+    let finished = false;
+
+    return new Promise((resolve) => {
+      const onKey = (event) => {
+        if (event.key !== 'Escape') return;
+        event.stopPropagation();
+        finish(null);
+      };
+      function finish(value) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        if (stream) stream.getTracks().forEach((track) => track.stop());
+        video.srcObject = null;
+        video.hidden = true;
+        modal.classList.remove('is-open');
+        cancel.onclick = null;
+        file.onchange = null;
+        file.value = '';
+        document.removeEventListener('keydown', onKey, true);
+        resolve(value);
+      }
+      function handle(result) {
+        if (!result) return;
+        const reply = onScan(result) || {};
+        if (reply.error) {
+          status.textContent = reply.error;
+          return;
+        }
+        if (reply.done) {
+          finish(reply.value);
+          return;
+        }
+        if (typeof reply.progress === 'number') {
+          progress.hidden = false;
+          bar.style.width = `${Math.round(reply.progress * 100)}%`;
+        }
+        if (reply.message) status.textContent = reply.message;
+      }
+      function decodeFrom(source, width, height, maxSide) {
+        const scale = Math.min(1, maxSide / Math.max(width, height));
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+        return window.qrScan.decode(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      }
+      function scanFrame() {
+        if (finished) return;
+        if (video.readyState >= 2 && video.videoWidth) {
+          handle(decodeFrom(video, video.videoWidth, video.videoHeight, 800));
+        }
+        timer = setTimeout(scanFrame, 120);
+      }
+
+      cancel.onclick = () => finish(null);
+      document.addEventListener('keydown', onKey, true);
+      file.onchange = async () => {
+        const picked = file.files && file.files[0];
+        file.value = '';
+        if (!picked) return;
+        try {
+          const bitmap = await createImageBitmap(picked);
+          const result = decodeFrom(bitmap, bitmap.width, bitmap.height, 1600);
+          if (bitmap.close) bitmap.close();
+          if (!result) status.textContent = 'No QR code was found in that image.';
+          else handle(result);
+        } catch (e) {
+          status.textContent = 'That image could not be read.';
+        }
+      };
+      modal.classList.add('is-open');
+      cancel.focus();
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        status.textContent = 'This browser cannot use a camera here. Choose an image of the QR code instead.';
+        return;
+      }
+      status.textContent = 'Starting the camera…';
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+        .then((s) => {
+          if (finished) {
+            s.getTracks().forEach((track) => track.stop());
+            return null;
+          }
+          stream = s;
+          video.srcObject = s;
+          video.hidden = false;
+          return video.play();
+        })
+        .then(() => {
+          if (finished) return;
+          status.textContent = 'Looking for a QR code…';
+          scanFrame();
+        })
+        .catch((e) => {
+          if (finished) return;
+          status.textContent = e && e.name === 'NotAllowedError'
+            ? 'Camera access was blocked. Allow it in the browser, or choose an image of the QR code instead.'
+            : 'No camera is available. Choose an image of the QR code instead.';
+        });
+    });
+  }
+  window.openQrScanner = openQrScanner;
+
+  function bytesToBase64(bytes) {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(binary);
+  }
+
+  // Scan a PSBT: one QR with base64 or hex text, or an animated UR code
+  // (ur:psbt or ur:crypto-psbt) collected frame by frame
+  async function scanPsbtInto(inputEl, inspectBtn) {
+    if (!window.qrScan) return;
+    const collector = window.qrScan.createUrCollector();
+    const psbt = await openQrScanner({
+      title: 'Scan a PSBT',
+      help: 'Point the camera at the QR code your wallet shows. Animated codes are collected frame by frame, so keep the camera on them until the bar fills.',
+      onScan(result) {
+        const text = result.text.trim();
+        if (/^ur:/i.test(text)) {
+          const got = collector.receive(text);
+          if (got.error) return { error: got.error };
+          if (!got.done) {
+            return { progress: got.progress, message: `Collecting frames: ${Math.round(got.progress * 100)}%` };
+          }
+          if (!window.qrScan.PSBT_UR_TYPES.includes(got.type)) {
+            collector.reset();
+            return { error: `That animated code holds "${got.type}", not a PSBT.` };
+          }
+          return { done: true, value: bytesToBase64(got.bytes) };
+        }
+        if (/^cHNidP8/.test(text) || /^70736274ff/i.test(text)) return { done: true, value: text };
+        return { error: 'That QR code does not hold a PSBT.' };
+      },
+    });
+    if (!psbt) return;
+    inputEl.value = psbt;
+    inspectBtn.click();
+  }
+
+  // ----- Scan a SeedQR into the Enter words tab -----------------------------
+  // The words are filled in for checking; nothing is loaded until Load Seed.
+  function initSeedScan() {
+    const btn = document.getElementById('inputMnemonicScan');
+    const note = document.getElementById('inputMnemonicScanned');
+    if (!btn || !window.seedKeys || !window.qrScan) return;
+    btn.addEventListener('click', async () => {
+      const found = await openQrScanner({
+        title: 'Scan a SeedQR',
+        help: 'Hold the SeedQR, Compact SeedQR or seed-words QR code in front of the camera.',
+        onScan(result) {
+          try {
+            return { done: true, value: window.seedKeys.mnemonicFromQr(result) };
+          } catch (e) {
+            return { error: e.message };
+          }
+        },
+      });
+      if (!found) return;
+      const words = found.mnemonic.split(' ');
+      DOM.mnemonicLengthSelect.value = String(words.length);
+      mnemonicInputLengthAdjust();
+      DOM.mnemonicInputs.forEach((div, i) => {
+        const input = div.querySelector('input');
+        input.value = words[i] || '';
+        checkMnemonicWordBox(input, true);
+      });
+      showMnemonicWordHint();
+      note.textContent = `Read a ${found.format} with ${words.length} words. Check them against your backup, then press Load Seed.`;
+      note.classList.remove('hidden');
+    });
+  }
+
+  // ----- Nostr keys ---------------------------------------------------------
+  function initNostrTool() {
+    const view = document.querySelector('[data-tool="nostr"]');
+    if (!view || !window.seedKeys) return;
+    const $ = (id) => document.getElementById(id);
+    const empty = view.querySelector('[data-nostr-empty]');
+    const fields = view.querySelector('[data-nostr-fields]');
+    const error = $('nostrError');
+    const FIELDS = ['Npub', 'Nsec', 'PubHex', 'PrivHex'];
+    const clear = (prefix) => {
+      FIELDS.forEach((name) => { $(prefix + name).value = ''; });
+      const qr = $(prefix + 'NpubQR');
+      while (qr && qr.firstChild) qr.removeChild(qr.firstChild);
+    };
+    const show = (prefix, keys) => {
+      $(prefix + 'Npub').value = keys.npub;
+      $(prefix + 'Nsec').value = keys.nsec;
+      $(prefix + 'PubHex').value = keys.publicKeyHex;
+      $(prefix + 'PrivHex').value = keys.privateKeyHex;
+      $(prefix + 'Path').textContent = keys.path;
+      if (typeof addQRIcon === 'function') addQRIcon($(prefix + 'NpubQR'), keys.npub);
+    };
+    const fail = (prefix, e) => {
+      clear(prefix);
+      error.textContent = e.message;
+      error.classList.remove('hidden');
+    };
+    function refresh() {
+      const root = ($('bip32RootKey') || {}).value || '';
+      empty.hidden = !!root;
+      fields.hidden = !root;
+      error.textContent = '';
+      error.classList.add('hidden');
+      if (!root) {
+        clear('nostrNip06');
+        clear('nostrBip85');
+        return;
+      }
+      try {
+        show('nostrNip06', window.seedKeys.nip06(root, $('nostrNip06Account').value));
+      } catch (e) {
+        fail('nostrNip06', e);
+      }
+      try {
+        show('nostrBip85', window.seedKeys.bip85Nostr(root, $('nostrBip85Identity').value, $('nostrBip85Account').value));
+      } catch (e) {
+        fail('nostrBip85', e);
+      }
+    }
+    ['nostrNip06Account', 'nostrBip85Identity', 'nostrBip85Account'].forEach((id) => {
+      $(id).addEventListener('input', refresh);
+    });
+    document.addEventListener('seedtool:seed-changed', refresh);
+    window.addEventListener('hashchange', () => {
+      if (location.hash === '#/nostr') refresh();
+    });
+    refresh();
+  }
+
   function boot() {
     applyDismissed();
     refreshLockState();
@@ -2940,6 +3202,8 @@
     initLightningTool();
     initMiniscriptTool();
     initPsbtTool();
+    initNostrTool();
+    initSeedScan();
     initBip353Tool();
     initEntropyCollapsible();
     initSeedHero();

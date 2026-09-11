@@ -89,6 +89,22 @@
     </div>
   </div>
 
+  <!-- QR scanner, shared by the tools (shell.js openQrScanner) -->
+  <div class="confirm-modal" id="qrScanModal" role="dialog" aria-modal="true" aria-labelledby="qrScanTitle">
+    <div class="confirm-modal__card qr-scan">
+      <h2 class="confirm-modal__title" id="qrScanTitle">Scan a QR code</h2>
+      <p class="confirm-modal__body" id="qrScanHelp"></p>
+      <video id="qrScanVideo" class="qr-scan__video" playsinline muted hidden></video>
+      <div class="qr-scan__progress" id="qrScanProgress" hidden><div class="qr-scan__bar" id="qrScanBar"></div></div>
+      <p class="confirm-modal__body confirm-modal__body--muted" id="qrScanStatus" role="status" aria-live="polite"></p>
+      <div class="confirm-modal__actions">
+        <input type="file" id="qrScanFile" class="qr-scan__file" accept="image/*">
+        <label class="btn" for="qrScanFile">Choose image…</label>
+        <button type="button" class="btn" id="qrScanCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Replace seed confirmation modal (dom.js confirmReplaceSeed) -->
   <div class="confirm-modal" id="replaceSeedConfirm" role="dialog" aria-modal="true" aria-labelledby="replaceSeedTitle">
     <div class="confirm-modal__card">
@@ -173,6 +189,11 @@
             <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M5 16h14"/></svg></span>
             <span class="card__title">BIP85 Tools</span>
             <span class="card__desc">Derive child seeds and deterministic passwords from your master seed. Advanced.</span>
+          </a>
+          <a class="card" href="#/nostr" data-route="nostr" data-requires-seed data-keywords="nostr npub nsec nip06 nip-06 bip85 keys identity">
+            <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>
+            <span class="card__title">Nostr Keys</span>
+            <span class="card__desc">Derive Nostr keys (npub and nsec) from your seed with NIP-06, or separate unlinkable identities with BIP-85.</span>
           </a>
           <a class="card" href="#/lastword" data-route="lastword" data-requires-seed data-keywords="last word calculator coin flip">
             <span class="card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></span>
@@ -320,7 +341,7 @@ gpg --verify signature.txt</code></pre>
       <div class="explainer" data-explainer="seed">
         <span class="explainer__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M12 22c4-3 7-7 7-12a7 7 0 1 0-14 0c0 5 3 9 7 12z"/><circle cx="12" cy="10" r="2"/></svg></span>
         <div class="explainer__body">
-          <p><strong>Three ways to load a seed:</strong> Pick a tab below. 🤖 generates a fresh random mnemonic, 📥 lets you type one you already have, and 🎲 takes raw entropy from dice / coins / cards. Once a seed is loaded you can add a BIP39 passphrase, and the rest of the toolkit unlocks.</p>
+          <p><strong>Three ways to load a seed:</strong> Pick a tab below. <strong>Generate</strong> makes a fresh random mnemonic, <strong>Enter words</strong> lets you type one you already have, and <strong>From entropy</strong> takes raw entropy from dice, coins or cards. Once a seed is loaded you can add a BIP39 passphrase, and the rest of the toolkit unlocks.</p>
           <div class="explainer__learn-row">
             <button type="button" class="explainer__learn" onclick="openInfoModal(event, 'entropy')">Learn more: Entropy</button>
             <button type="button" class="explainer__learn" onclick="openInfoModal(event, 'BIP39')">Learn more: BIP39</button>
@@ -330,18 +351,13 @@ gpg --verify signature.txt</code></pre>
       </div>
       <button type="button" class="accordion" hidden>Seed Generation/Input</button>
       <div class="panel">
-        <ul class="tool-modes">
-          <li>🤖 Generate a cryptographically strong random mnemonic</li>
-          <li>📥 Enter your own (previously generated) mnemonic</li>
-          <li>🎲 Enter in your own entropy</li>
-        </ul>
         <div class="tab">
-          <button type="button" class="tabLinks" title="Show the Generate Random Entropy Section" aria-label="Generate a random mnemonic" id="defaultOpenTab"
-            onclick="tabSelect(event, 'Generate_Random')">🤖</button>
-          <button type="button" class="tabLinks" title="Show the Mnemonic Input Section" aria-label="Enter an existing mnemonic"
-            onclick="tabSelect(event, 'Input_Mnemonic')">📥</button>
-          <button type="button" class="tabLinks" title="Show the Entropy Section" aria-label="Enter your own entropy"
-            onclick="tabSelect(event, 'Input_Entropy')">🎲</button>
+          <button type="button" class="tabLinks" title="Generate a cryptographically strong random mnemonic" id="defaultOpenTab"
+            onclick="tabSelect(event, 'Generate_Random')"><span aria-hidden="true">🤖</span> Generate</button>
+          <button type="button" class="tabLinks" title="Enter a mnemonic you already have"
+            onclick="tabSelect(event, 'Input_Mnemonic')"><span aria-hidden="true">📥</span> Enter words</button>
+          <button type="button" class="tabLinks" title="Make a mnemonic from your own entropy: dice, coins or cards"
+            onclick="tabSelect(event, 'Input_Entropy')"><span aria-hidden="true">🎲</span> From entropy</button>
         </div>
         <div id="Generate_Random" class="tabContent">
           <p style="text-align: left;">
@@ -374,34 +390,39 @@ gpg --verify signature.txt</code></pre>
             </label>
           </p>
           <section id="inputMnemonicWords" class="private-data">
-            <div class="inputMnemonic-div"><label data-number="01" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="02" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="03" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="04" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="05" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="06" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="07" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="08" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="09" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="10" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="11" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="12" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="13" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="14" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="15" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="16" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="17" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="18" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="19" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="20" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="21" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="22" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="23" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
-            <div class="inputMnemonic-div"><label data-number="24" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word"></label></div>
+            <div class="inputMnemonic-div"><label data-number="01" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="02" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="03" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 3" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="04" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="05" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 5" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="06" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="07" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 7" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="08" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="09" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 9" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="10" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 10" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="11" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 11" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="12" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 12" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="13" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 13" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="14" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 14" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="15" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 15" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="16" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 16" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="17" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 17" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="18" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 18" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="19" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 19" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="20" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 20" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="21" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 21" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="22" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 22" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="23" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 23" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
+            <div class="inputMnemonic-div"><label data-number="24" class="inputMnemonic-label"><input type="text" onkeyup="lastWordAutocomplete(this)" class="inputMnemonic-word" aria-label="Word 24" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label></div>
           </section>
           <p class="warning"><strong>NOTE:</strong> You can enter your BIP39 Passphrase below.</p>
-          <button type="button" class="btn" onclick="mnemonicInputSeedLoad();" title="Click to load the words entered above into the seed tool">Load Seed</button>
-          <p class="warning hidden" id="inputMnemonicError"></p>
+          <p class="warning hidden" id="inputMnemonicHint" role="status" aria-live="polite"></p>
+          <div class="button-row">
+            <button type="button" class="btn" onclick="mnemonicInputSeedLoad();" title="Click to load the words entered above into the seed tool">Load Seed</button>
+            <button type="button" class="btn" id="inputMnemonicScan" title="Read a SeedQR, Compact SeedQR or seed-words QR code with your camera or from an image">Scan SeedQR</button>
+          </div>
+          <p class="recover-hint hidden" id="inputMnemonicScanned" role="status" aria-live="polite"></p>
+          <p class="warning hidden" id="inputMnemonicError" role="alert"></p>
         </div>
         <div id="Input_Entropy" class="tabContent">
           <div class="warning">
@@ -547,6 +568,13 @@ gpg --verify signature.txt</code></pre>
           <div id="compactSeedQR"></div>
         </div>
         <div>
+          <label for="standardSeedQR">SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+            <p>The standard SeedQR stores each word's number (0000 to 2047), so it can be read, and even copied, by hand. Compact SeedQR stores the raw entropy in a smaller code. Signers such as SeedSigner read both.</p>
+            <p>Neither includes your passphrase.</p>
+          </span></span></label>
+          <div id="standardSeedQR"></div>
+        </div>
+        <div>
           <label for="bip39Passphrase">BIP39 Passphrase (recommended)</label>
           <div class="copy-wrapper private-data">
             <textarea id="bip39Passphrase" class="passphrase textarea-input" title="Encrypt your Mnemonic with a strong passphrase. Keep it safe and private." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
@@ -676,6 +704,15 @@ gpg --verify signature.txt</code></pre>
         <label for="bip32AccountXpub">BIP32 Extended Public Key<span class="qr-button-holder" id="bip32AccountXpubQR"></span></label>
         <div class="copy-wrapper">
           <textarea id="bip32AccountXpub" type="text" class="account-xpub textarea-input" title="Public key - can see your money but not spend it." readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        </div>
+        <div id="descriptorSection" class="hidden">
+          <label for="descriptorCombined">Output descriptor<span class="qr-button-holder" id="descriptorCombinedQR"></span></label>
+          <div class="copy-wrapper"><textarea id="descriptorCombined" class="textarea-input" rows="3" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <p class="recover-hint">Import this into a wallet such as Sparrow or Bitcoin Core to watch this account. It holds public keys only. Wallets that don't accept the combined <code>&lt;0;1&gt;</code> form take the receive and change descriptors below instead.</p>
+          <label for="descriptorReceive">Receive descriptor</label>
+          <div class="copy-wrapper"><textarea id="descriptorReceive" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <label for="descriptorChange">Change descriptor</label>
+          <div class="copy-wrapper"><textarea id="descriptorChange" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
         </div>
         <p>Note these addresses are derived from the BIP32 Extended Key.</p>
         <div>
@@ -1002,11 +1039,21 @@ gpg --verify signature.txt</code></pre>
       <button type="button" class="accordion" hidden>Passphrase Tester</button>
       <div class="panel">
         <section id="bip39PassTestSection" class="bip39ToolSection">
-          <p id="bip39PassTestInfo" class="warning">Please be patient, each search can take up to 20 seconds!</p>
+          <p id="bip39PassTestInfo" class="recover-hint" role="status" aria-live="polite">Enter an address you know belongs to this wallet and the path it came from. The search checks the passphrase in the Seed Workspace, or each passphrase you list below.</p>
           <label>Known Address: <textarea id="bip39KnownAddr" class="textarea-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Input an address that you know is associated with this account"></textarea></label>
           <label class="hidden"><input type="checkbox" id="bip39PassTestCustom">Use custom path</label>
           <label>Derivation path: <textarea id="bip39CustomPath" placeholder="Do NOT include the index" class="textarea-input">m/84'/0'/0'/0</textarea></label>
-          <button type="button" id="bip39PassTestBtn" class="btn btn--primary" title="Search for your address using the seed from the mnemonic and passphrase above">Search</button>
+          <label for="bip39PassTestCandidates">Passphrases to try, one per line (optional)</label>
+          <div class="private-data">
+            <textarea id="bip39PassTestCandidates" class="textarea-input" rows="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Leave empty to test the passphrase entered in the Seed Workspace"></textarea>
+          </div>
+          <label for="bip39PassTestGap">Addresses to check for each passphrase</label>
+          <input type="number" id="bip39PassTestGap" min="1" max="1000" value="20">
+          <p class="recover-hint">Each line is tried exactly as typed, spaces included. Most wallets use the first 20 addresses, so 20 is usually enough.</p>
+          <div class="button-row">
+            <button type="button" id="bip39PassTestBtn" class="btn btn--primary" title="Search for your address using the seed from the mnemonic and passphrase above">Search</button>
+            <button type="button" id="bip39PassTestStop" class="btn" hidden>Stop</button>
+          </div>
         </section>
       </div>
     </section>
@@ -1752,6 +1799,7 @@ gpg --verify signature.txt</code></pre>
         </div>
         <div class="ms-actions">
           <button type="button" class="btn btn--primary" id="psbtInspectBtn">Inspect</button>
+          <button type="button" class="btn" id="psbtScanBtn" title="Read a PSBT QR code, animated ones included, with your camera or from images">Scan QR</button>
           <button type="button" class="btn btn--demo" id="psbtDemoBtn">Load demo PSBT</button>
         </div>
         <p class="warning hidden" id="psbtError"></p>
@@ -1923,6 +1971,55 @@ gpg --verify signature.txt</code></pre>
     </section>
 
     <!-- Silent Payments (BIP-352) -->
+    <!-- Nostr keys (shell.js initNostrTool, keys.js) -->
+    <section class="view view--tool" data-view="tool" data-tool="nostr" hidden>
+      <header class="view__header">
+        <a class="view__back" href="#/">← All tools</a>
+        <h1 class="view__title">Nostr Keys</h1>
+        <p class="view__lede">A Nostr identity is a secp256k1 key pair, so your seed can back it up too. Derive keys the NIP-06 way, which Nostr apps that import seed words use, or as separate unlinkable identities with BIP-85.</p>
+      </header>
+      <div class="panel nostr-keys">
+        <p class="warning"><strong>Anyone with an nsec can post as you.</strong> Use test seeds here unless you are working offline.</p>
+        <p class="sp-empty" data-nostr-empty hidden>Load a seed first to derive Nostr keys. <a href="#/seed" class="btn btn--primary" style="text-decoration:none; margin-left:8px;">Load a seed →</a></p>
+        <div data-nostr-fields hidden>
+          <h2 class="section-heading">NIP-06</h2>
+          <p class="recover-hint">Path <code id="nostrNip06Path">m/44'/1237'/0'/0/0</code>. Most apps that import seed words use account 0. Your BIP39 passphrase, if you entered one, is part of these keys.</p>
+          <label for="nostrNip06Account">Account</label>
+          <input type="number" id="nostrNip06Account" min="0" value="0">
+          <label for="nostrNip06Npub">Public key (npub)<span class="qr-button-holder" id="nostrNip06NpubQR"></span></label>
+          <div class="copy-wrapper"><textarea id="nostrNip06Npub" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <label for="nostrNip06Nsec">Private key (nsec)</label>
+          <div class="copy-wrapper private-data"><textarea id="nostrNip06Nsec" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <details>
+            <summary>Hex keys</summary>
+            <label for="nostrNip06PubHex">Public key (hex)</label>
+            <div class="copy-wrapper"><textarea id="nostrNip06PubHex" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="nostrNip06PrivHex">Private key (hex)</label>
+            <div class="copy-wrapper private-data"><textarea id="nostrNip06PrivHex" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          </details>
+
+          <h2 class="section-heading">BIP-85</h2>
+          <p class="recover-hint">Path <code id="nostrBip85Path">m/83696968'/128002'/1'/1'</code>. Each identity is unlinkable from the others and from your wallet, and each account is a separate key within an identity. Numbering starts at 1 because the spec reserves 0.</p>
+          <label for="nostrBip85Identity">Identity</label>
+          <input type="number" id="nostrBip85Identity" min="1" value="1">
+          <label for="nostrBip85Account">Account</label>
+          <input type="number" id="nostrBip85Account" min="1" value="1">
+          <label for="nostrBip85Npub">Public key (npub)<span class="qr-button-holder" id="nostrBip85NpubQR"></span></label>
+          <div class="copy-wrapper"><textarea id="nostrBip85Npub" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <label for="nostrBip85Nsec">Private key (nsec)</label>
+          <div class="copy-wrapper private-data"><textarea id="nostrBip85Nsec" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          <details>
+            <summary>Hex keys</summary>
+            <label for="nostrBip85PubHex">Public key (hex)</label>
+            <div class="copy-wrapper"><textarea id="nostrBip85PubHex" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+            <label for="nostrBip85PrivHex">Private key (hex)</label>
+            <div class="copy-wrapper private-data"><textarea id="nostrBip85PrivHex" class="textarea-input" rows="2" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea></div>
+          </details>
+          <p class="warning hidden" id="nostrError" role="alert"></p>
+        </div>
+      </div>
+    </section>
+
     <section class="view view--tool" data-view="tool" data-tool="silent" hidden>
       <header class="view__header">
         <a class="view__back" href="#/">← All tools</a>
@@ -2890,8 +2987,10 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
   <script class="dev-script" src="js/lib/decoders.js"></script>
   <script class="dev-script" src="js/lib/miniscript.js"></script>
   <script class="dev-script" src="js/lib/psbt.js"></script>
+  <script class="dev-script" src="js/lib/qrscan.js"></script>
   <script class="dev-script" src="js/dom.js"></script>
   <script class="dev-script" src="js/recover.js"></script>
+  <script class="dev-script" src="js/keys.js"></script>
   <script class="dev-script" src="js/shell.js"></script>
 
   <script id="dev-reload">// Dev server only: reload when a file changes or the server restarts.
