@@ -16,8 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      # The tests and build.js only use Node's standard library and the
-      # bundles committed in src/www/js/lib, so nothing is installed.
+          cache: npm
+      # The tests load a few packages (QR and UR decoding, descriptors) from the
+      # lockfile. Install scripts are not needed for the tests or build.js.
+      - name: Install
+        run: npm ci --ignore-scripts
       - name: Tests
         run: npm test
       - name: dist/index.html matches the source
