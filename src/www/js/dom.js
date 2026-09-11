@@ -336,6 +336,9 @@ const setupDom = async () => {
   document.getElementById('xorShareCount').oninput = () => makeXorShares();
   document.getElementById('xorNewShares').onclick = () => makeXorShares(true);
   document.getElementById('xorLoadResult').onclick = loadXorResult;
+  document.querySelectorAll('#qrModalFormat [data-format]').forEach((btn) => {
+    btn.addEventListener('click', () => showSeedQrFormat(btn.dataset.format));
+  });
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -1290,8 +1293,8 @@ const deriveChecksumBits = async (entropyBuffer) => {
   return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
 };
 
-// Show a Seed XOR share or result as a Compact SeedQR. The icon's
-// data-target names the box it belongs to.
+// Show a Seed XOR share or result as a SeedQR. The icon's data-target
+// names the box it belongs to.
 const showXorQr = (icon) => {
   const field = document.getElementById(icon.dataset.target);
   const phrase = normalizeString(field ? field.value : '');
@@ -1517,6 +1520,9 @@ const decryptOneTimePad = async () => {
 // adjust textarea rows/height
 function textareaResize() {
   document.querySelectorAll('textarea').forEach((textareaElement) => {
+    // A hidden box measures 0 high, which would squash it to 5px. Leave it
+    // to be sized when its view or tab is shown.
+    if (!textareaElement.getClientRects().length) return;
     textareaElement.style.width = '100%';
     textareaElement.style.height = 'auto';
     textareaElement.style.height = textareaElement.scrollHeight + 5 + 'px';
@@ -1992,7 +1998,7 @@ document.addEventListener('keydown', (e) => {
   });
 })();
 const clearCompactSeedQR = () => {
-  ['compactSeedQR', 'standardSeedQR'].forEach((id) => {
+  ['compactSeedQR'].forEach((id) => {
     const el = document.getElementById(id);
     while (el && el.firstChild) el.removeChild(el.firstChild);
   });
@@ -2011,19 +2017,12 @@ const makeCompactSeedQR = () => {
   clearCompactSeedQR();
   const phrase = getPhrase();
   if (!bip39.validateMnemonic(phrase)) return;
+  // One button; the QR window offers SeedQR or Compact SeedQR
   addQRIcon(
     document.getElementById('compactSeedQR'),
     phraseToCompactQrBytes(phrase),
     phrase
   );
-  if (typeof seedKeys !== 'undefined') {
-    addQRIcon(
-      document.getElementById('standardSeedQR'),
-      seedKeys.mnemonicToSeedQrDigits(phrase),
-      phrase,
-      'Numeric'
-    );
-  }
 };
 /**
  * QR dialog / Modal
@@ -2035,10 +2034,23 @@ const makeCompactSeedQR = () => {
 const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
   DOM.qrModalDiv.innerHTML = '';
+  qrModalPhrase = '';
   restoreDialogFocus(DOM.qrModal);
 };
-const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
-  clearQRModal();
+
+// A seed opens in the QR window with a choice of SeedQR or Compact SeedQR.
+// The choice is kept for the rest of the visit.
+let seedQrFormat = 'standard';
+let qrModalPhrase = '';
+
+const seedQrData = (phrase, format) =>
+  format === 'compact'
+    ? { data: phraseToCompactQrBytes(phrase), mode: 'Byte' }
+    : { data: seedKeys.mnemonicToSeedQrDigits(phrase), mode: 'Numeric' };
+
+// Draw one QR code in the QR window
+const drawQrInModal = (dataString, seedPhrase, mode) => {
+  DOM.qrModalDiv.innerHTML = '';
   const qr = new QRCode(0, 'L');
   qr.addData(dataString, mode);
   qr.make();
@@ -2090,6 +2102,30 @@ const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
     // DOM.qrModalDiv.appendChild(qrCode);
   } else {
     DOM.qrModalDiv.innerHTML = qrSvg;
+  }
+};
+
+const showSeedQrFormat = (format) => {
+  seedQrFormat = format === 'compact' ? 'compact' : 'standard';
+  document.querySelectorAll('#qrModalFormat [data-format]').forEach((btn) => {
+    btn.setAttribute('aria-pressed', String(btn.dataset.format === seedQrFormat));
+  });
+  // With no seed open, only remember the choice
+  if (!qrModalPhrase) return;
+  const { data, mode } = seedQrData(qrModalPhrase, seedQrFormat);
+  drawQrInModal(data, qrModalPhrase, mode);
+};
+
+const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
+  clearQRModal();
+  const isSeed =
+    !!seedPhrase && typeof seedKeys !== 'undefined' && bip39.validateMnemonic(seedPhrase);
+  document.getElementById('qrModalFormat').hidden = !isSeed;
+  if (isSeed) {
+    qrModalPhrase = seedPhrase;
+    showSeedQrFormat(seedQrFormat);
+  } else {
+    drawQrInModal(dataString, seedPhrase, mode);
   }
   DOM.qrModal.style.display = 'block';
   DOM.qrModalDiv.style.display = 'block';
@@ -2144,6 +2180,9 @@ const adjustPanelHeight = debounce(() => {
       : null;
   });
 }, 50);
+// shell.js re-measures text boxes after it shows a view or tab. A top-level
+// const is not a window property, so it has to be exposed.
+window.adjustPanelHeight = adjustPanelHeight;
 
 // event handler for when the path is changed
 const changePath = () => {

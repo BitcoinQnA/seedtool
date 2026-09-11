@@ -1811,7 +1811,7 @@ legend {
 }
 #compactSeedQR:empty::before,
 #bip85CompactSeedQR:empty::before {
-  content: 'Load a seed to generate a Compact SeedQR';
+  content: 'Load a seed to generate a SeedQR';
 }
 /* Loaded state: the inner .qr-div becomes a button-shaped chip with label. */
 #compactSeedQR .qr-div,
@@ -4019,4 +4019,103 @@ body.is-private .seed-hero__word-text { visibility: hidden; }
   .backup-sheet__notes { height: 45mm; border: 0.3mm solid #000; border-radius: 1.5mm; }
   .backup-sheet__foot { font-size: 9pt; margin-top: 4mm; }
   .backup-sheet__grid { display: block; width: 100%; max-width: 180mm; max-height: 205mm; margin: 4mm auto; }
+}
+
+/* Seed input tabs: the icon sits above its label at every width */
+.tab button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.tab button span[aria-hidden="true"] { margin-right: 0; line-height: 1; }
+
+/* SeedQR format switch in the QR window */
+.seedqr-format {
+  clear: both;
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 auto 12px;
+  padding: 4px;
+  background: var(--q-dark);
+  border: 1px solid var(--q-border-soft);
+  border-radius: 10px;
+}
+.seedqr-format[hidden] { display: none; }
+.seedqr-format__btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--q-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.seedqr-format__btn[aria-pressed="true"] { background: var(--q-light-grey); color: var(--q-white); }
+.seedqr-format__btn:hover:not([aria-pressed="true"]) { color: var(--q-white); }
+.seedqr-format__btn:focus-visible { outline: 2px solid var(--q-accent-hi); outline-offset: 2px; }
+@media (pointer: coarse) {
+  .seedqr-format__btn { min-height: 44px; }
+}
+
+/* Word boxes: keep room for the word number. The dark input rule for tool
+   views is more specific than .inputMnemonic-word and reset the padding,
+   so typed words ran over the numbers. */
+#inputMnemonicWords .inputMnemonic-word,
+#lastWordSeedWords .lastWord-word { padding-left: 2.8em; }
+
+/* Seed cards: each column fits the longest BIP39 word (8 letters) with its
+   number, and there are never more than 4 across. The grid uses the cards'
+   monospace font so that ch matches the width of a letter. */
+.seed-hero__words {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  grid-template-columns: repeat(auto-fill, minmax(max(calc(8ch + 48px), calc((100% - 24px) / 4)), 1fr));
+}
+.seed-hero__word { min-width: 0; padding: 10px; }
+.seed-hero__word-text { min-width: 0; overflow-wrap: anywhere; }
+
+/* Backup sheet options: one label column, and selects of the same width */
+.backup-sheet-tool__options {
+  flex-direction: column;
+  align-items: stretch;
+  max-width: 22rem;
+}
+.backup-sheet-tool__options label {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding-top: 0;
+  white-space: nowrap;
+}
+.backup-sheet-tool__options select { width: 100%; }
+
+/* Sub-tabs are all as wide as the widest one, and share the space evenly
+   when the screen is narrow */
+.subtabs {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  max-width: 100%;
+}
+.subtabs__tab { text-align: center; }
+
+/* Dropdowns never grow past their container. iPhone Safari otherwise sizes
+   a select to its longest option and it runs off the screen. */
+select {
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+/* Two seed card columns still fit on a 360px phone */
+.seed-hero__word { gap: 6px; }
+.seed-hero__word-num { min-width: 16px; }
+.seed-hero__words {
+  grid-template-columns: repeat(auto-fill, minmax(max(calc(8ch + 44px), calc((100% - 24px) / 4)), 1fr));
 }

@@ -347,6 +347,27 @@ test('backup sheet: blank unless the words are asked for', async () => {
   assert.throws(() => sheet.build({ mnemonic: 'abandon abandon' }), /not a valid BIP39 mnemonic/);
 });
 
+test('seedqr: one button, and the QR window offers both formats', async () => {
+  const tool = await openTool();
+  const seedQrData = tool.run('seedQrData');
+  const keys = tool.run('seedKeys');
+  const standard = seedQrData(ZERO_12, 'standard');
+  assert.strictEqual(standard.mode, 'Numeric');
+  assert.strictEqual(standard.data, keys.mnemonicToSeedQrDigits(ZERO_12));
+  const compact = seedQrData(ZERO_12, 'compact');
+  assert.strictEqual(compact.mode, 'Byte');
+  assert.strictEqual(compact.data, tool.run('phraseToCompactQrBytes')(ZERO_12));
+  const html = fs.readFileSync(path.join(WWW, 'dev.html'), 'utf8');
+  assert.doesNotMatch(html, /standardSeedQR/);
+  assert.strictEqual((html.match(/class="seedqr-format__btn" data-format="(standard|compact)"/g) || []).length, 2);
+});
+
+test('layout: the shell can re-measure text boxes once a view is shown', async () => {
+  const tool = await openTool();
+  // refreshTextareaSizes in shell.js calls window.adjustPanelHeight
+  assert.strictEqual(typeof tool.run('window.adjustPanelHeight'), 'function');
+});
+
 (async () => {
   console.log('seed tool ui');
   for (const [name, fn] of tests) {
