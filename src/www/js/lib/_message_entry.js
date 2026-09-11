@@ -1,5 +1,5 @@
-// Entry point browserified into js/lib/message.js - exposes a global
-// `messageSigning` with both BIP-137 and BIP-322 sign/verify.
+// Entry point bundled with esbuild into js/lib/message.js by build_message.js.
+// Exposes a global `messageSigning` with both BIP-137 and BIP-322 sign/verify.
 //
 // BIP-137 is bitcoinjs-message (legacy P2PKH-style signed messages, also
 // supports P2WPKH-in-P2SH via "address type" header byte tricks).
