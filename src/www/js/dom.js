@@ -325,6 +325,17 @@ const setupDom = async () => {
   DOM.bip85Index.oninput = calcBip85;
   DOM.bip85LoadParent.onclick = bip85LoadParent;
   DOM.bip85LoadChild.onclick = bip85LoadChild;
+  document.getElementById('bip85PWDFormat').oninput = bip85PasswordFormatChanged;
+  ['bip85DiceSides', 'bip85DiceCount', 'bip85DiceIndex'].forEach((id) => {
+    document.getElementById(id).oninput = calcBip85Dice;
+  });
+  // Seed XOR: combine as shares are typed, split when asked
+  document
+    .querySelectorAll('.xor-seed textarea')
+    .forEach((el) => el.addEventListener('input', calculateXor));
+  document.getElementById('xorShareCount').oninput = () => makeXorShares();
+  document.getElementById('xorNewShares').onclick = () => makeXorShares(true);
+  document.getElementById('xorLoadResult').onclick = loadXorResult;
   // Accordion Sections
   DOM.accordionButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
@@ -551,6 +562,9 @@ const toggleHideAllPrivateData = () => {
   hidePrivateData = !hidePrivateData;
   document.getElementById('hideIcon').classList.toggle('hidden');
   document.getElementById('showIcon').classList.toggle('hidden');
+  DOM.showHide.setAttribute('aria-pressed', String(hidePrivateData));
+  // Seed words shown outside the private fields: the top bar and seed cards
+  document.body.classList.toggle('is-private', hidePrivateData);
   document.querySelectorAll('.private-data').forEach((el) => {
     el.style.display = hidePrivateData ? 'none' : '';
   });
@@ -1231,52 +1245,34 @@ const bip39PassphraseMessage = (msg) => {
   adjustPanelHeight();
 };
 
-// Remove XOR seed
-const removeXorSeed = async (event) => {
-  event.preventDefault();
-  document.getElementById('xorAddSeed').disabled = false;
-  const seeds = [...document.querySelectorAll('.xor-seed')];
-  let visibleSeeds = 0;
-  for (let i = seeds.length - 1; i > 0; i--) {
-    visibleSeeds = i;
-    const seed = seeds[i];
-    if (!seed.classList.contains('hidden')) {
-      seed.classList.add('hidden');
-      break;
-    }
-  }
-  visibleSeeds++;
+// Seed XOR "Combine shares": the share boxes in use
+const xorVisibleParts = () =>
+  [...document.querySelectorAll('.xor-seed')].filter(
+    (div) => !div.classList.contains('hidden')
+  );
+
+// Show 2 to 8 share boxes. A box that is taken away keeps what was typed
+// in it until "Clear seed", in case it was removed by mistake.
+const setXorPartCount = (count) => {
+  const rows = [...document.querySelectorAll('.xor-seed')];
+  const shown = Math.max(2, Math.min(rows.length, count));
+  rows.forEach((row, i) => row.classList.toggle('hidden', i >= shown));
   document
     .querySelectorAll('.xor-number-seeds')
-    .forEach((span) => (span.innerText = visibleSeeds));
-  document.getElementById('xorRemoveSeed').disabled =
-    visibleSeeds === 2 ? true : false;
-  await calculateXor();
-  adjustPanelHeight();
+    .forEach((span) => (span.textContent = shown));
+  document.getElementById('xorAddSeed').disabled = shown >= rows.length;
+  document.getElementById('xorRemoveSeed').disabled = shown <= 2;
+  calculateXor();
 };
 
-// Add an xor seed
-const addXorSeed = async (event) => {
+const removeXorSeed = (event) => {
   event.preventDefault();
-  document.getElementById('xorRemoveSeed').disabled = false;
-  const seeds = [...document.querySelectorAll('.xor-seed')];
-  let visibleSeeds = 0;
-  for (let i = 0; i < seeds.length; i++) {
-    visibleSeeds = i;
-    const seed = seeds[i];
-    if (seed.classList.contains('hidden')) {
-      seed.classList.remove('hidden');
-      break;
-    }
-  }
-  visibleSeeds += 2;
-  document
-    .querySelectorAll('.xor-number-seeds')
-    .forEach((span) => (span.innerText = visibleSeeds));
-  document.getElementById('xorAddSeed').disabled =
-    visibleSeeds === 8 ? true : false;
-  await calculateXor();
-  adjustPanelHeight();
+  setXorPartCount(xorVisibleParts().length - 1);
+};
+
+const addXorSeed = (event) => {
+  event.preventDefault();
+  setXorPartCount(xorVisibleParts().length + 1);
 };
 
 /**
@@ -1294,16 +1290,11 @@ const deriveChecksumBits = async (entropyBuffer) => {
   return bytesToBinary([...new Uint8Array(hash)]).slice(0, CS);
 };
 
-const showXorQr = (ev) => {
-  let phrase = '';
-  if (ev.id === 'qrXorResult') {
-    phrase = document.getElementById('xorResult').value;
-  } else {
-    //qrXor
-    phrase = document.getElementById(
-      `xorSeed${ev.id.replace('qrXor', '')}`
-    ).value;
-  }
+// Show a Seed XOR share or result as a Compact SeedQR. The icon's
+// data-target names the box it belongs to.
+const showXorQr = (icon) => {
+  const field = document.getElementById(icon.dataset.target);
+  const phrase = normalizeString(field ? field.value : '');
   if (!bip39.validateMnemonic(phrase)) return;
   openQrModal(phraseToCompactQrBytes(phrase), phrase);
 };
@@ -1323,25 +1314,29 @@ const describePhraseError = (errorText) => {
  * Every phrase must be a valid mnemonic and all must be the same length. A
  * bad word or a short share would otherwise still produce a checksummed,
  * valid looking, wrong mnemonic, so they are refused instead.
- * @param {string[]} phrases The loaded seed followed by each share
+ * @param {string[]} phrases The seeds to combine
+ * @param {function(number): string} labelFor Names phrase i in errors
  * @returns {{phrase: string}|{error: string}}
  */
-const xorMnemonics = (phrases) => {
+const loadedSeedLabel = (i) => (i === 0 ? 'The loaded seed' : `Seed ${i + 1}`);
+const shareLabel = (i) => `Share ${i + 1}`;
+const xorMnemonics = (phrases, labelFor = loadedSeedLabel) => {
   if (phrases.length < 2) {
-    return { error: 'Seed XOR needs the loaded seed and at least one share.' };
+    return { error: 'Seed XOR needs at least two seeds.' };
   }
   const wordArrays = phrases.map((phrase) =>
     phraseToWordArray(normalizeString(phrase))
   );
+  const first = labelFor(0).replace(/^The /, 'the ');
   for (let i = 0; i < phrases.length; i++) {
-    const label = i === 0 ? 'The loaded seed' : `Seed ${i + 1}`;
+    const label = labelFor(i);
     const errorText = findPhraseErrors(phrases[i]);
     if (errorText) {
       return { error: `${label}: ${describePhraseError(errorText)}.` };
     }
     if (wordArrays[i].length !== wordArrays[0].length) {
       return {
-        error: `${label} has ${wordArrays[i].length} words but the loaded seed has ${wordArrays[0].length}. Every share must be the same length.`,
+        error: `${label} has ${wordArrays[i].length} words but ${first} has ${wordArrays[0].length}. Every share must be the same length.`,
       };
     }
   }
@@ -1359,29 +1354,82 @@ const xorMnemonics = (phrases) => {
   return { phrase: window.bip39.entropyToMnemonic(xored) };
 };
 
-// Calculate XOR from the loaded seed and every visible share
+// "Combine shares": XOR every share box in use. Nothing shows until each
+// box has words in it, so a share still being typed is not an error.
 const calculateXor = () => {
-  const shares = [...document.querySelectorAll('.xor-seed')]
-    .filter((div) => !div.classList.contains('hidden'))
-    .map((div) => div.querySelector('textarea').value);
-  const { phrase, error } = xorMnemonics([getPhrase(), ...shares]);
+  const parts = xorVisibleParts().map((div) => div.querySelector('textarea').value);
+  const complete = parts.length >= 2 && parts.every((part) => normalizeString(part));
+  const { phrase, error } = complete ? xorMnemonics(parts, shareLabel) : {};
   // Never leave an earlier result on screen beside an error
   document.getElementById('xorResult').value = phrase || '';
   const errorEl = document.getElementById('xorError');
   errorEl.textContent = error || '';
   errorEl.classList.toggle('hidden', !error);
+  document.getElementById('xorLoadResult').disabled = !phrase;
   adjustPanelHeight();
 };
 
-// Offer random shares for splitting the loaded seed. A share the user typed
-// is never replaced; one this tool generated is refreshed for the new seed.
-const fillRandomXorSeeds = () => {
-  document.querySelectorAll('.xor-seed textarea').forEach((textarea) => {
-    const current = normalizeString(textarea.value);
-    if (current && current !== textarea.dataset.generated) return;
-    textarea.value = createMnemonic();
-    textarea.dataset.generated = textarea.value;
-  });
+// Load the combined seed, asking first if a seed is already loaded
+const loadXorResult = async () => {
+  const phrase = normalizeString(document.getElementById('xorResult').value);
+  if (!phrase || findPhraseErrors(phrase)) return;
+  if (!(await confirmReplaceSeed())) return;
+  DOM.bip39Phrase.value = phrase;
+  toast('Loading the combined seed...');
+  mnemonicToSeedPopulate();
+  location.hash = '#/seed';
+};
+
+// "Split my seed": random shares, plus a last share that XORs with them
+// back to the loaded seed. The shares only change with the seed, the
+// number of shares, or "Make new shares", so typing a passphrase never
+// replaces shares that may already be written down.
+let xorSplitKey = '';
+const makeXorShares = (fresh = false) => {
+  const rows = [...document.querySelectorAll('.xor-share')];
+  if (!rows.length) return;
+  const countEl = document.getElementById('xorShareCount');
+  const count = Math.max(2, Math.min(rows.length, parseInt(countEl.value, 10) || 2));
+  const checkEl = document.getElementById('xorSplitCheck');
+  const show = (shares, check) => {
+    rows.forEach((row, i) => {
+      row.classList.toggle('hidden', i >= count);
+      row.querySelector('textarea').value = shares[i] || '';
+    });
+    document
+      .querySelectorAll('.xor-share-total')
+      .forEach((span) => (span.textContent = count));
+    checkEl.textContent = check;
+    adjustPanelHeight();
+  };
+  const phrase = getPhrase();
+  if (!phrase || findPhraseErrors(phrase)) {
+    xorSplitKey = '';
+    show([], '');
+    return;
+  }
+  const key = `${count} ${phrase}`;
+  if (!fresh && key === xorSplitKey) return;
+  const words = phraseToWordArray(phrase);
+  const random = Array.from({ length: count - 1 }, () =>
+    bip39.generateMnemonic((words.length / 3) * 32)
+  );
+  const last = xorMnemonics([phrase, ...random]);
+  if (last.error) {
+    xorSplitKey = '';
+    show([], last.error);
+    return;
+  }
+  const shares = [...random, last.phrase];
+  xorSplitKey = key;
+  // Prove the shares rebuild the seed before anyone writes them down
+  const rebuilt = xorMnemonics(shares, shareLabel).phrase;
+  show(
+    shares,
+    rebuilt === wordArrayToPhrase(words)
+      ? `Checked: these ${count} shares combine back to the loaded seed.`
+      : 'These shares do not combine back to the loaded seed. Do not use them.'
+  );
 };
 
 // Show a result or a problem beside the One Time Pad output
@@ -1862,9 +1910,24 @@ const derivedPathSelectChanged = (event) => {
 /**
  * Hide the modal and clear it's text
  */
+// Dialogs take keyboard focus when they open and hand it back when they
+// close, so keyboard and screen reader users are not left behind them
+const dialogReturnFocus = new Map();
+const focusDialog = (modal) => {
+  if (!dialogReturnFocus.has(modal)) dialogReturnFocus.set(modal, document.activeElement);
+  const close = modal.querySelector('.modal__close');
+  if (close) close.focus();
+};
+const restoreDialogFocus = (modal) => {
+  const target = dialogReturnFocus.get(modal);
+  dialogReturnFocus.delete(modal);
+  if (target && typeof target.focus === 'function') target.focus();
+};
+
 const clearInfoModal = () => {
   DOM.infoModal.style.display = 'none';
   DOM.infoModalText.innerHTML = '';
+  restoreDialogFocus(DOM.infoModal);
 };
 /**
  * Open the QnA Explains dialog
@@ -1889,6 +1952,7 @@ window.openInfoModal = (_event, section) => {
   }
   DOM.infoModalText.innerHTML = window.infoHtml[section];
   DOM.infoModal.style.display = 'block';
+  focusDialog(DOM.infoModal);
 };
 /**
  * Function to close the dialog when user clicks on the outside
@@ -1971,6 +2035,7 @@ const makeCompactSeedQR = () => {
 const clearQRModal = () => {
   DOM.qrModal.style.display = 'none';
   DOM.qrModalDiv.innerHTML = '';
+  restoreDialogFocus(DOM.qrModal);
 };
 const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
   clearQRModal();
@@ -2028,6 +2093,7 @@ const openQrModal = (dataString, seedPhrase = '', mode = 'Byte') => {
   }
   DOM.qrModal.style.display = 'block';
   DOM.qrModalDiv.style.display = 'block';
+  focusDialog(DOM.qrModal);
 };
 /**
  * Function to close the dialog when user clicks on the outside
@@ -2365,27 +2431,73 @@ const displayAccountKeys = () => {
   addQRIcon(document.getElementById('pathAccountXpubQR'), xpub);
 };
 
-// Calculate BIP85 Password
+// Show a problem beside a BIP85 output, or hide it
+const showBip85Error = (id, message) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = message || '';
+  el.classList.toggle('hidden', !message);
+};
+
+// Calculate BIP85 Password, in base64 or base85
 const calcBip85Password = async () => {
-  const index = DOM.bip85PWDIndex.value;
-  const length = parseInt(DOM.bip85PWDLength.value);
-  const path = `m/83696968'/707764'/${length}'/${index}'`
+  DOM.bip85PWDPassword.value = '';
+  showBip85Error('bip85PWDError', '');
   const rootKeyBase58 = DOM.bip32RootKey.value;
-  if (!rootKeyBase58) {
+  if (!rootKeyBase58 || typeof seedKeys === 'undefined') return;
+  const formatEl = document.getElementById('bip85PWDFormat');
+  try {
+    DOM.bip85PWDPassword.value = seedKeys.bip85Password(rootKeyBase58, {
+      format: (formatEl && formatEl.value) || 'base64',
+      length: Number(DOM.bip85PWDLength.value),
+      index: Number(DOM.bip85PWDIndex.value),
+    }).password;
+  } catch (e) {
+    showBip85Error('bip85PWDError', e.message);
+  }
+  adjustPanelHeight();
+};
+
+// Each password format has its own length limits
+const bip85PasswordFormatChanged = () => {
+  const base85 = document.getElementById('bip85PWDFormat').value === 'base85';
+  const [min, max] = base85 ? [10, 80] : [20, 86];
+  DOM.bip85PWDLength.min = min;
+  DOM.bip85PWDLength.max = max;
+  const length = Number(DOM.bip85PWDLength.value);
+  if (!(length >= min && length <= max)) {
+    DOM.bip85PWDLength.value = Math.min(max, Math.max(min, Math.round(length) || min));
+  }
+  calcBip85Password();
+};
+
+// BIP85 dice rolls, comma separated
+const calcBip85Dice = () => {
+  const out = document.getElementById('bip85DiceResult');
+  if (!out) return;
+  out.value = '';
+  showBip85Error('bip85DiceError', '');
+  const rootKeyBase58 = DOM.bip32RootKey.value;
+  if (!rootKeyBase58 || typeof seedKeys === 'undefined') return;
+  const value = (id) => Number(document.getElementById(id).value);
+  const rolls = value('bip85DiceCount');
+  if (rolls > 1000) {
+    showBip85Error('bip85DiceError', 'Up to 1,000 rolls at a time.');
     return;
   }
   try {
-    const master = bip85.BIP85.fromBase58(rootKeyBase58);
-    const child = master.derive(path); // hex string
-    // one liner to convert hex to base64, remove whitespace and new lines, then slice to desired length removing padding
-    const pwd = btoa(child.match(/\w{2}/g).map(a=>String.fromCharCode(parseInt(a, 16))).join("")).replaceAll(/\s/g, '').slice(0, length);
-    DOM.bip85PWDPassword.value = pwd;
+    out.value = seedKeys
+      .bip85Dice(rootKeyBase58, {
+        sides: value('bip85DiceSides'),
+        rolls,
+        index: value('bip85DiceIndex'),
+      })
+      .rolls.join(', ');
   } catch (e) {
-    toast('BIP85: ' + e.message);
-    console.error('BIP85: ' + e.message);
-    DOM.bip85PWDPassword.value = '';
+    showBip85Error('bip85DiceError', e.message);
   }
-}
+  adjustPanelHeight();
+};
 
 // Calculate and populate the BIP85 section
 const calcBip85 = async () => {
@@ -2693,6 +2805,34 @@ const entropyTypeChanged = () => {
 };
 
 // Calculate and display entropy
+// zxcvbn's crack times assume a password a person made up, so they mean
+// nothing for dice, coin or card rolls. Only its warning about patterns,
+// such as a long run of one number, is shown for entropy.
+const entropyPatternCheck = (events) => {
+  try {
+    const { warning } = window.zxcvbn(events).feedback;
+    return warning ? `Warning: ${warning}` : 'No obvious patterns';
+  } catch (e) {
+    console.error('Error checking the entropy for patterns:');
+    console.error(e);
+    return '';
+  }
+};
+
+// How long the passphrase would take to crack. Hidden until one is typed.
+const showPassphraseStrength = (passphrase) => {
+  const text = DOM.bip39PassphraseCrackTime;
+  const box = text.parentElement;
+  const crackText = passphrase
+    ? window.zxcvbn(passphrase)?.crack_times_display?.offline_fast_hashing_1e10_per_second
+    : '';
+  const strong = crackText === 'centuries';
+  text.textContent = crackText ? `Time to crack with a fast offline attack: ${crackText}` : '';
+  box.classList.toggle('hidden', !crackText);
+  box.classList.toggle('warning', !strong);
+  box.classList.toggle('recover-hint', strong);
+};
+
 const calculateEntropy = async () => {
   const input = getEntropy();
   // A seed that did not come from this box has no entropy events to show
@@ -2718,22 +2858,12 @@ const calculateEntropy = async () => {
   const spacedBinaryStr = entropy.binaryStr
     ? addSpacesEveryElevenBits(entropy.binaryStr)
     : '';
-  let timeToCrack = '';
-  try {
-    const z = window.zxcvbn(entropy.base.events.join(''));
-    timeToCrack = z.crack_times_display.offline_fast_hashing_1e10_per_second;
-    if (z.feedback.warning != '') {
-      timeToCrack = timeToCrack + ' - ' + z.feedback.warning;
-    }
-  } catch (e) {
-    console.error('Error detecting entropy strength with zxcvbn:');
-    console.error(e);
-  }
+  const patternCheck = entropyPatternCheck(entropy.base.events.join(''));
   const reqWords = !!parseInt(DOM.entropyMnemonicLengthSelect.value)
     ? parseInt(DOM.entropyMnemonicLengthSelect.value)
     : wordCount;
   //
-  DOM.entropyTimeToCrack.innerText = timeToCrack;
+  DOM.entropyTimeToCrack.innerText = patternCheck;
   DOM.entropyEventCount.innerText = eventCount;
   DOM.entropyEntropyType.innerText = getEntropyTypeStr(entropy);
   DOM.entropyMethod.value = entropy.base.str;
@@ -2880,13 +3010,13 @@ const emptyElement = (el) => {
 
 // Blank values derived from the seed that are only rebuilt when their own
 // tool recalculates: account keys, multisig Ypub and Zpub, the BIP85
-// password, BIP47 addresses and the Seed XOR result. Left alone they would
+// password and dice rolls, and BIP47 addresses. Left alone they would
 // sit beside a new or cleared seed as if they belonged to it.
 const clearSecondaryDerivedOutputs = () => {
   DOM.bip32AccountXprv.value = '';
   DOM.bip32AccountXpub.value = '';
   DOM.bip85PWDPassword.value = '';
-  ['myZpub', 'myYpub', 'xorResult'].forEach((id) => {
+  ['myZpub', 'myYpub', 'bip85DiceResult'].forEach((id) => {
     document.getElementById(id).value = '';
   });
   ['bip32AccountXpubQR', 'myZpubQR', 'myYpubQR'].forEach((id) =>
@@ -2910,14 +3040,14 @@ const wipeAllSeedMaterial = () => {
   bip85Lineage.length = 0;
   DOM.bip85LoadParent.disabled = true;
   DOM.bip85LoadParent.title = 'No parent key to load';
+  xorSplitKey = '';
   document
-    .querySelectorAll('.xor-seed textarea, .inputMnemonic-word, .lastWord-word')
+    .querySelectorAll('.xor-seed textarea, .xor-share textarea, .inputMnemonic-word, .lastWord-word')
     .forEach((el) => {
       el.value = '';
-      if (el.dataset) delete el.dataset.generated;
     });
   [
-    'otpDecrypted', 'singleSigInput', 'bip39PassTestCandidates',
+    'otpDecrypted', 'singleSigInput', 'bip39PassTestCandidates', 'xorResult',
     'nostrNip06Npub', 'nostrNip06Nsec', 'nostrNip06PubHex', 'nostrNip06PrivHex',
     'nostrBip85Npub', 'nostrBip85Nsec', 'nostrBip85PubHex', 'nostrBip85PrivHex',
   ].forEach((id) => {
@@ -3233,27 +3363,14 @@ const diceToPassphrase = () => {
 const mnemonicToSeedPopulate = debounce(async () => {
   const mnemonic = getPhrase();
   const passphrase = getPassphrase();
-  if (!passphrase) {
-    DOM.bip39PassphraseCrackTime.innerText = 'No passphrase entered!';
-  } else {
-    const crackTime = zxcvbn(passphrase);
-    const crackText =
-      crackTime?.crack_times_display?.offline_fast_hashing_1e10_per_second;
-    if (crackText) {
-      DOM.bip39PassphraseCrackTime.innerText = 'Time to crack: ' + crackText;
-      if (crackText !== 'centuries') {
-        DOM.bip39PassphraseCrackTime.parentElement.classList.add('warning');
-      } else {
-        DOM.bip39PassphraseCrackTime.parentElement.classList.remove('warning');
-      }
-    }
-  }
+  showPassphraseStrength(passphrase);
   let seedHex = '';
   resetEverything();
   seed = null;
   // Test if valid
   const errorText = findPhraseErrors(mnemonic);
   showValidationError(errorText);
+  makeXorShares();
   if (!errorText) {
     seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
     seedHex = seed.toString('hex');
@@ -3282,10 +3399,9 @@ const mnemonicToSeedPopulate = debounce(async () => {
     fillBip32Keys();
     calcBip85();
     calcBip85Password();
+    calcBip85Dice();
     calcBip47();
   }
-  fillRandomXorSeeds();
-  calculateXor();
   await generateOneTimePad();
   makeCompactSeedQR();
   adjustPanelHeight();

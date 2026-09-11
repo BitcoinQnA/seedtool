@@ -272,6 +272,47 @@ test('qr: standard SeedQR is numeric mode, the SeedSigner sizes, and decodes', a
   assert.throws(() => make('12a4', 'Numeric'), /digits/);
 });
 
+test('shake256: the FIPS 202 empty-input vector, and Node for other lengths', async () => {
+  const { keys } = await openTool();
+  const hex = (bytes) => Buffer.from(bytes).toString('hex');
+  assert.strictEqual(
+    hex(keys.shake256(new Uint8Array(0), 32)),
+    '46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762f'
+  );
+  for (const length of [0, 1, 64, 135, 136, 137, 300]) {
+    for (const out of [1, 80, 136, 137, 500]) {
+      const input = nodeCrypto.randomBytes(length);
+      const want = nodeCrypto.createHash('shake256', { outputLength: out }).update(input).digest('hex');
+      assert.strictEqual(hex(keys.shake256(Uint8Array.from(input), out)), want, `${length} bytes in, ${out} out`);
+    }
+  }
+});
+
+test('base85: matches Python base64.b85encode', async () => {
+  const { keys } = await openTool();
+  assert.strictEqual(keys.base85Encode(new Uint8Array(4)), '00000');
+  assert.strictEqual(keys.base85Encode(Uint8Array.of(255, 255, 255, 255)), '|NsC0');
+  assert.throws(() => keys.base85Encode(new Uint8Array(3)), /multiple of 4/);
+});
+
+test('bip85: PWD BASE64, PWD BASE85 and DICE spec vectors', async () => {
+  const { keys } = await openTool();
+  const base64 = keys.bip85Password(BIP85_MASTER, { format: 'base64', length: 21, index: 0 });
+  assert.strictEqual(base64.path, "m/83696968'/707764'/21'/0'");
+  assert.strictEqual(base64.password, 'dKLoepugzdVJvdL56ogNV');
+  const base85 = keys.bip85Password(BIP85_MASTER, { format: 'base85', length: 12, index: 0 });
+  assert.strictEqual(base85.path, "m/83696968'/707785'/12'/0'");
+  assert.strictEqual(base85.password, '_s`{TW89)i4`');
+  const dice = keys.bip85Dice(BIP85_MASTER, { sides: 6, rolls: 10, index: 0 });
+  assert.strictEqual(dice.path, "m/83696968'/89101'/6'/10'/0'");
+  assert.strictEqual(dice.rolls.join(','), '1,0,0,2,0,1,5,5,2,4');
+
+  assert.throws(() => keys.bip85Password(BIP85_MASTER, { format: 'base85', length: 9 }), /10 to 80/);
+  assert.throws(() => keys.bip85Password(BIP85_MASTER, { format: 'base64', length: 87 }), /20 to 86/);
+  assert.throws(() => keys.bip85Password(BIP85_MASTER, { format: 'hex', length: 20 }), /Unknown password format/);
+  assert.throws(() => keys.bip85Dice(BIP85_MASTER, { sides: 1 }), /Sides/);
+});
+
 (async () => {
   console.log('reference vectors and keys');
   for (const [name, fn] of tests) {

@@ -581,6 +581,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 16px); }
 }
 .card--locked::after {
   content: "🔒 Load seed first";
+  content: "🔒 Load seed first" / "";
   position: absolute;
   top: 12px;
   right: 12px;
@@ -3845,4 +3846,177 @@ pre {
 .nostr-keys summary {
   cursor: pointer;
   color: var(--q-muted);
+}
+
+/* ----- Polish and features batch ----------------------------------------- */
+
+/* Text for screen readers only */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Parts shown only with a seed (shell.js refreshLockState) */
+[data-seed-only][hidden],
+[data-seed-output][hidden],
+[data-seed-output-hint][hidden] { display: none !important; }
+
+/* The eye button also hides seed words shown outside the private fields */
+body.is-private .seedbar__words { font-size: 0; }
+body.is-private .seedbar__words::after {
+  content: "words hidden";
+  font-size: 0.75rem;
+}
+body.is-private .seed-hero__word-text { visibility: hidden; }
+
+/* A checkbox with its label */
+.check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.check-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--q-accent-hi);
+}
+
+/* Derived Addresses: private keys stay hidden until asked for */
+[data-tool="derived"] .address-display:not(.show-private-keys) .address-prv-row { display: none; }
+
+/* Home search feedback */
+.home__search-status {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--q-muted);
+  margin: 10px 0 0;
+  min-height: 1.25em;
+}
+.home__search-empty {
+  text-align: center;
+  color: var(--q-muted);
+  max-width: 480px;
+  margin: 8px auto 0;
+  font-size: 0.875rem;
+}
+.home__search-empty[hidden] { display: none; }
+
+/* A plain-English error with the technical message folded underneath */
+.error-detail { margin-top: 8px; font-size: 0.8125rem; }
+.error-detail summary { cursor: pointer; color: var(--q-muted); }
+.error-detail code {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--q-muted);
+}
+
+/* Seed XOR split controls */
+.xor-controls { align-items: center; }
+.xor-controls label { font-size: 0.875rem; }
+
+/* Backup sheet options in the Seed Workspace */
+.backup-sheet-tool { margin-top: 8px; }
+.backup-sheet-tool__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 8px 0;
+}
+.backup-sheet-tool__options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+.backup-sheet-tool [hidden] { display: none !important; }
+
+/* Bigger tap targets on touch screens */
+@media (pointer: coarse) {
+  .topbar__home,
+  .topbar__eye { width: 44px; height: 44px; }
+  .online-banner__dismiss,
+  .explainer__dismiss { min-width: 44px; min-height: 44px; flex-basis: 44px; }
+  .view__back { min-height: 44px; }
+  .footer__inner a { display: inline-flex; align-items: center; min-height: 44px; }
+  .seedbar__edit,
+  .seedbar__clear { display: inline-flex; align-items: center; min-height: 44px; }
+  .modal__close,
+  .confirm-modal__close { width: 44px; height: 44px; }
+  .subtabs__tab { min-height: 44px; }
+  select { min-height: 44px; }
+}
+
+/* ----- Printable backup sheet (backup-sheet.js) ----- */
+.backup-sheet { display: none; }
+@media print {
+  @page { margin: 12mm; }
+  body.is-printing-sheet { background: #fff !important; color: #000 !important; }
+  body.is-printing-sheet > :not(#backupSheet) { display: none !important; }
+  body.is-printing-sheet #backupSheet {
+    display: block;
+    color: #000;
+    font: 11pt/1.4 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .backup-sheet__page { break-after: page; }
+  .backup-sheet__page:last-child { break-after: auto; }
+  .backup-sheet__title { font-size: 16pt; margin: 0 0 4mm; color: #000; }
+  .backup-sheet h2 {
+    font-size: 10pt;
+    margin: 7mm 0 2.5mm;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #000;
+  }
+  .backup-sheet p { margin: 0 0 3mm; color: #000; }
+  .backup-sheet__fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6mm;
+  }
+  .backup-sheet__fields > div { display: flex; flex-direction: column; gap: 1mm; font-size: 9pt; }
+  .backup-sheet__line {
+    display: flex;
+    align-items: flex-end;
+    min-height: 8mm;
+    border-bottom: 0.3mm solid #000;
+    font: 11pt ui-monospace, Menlo, Consolas, monospace;
+  }
+  .backup-sheet__words {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: column;
+    gap: 2.5mm 5mm;
+  }
+  .backup-sheet__words li {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    height: 10mm;
+    padding: 0 2mm;
+    border: 0.3mm solid #000;
+    border-radius: 1.5mm;
+  }
+  .backup-sheet__num { min-width: 5mm; font-size: 8pt; color: #444; }
+  .backup-sheet__word { font: 12pt ui-monospace, Menlo, Consolas, monospace; }
+  .backup-sheet__notes { height: 45mm; border: 0.3mm solid #000; border-radius: 1.5mm; }
+  .backup-sheet__foot { font-size: 9pt; margin-top: 4mm; }
+  .backup-sheet__grid { display: block; width: 100%; max-width: 180mm; max-height: 205mm; margin: 4mm auto; }
 }
