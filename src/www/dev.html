@@ -567,18 +567,12 @@ gpg --verify signature.txt</code></pre>
           </div>
         </div>
         <div>
-          <label for="compactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
-            <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
-            <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
+          <label for="compactSeedQR">SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+            <p>A SeedQR lets you scan your seed words into a signer such as SeedSigner. It does not include your passphrase.</p>
+            <p>Pick the format in the QR window. SeedQR stores each word's number (0000 to 2047), so it can be read and even copied by hand. Compact SeedQR stores the raw entropy in a smaller code.</p>
+            <p>The fingerprint shown is for the words alone, so it differs from your wallet fingerprint once you add a passphrase.</p>
           </span></span></label>
           <div id="compactSeedQR"></div>
-        </div>
-        <div>
-          <label for="standardSeedQR">SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
-            <p>The standard SeedQR stores each word's number (0000 to 2047), so it can be read, and even copied, by hand. Compact SeedQR stores the raw entropy in a smaller code. Signers such as SeedSigner read both.</p>
-            <p>Neither includes your passphrase.</p>
-          </span></span></label>
-          <div id="standardSeedQR"></div>
         </div>
         <div>
           <label for="bip39Passphrase">BIP39 Passphrase (recommended)</label>
@@ -983,7 +977,7 @@ gpg --verify signature.txt</code></pre>
               <div class="copy-wrapper private-data"><textarea id="bip85ChildKey" title="Private - don't share!" class="bip85Field textarea-input" readonly rows="3"></textarea></div>
             </div>
             <div>
-              <label for="bip85CompactSeedQR">Compact SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
+              <label for="bip85CompactSeedQR">SeedQR <span class="seedQrInfo">&#9432;<span class="seedQrTooltip">
                 <p>Seed QR is a QR code used to scan your seed words into a hardware signer. It does not include your passphrase so that if someone finds the qr code, they don't have access to your funds.</p>
                 <p>The fingerprint allows you to check the QR code matches your seed. Once you have added a passphrase, the seed changes and so does the fingerprint so it is correct that the seedQR fingerprint will be different to your wallet fingerprint after you enter your passphrase.</p>
               </span></span></label>
@@ -3057,6 +3051,10 @@ m/86'/0'/0'/0/0  ← BIP-86 Taproot (bc1p…)</pre>
       <button type="button" class="modal__close" title="Close" onclick="clearQRModal();" aria-label="Close">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
+      <div class="seedqr-format" id="qrModalFormat" role="group" aria-label="SeedQR format" hidden>
+        <button type="button" class="seedqr-format__btn" data-format="standard" aria-pressed="true">SeedQR</button>
+        <button type="button" class="seedqr-format__btn" data-format="compact" aria-pressed="false">Compact SeedQR</button>
+      </div>
       <div id="qrModalDiv"></div>
     </div>
   </div>

@@ -182,6 +182,8 @@
     // Notify any features that listen for seed changes (message tool, walkthrough)
     document.dispatchEvent(new CustomEvent('seedtool:seed-changed', { detail: { present } }));
     updateWalkthroughBindings();
+    // Tools fill fields such as the signing address when the seed changes
+    refreshTextareaSizes();
   }
 
   setInterval(refreshSeedBar, 700);
