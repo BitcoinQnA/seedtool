@@ -543,6 +543,7 @@ window.infoHtml = {
           <li>V2.2.0 - ADD: Paste mnemonic, BIP85 passwords.    FIX: Update to paynym.rs, testnet WIF for BIP47, BIP47 library link  </li>
           <li>V2.3.0 - ADD: Standalone tools (PSBT, Miniscript, Lightning, BIP-353, Sign & Verify, Silent Payments, Shamir, BIP-329 labels), seed recovery and the Learn walkthrough</li>
           <li>V2.4.0 - ADD: QR scanning, Seed XOR split mode, printable backup sheet, Nostr keys, output descriptors, standard SeedQR, BIP85 base85 passwords and dice, passphrase lists.    FIX: Seed XOR, One Time Pad and raw entropy errors, Clear seed wipes everything, Content Security Policy</li>
+          <li>V2.4.1 - ADD: One SeedQR button with a SeedQR / Compact SeedQR switch.    FIX: Mobile layout (seed tabs, word boxes, seed cards, cut-off text boxes, dropdowns, sub-tabs)</li>
         </ul>`,
   UNKNOWN: /*html*/ `
         <h3>ERROR: 404</h3>
