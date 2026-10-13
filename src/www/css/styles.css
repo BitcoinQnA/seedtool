@@ -4063,12 +4063,6 @@ body.is-private .seed-hero__word-text { visibility: hidden; }
   .seedqr-format__btn { min-height: 44px; }
 }
 
-/* Word boxes: keep room for the word number. The dark input rule for tool
-   views is more specific than .inputMnemonic-word and reset the padding,
-   so typed words ran over the numbers. */
-#inputMnemonicWords .inputMnemonic-word,
-#lastWordSeedWords .lastWord-word { padding-left: 2.8em; }
-
 /* Seed cards: each column fits the longest BIP39 word (8 letters) with its
    number, and there are never more than 4 across. The grid uses the cards'
    monospace font so that ch matches the width of a letter. */
