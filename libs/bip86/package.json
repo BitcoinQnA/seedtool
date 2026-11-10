@@ -11,5 +11,9 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "bip86": "^0.0.2"
+  },
+  "overrides": {
+    "bip32": "3.0.1",
+    "bitcoinjs-lib": "^6.1.10"
   }
 }
